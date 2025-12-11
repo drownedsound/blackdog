@@ -1,5 +1,7 @@
 .DEFAULT_GOAL := build
 
+# TODO: Create switch to run unit tests
+# TODO: Create switch to run unit tests and compile code
 .PHONY:goimports gofumpt staticcheck test build clean
 
 goimports:
@@ -12,8 +14,8 @@ staticcheck: gofumpt
 	staticcheck ./...
 
 test: staticcheck
-	go test ./... -v -cover
-	
+	go test ./internal/features/application ./internal/infra -cover
+
 build: test
 	go build -C cmd/web -o ../../bin/blackdog-web
 

@@ -1,8 +1,0 @@
-body {
-    font-family: "Adwaita Sans", system-ui, -apple-system, sans-serif;
-    color: #2e3436; /* Standard Adwaita dark text color */
-    background-color: #ffffff;
-}
-
-a:hover { color: #3584e4; } 
-
