@@ -12,7 +12,7 @@ import (
 
 type mockRepo struct {
 	saveFunc    func(ctx context.Context, a *Application) error
-	getByIdFunc func(ctx context.Context, id int64) (*Application, error)
+	getByIdFunc func(ctx context.Context, id int64) (Application, error)
 }
 
 func (m *mockRepo) Save(ctx context.Context, a *Application) error {
@@ -22,11 +22,11 @@ func (m *mockRepo) Save(ctx context.Context, a *Application) error {
 	return nil
 }
 
-func (m *mockRepo) GetById(ctx context.Context, id int64) (*Application, error) {
+func (m *mockRepo) GetById(ctx context.Context, id int64) (Application, error) {
 	if m.getByIdFunc != nil {
 		return m.getByIdFunc(ctx, id)
 	}
-	return nil, ErrNotFound
+	return Application{}, ErrNotFound
 }
 
 func TestService_CreateApplication(t *testing.T) {
@@ -64,8 +64,30 @@ func TestService_CreateApplication(t *testing.T) {
 				return ErrInsertFailed
 			},
 			expectedErr: fmt.Errorf(
-				"failed to save application: %w", ErrInsertFailed,
+				"application.service failed to save entity: %w",
+				ErrInsertFailed,
 			),
+		},
+		{
+			desc: "Domain Validation Failure (Empty Category)",
+			req: CreateApplicationRequest{
+				MemberReferenceNo: "APP-INVALID",
+				CategoryCode:      "", // Invalid: Causes app.Validate() to fail
+				RequestedAmount:   100_000,
+			},
+			mockSave: func(ctx context.Context, a *Application) error {
+				t.Error(
+					"Repository Save should not be called" +
+						"on validation failure",
+				)
+				return nil
+			},
+			expectedErr: fmt.Errorf(
+				"application.service stopped saving entity: %w",
+				ErrMissingCategoryCode,
+			),
+			expectedId:    0,
+			expectedState: "",
 		},
 	}
 
@@ -123,7 +145,7 @@ func TestService_GetApplicationById(t *testing.T) {
 	testCases := []struct {
 		desc          string
 		req           GetApplicationRequest
-		mockGetById   func(ctx context.Context, id int64) (*Application, error)
+		mockGetById   func(ctx context.Context, id int64) (Application, error)
 		expectedErr   error
 		expectedState string
 	}{
@@ -131,20 +153,20 @@ func TestService_GetApplicationById(t *testing.T) {
 			desc: "Get Existing Application Succeeds",
 			req:  GetApplicationRequest{Id: 99},
 			mockGetById: func(ctx context.Context, id int64) (
-				*Application, error,
+				Application, error,
 			) {
 				if id == 99 {
-					return &Application{
+					return Application{
 						CreatedAt:         now,
 						UpdatedAt:         now,
 						MemberReferenceNo: "APP-99",
 						CategoryCode:      "CARD",
-						StatusCode:        "APPROVED",
+						StatusCode:        StatusApproved,
 						Id:                99,
 						RequestedAmount:   1_000_000,
 					}, nil
 				}
-				return nil, ErrNotFound
+				return Application{}, ErrNotFound
 			},
 			expectedErr:   nil,
 			expectedState: "APPROVED",
@@ -153,24 +175,25 @@ func TestService_GetApplicationById(t *testing.T) {
 			desc: "Get Non-Existent Application Fails",
 			req:  GetApplicationRequest{Id: 999},
 			mockGetById: func(ctx context.Context, id int64) (
-				*Application, error,
+				Application, error,
 			) {
-				return nil, ErrNotFound
+				return Application{}, ErrNotFound
 			},
 			expectedErr: fmt.Errorf(
-				"failed to get application: %w", ErrNotFound,
+				"application.service failed to get application: %w",
+				ErrNotFound,
 			),
 		},
 		{
 			desc: "Repository Failure Returns Error",
 			req:  GetApplicationRequest{Id: 50},
 			mockGetById: func(ctx context.Context, id int64) (
-				*Application, error,
+				Application, error,
 			) {
-				return nil, errors.New("connection refused")
+				return Application{}, errors.New("connection refused")
 			},
 			expectedErr: fmt.Errorf(
-				"failed to get application: %w",
+				"application.service failed to get application: %w",
 				errors.New("connection refused")),
 		},
 	}

@@ -21,6 +21,35 @@ var (
 	)
 )
 
+// FIXME: Convert status_code column of application table to INTEGER from TEXT
+type ApplicationStatus uint8
+
+const (
+	StatusUnknown ApplicationStatus = iota
+	StatusCreated
+	StatusInProgress
+	StatusApproved
+	StatusDeclined
+	StatusCancelled
+)
+
+func (s ApplicationStatus) String() string {
+	switch s {
+	case StatusCreated:
+		return "CREATED"
+	case StatusInProgress:
+		return "IN_PROGRESS"
+	case StatusApproved:
+		return "APPROVED"
+	case StatusDeclined:
+		return "DECLINED"
+	case StatusCancelled:
+		return "CANCELLED"
+	default:
+		return "UNKNOWN"
+	}
+}
+
 // Application is the aggregate root
 type Application struct {
 	CreatedAt time.Time
@@ -28,7 +57,7 @@ type Application struct {
 
 	MemberReferenceNo string // external identifier
 	CategoryCode      string
-	StatusCode        string
+	StatusCode        ApplicationStatus
 
 	Id              int64 // internal identifier
 	RequestedAmount int64 // Shown in centavos

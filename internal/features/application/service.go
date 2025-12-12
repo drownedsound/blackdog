@@ -19,35 +19,38 @@ func NewService(repo Repository, logger *slog.Logger) *Service {
 	}
 }
 
+// FIXME: Implement slog.LogValuer to log complex object graphs
+// FIXME: Group related fields using slog.GroupValue
 func (s *Service) CreateApplication(
 	ctx context.Context, req CreateApplicationRequest,
-) (*CreateApplicationResponse, error) {
+) (CreateApplicationResponse, error) {
 	app := &Application{
 		CreatedAt:         time.Now(),
 		UpdatedAt:         time.Now(),
 		MemberReferenceNo: req.MemberReferenceNo,
 		CategoryCode:      req.CategoryCode,
-		StatusCode:        "CREATED",
+		StatusCode:        StatusCreated,
 		RequestedAmount:   req.RequestedAmount,
 	}
 
-	// FIXME: Implement slog.LogValuer to log complex object graphs
-	// FIXME: Group related fields to create structured subgraphs using
-	//        slog.GroupValue
-	s.logger.Debug(
-		"Persisting transaction to the database",
-		slog.Any("txn", app),
-	)
-	if err := s.repo.Save(ctx, app); err != nil {
-		return nil, fmt.Errorf("failed to save application: %w", err)
+	if err := app.Validate(); err != nil {
+		return CreateApplicationResponse{}, fmt.Errorf(
+			"application.service stopped saving entity: %w", err,
+		)
 	}
 
-	return &CreateApplicationResponse{
+	if err := s.repo.Save(ctx, app); err != nil {
+		return CreateApplicationResponse{}, fmt.Errorf(
+			"application.service failed to save entity: %w", err,
+		)
+	}
+
+	return CreateApplicationResponse{
 		CreatedAt:         app.CreatedAt,
 		UpdatedAt:         app.UpdatedAt,
 		MemberReferenceNo: app.MemberReferenceNo,
 		CategoryCode:      app.CategoryCode,
-		StatusCode:        app.StatusCode,
+		StatusCode:        app.StatusCode.String(),
 		Id:                app.Id,
 		RequestedAmount:   app.RequestedAmount,
 	}, nil
@@ -55,18 +58,20 @@ func (s *Service) CreateApplication(
 
 func (s *Service) GetApplicationById(
 	ctx context.Context, req GetApplicationRequest,
-) (*GetApplicationResponse, error) {
+) (GetApplicationResponse, error) {
 	app, err := s.repo.GetById(ctx, req.Id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get application: %w", err)
+		return GetApplicationResponse{}, fmt.Errorf(
+			"application.service failed to get application: %w", err,
+		)
 	}
 
-	return &GetApplicationResponse{
+	return GetApplicationResponse{
 		CreatedAt:         app.CreatedAt,
 		UpdatedAt:         app.UpdatedAt,
 		MemberReferenceNo: app.MemberReferenceNo,
 		CategoryCode:      app.CategoryCode,
-		StatusCode:        app.StatusCode,
+		StatusCode:        app.StatusCode.String(),
 		Id:                app.Id,
 		RequestedAmount:   app.RequestedAmount,
 	}, nil

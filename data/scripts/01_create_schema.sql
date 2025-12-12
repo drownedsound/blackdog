@@ -1,4 +1,5 @@
 -- TODO: Rename application_number to member_reference_no
+-- FIXME: Convert status_code from TEXT to INTEGER
 
 .mode column
 .headers on

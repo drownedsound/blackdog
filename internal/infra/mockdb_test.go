@@ -18,7 +18,7 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 		UpdatedAt:         time.Now(),
 		MemberReferenceNo: "ABCDE12345",
 		CategoryCode:      "CARD",
-		StatusCode:        "CREATED",
+		StatusCode:        app.StatusCreated,
 		RequestedAmount:   100_000_000,
 	}
 
@@ -34,7 +34,7 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 		}
 	})
 
-	var fetchedApp *app.Application
+	var fetchedApp app.Application
 
 	t.Run("GetById Retrieves Saved Application", func(t *testing.T) {
 		var err error
@@ -57,7 +57,7 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 	// This ensures that modifying the struct returned by GetById does not
 	// corrupt the data inside the MockDb (common bug in in-memory mocks).
 	t.Run("Verify_Memory_Isolation", func(t *testing.T) {
-		if fetchedApp == nil {
+		if fetchedApp.Id == 0 {
 			t.Skip("Skipping Isolation Test Because Previous Fetch Failed")
 		}
 
@@ -81,12 +81,12 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 
 	// Verify Update
 	t.Run("Persist_And_Verify_Update", func(t *testing.T) {
-		if fetchedApp == nil {
+		if fetchedApp.Id == 0 {
 			t.Skip("Skipping Update Test Because Struct is Missing")
 		}
 
 		// Save the mutated 'fetchedApp' (which has Amount = 99999)
-		if err := repo.Save(ctx, fetchedApp); err != nil {
+		if err := repo.Save(ctx, &fetchedApp); err != nil {
 			t.Errorf("Save() Error on Update: %v", err)
 		}
 
@@ -133,7 +133,7 @@ func TestMockDb_ConcurrentSaveAndGetApplication(t *testing.T) {
 		UpdatedAt:         time.Now(),
 		MemberReferenceNo: "ABCDE12345",
 		CategoryCode:      "CARD",
-		StatusCode:        "CREATED",
+		StatusCode:        app.StatusCreated,
 		RequestedAmount:   100000000,
 	}
 	repo.Save(ctx, app)
@@ -151,7 +151,7 @@ func TestMockDb_ConcurrentSaveAndGetApplication(t *testing.T) {
 			<-start
 			a, _ := repo.GetById(ctx, targetId)
 			a.UpdatedAt = time.Now()
-			repo.Save(ctx, a)
+			repo.Save(ctx, &a)
 		}()
 	}
 
@@ -206,4 +206,24 @@ func TestMockDb_SerializationErrors(t *testing.T) {
 			)
 		}
 	})
+}
+
+func TestMockDb_SimulatedConnectionError(t *testing.T) {
+	repo := NewMockDb()
+	ctx := context.Background()
+
+	// Trigger the specific "ERR-100" condition
+	a := &app.Application{
+		MemberReferenceNo: "ERR-100",
+		CategoryCode:      "CARD",
+		RequestedAmount:   100,
+	}
+
+	err := repo.Save(ctx, a)
+	if err != app.ErrConnectionRefused {
+		t.Errorf(
+			"Expected ErrConnectionRefused for ERR-100, Got %v",
+			err,
+		)
+	}
 }

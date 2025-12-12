@@ -26,34 +26,39 @@ func NewMockDb() *MockDb {
 // Save persists the application.
 // If Id is 0, it acts as an INSERT and assigns a new Id.
 // If Id > 0, it acts as an UPDATE.
-func (r *MockDb) Save(ctx context.Context, app *app.Application) error {
+func (r *MockDb) Save(ctx context.Context, a *app.Application) error {
+	// Create error scenario to force an HTTP 500 on the handler
+	if a.MemberReferenceNo == "ERR-100" {
+		return app.ErrConnectionRefused
+	}
+
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	// Simulate Auto-Increment
-	if app.Id == 0 {
+	if a.Id == 0 {
 		r.lastId++
-		app.Id = r.lastId
-		app.CreatedAt = time.Now().UTC()
+		a.Id = r.lastId
+		a.CreatedAt = time.Now().UTC()
 	}
-	app.UpdatedAt = time.Now().UTC()
+	a.UpdatedAt = time.Now().UTC()
 
 	// Serialize to simulate DB storage
-	data, err := json.Marshal(app)
+	data, err := json.Marshal(a)
 	if err != nil {
 		return err
 	}
 
-	r.store[app.Id] = data
+	r.store[a.Id] = data
 	return nil
 }
 
 // GetById retrieves an application by id.
 func (r *MockDb) GetById(ctx context.Context, id int64) (
-	*app.Application, error,
+	app.Application, error,
 ) {
 	if id <= 0 {
-		return nil, app.ErrInvalidId
+		return app.Application{}, app.ErrInvalidId
 	}
 
 	r.mu.RLock()
@@ -61,14 +66,14 @@ func (r *MockDb) GetById(ctx context.Context, id int64) (
 
 	data, ok := r.store[id]
 	if !ok {
-		return nil, app.ErrNotFound
+		return app.Application{}, app.ErrNotFound
 	}
 
 	// Deserialize to return a fresh instance
-	var app app.Application
-	if err := json.Unmarshal(data, &app); err != nil {
-		return nil, err
+	var a app.Application
+	if err := json.Unmarshal(data, &a); err != nil {
+		return app.Application{}, err
 	}
 
-	return &app, nil
+	return a, nil
 }

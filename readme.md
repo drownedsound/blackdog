@@ -1,39 +1,71 @@
 # Black Dog
-## Directory Structure
-```mermaid
+**Black Dog** is an exercise in building a secure and high-performance web application designed for processing consumer applications for common retail banking products. Currently, the domain model focuses on credit cards and personal loans but other products are in the immediate roadmap. It employs Domain-Driven Design (DDD) to model the problem space but does not attempt to create microservices in the process. Instead, it aims to deliver the system with a monolithic design and fewer moving pieces with the objective of reducing overall system and cognitive complexity.
+## Project Structure
+```text
 blackdog/
-├── .gitignore                   
-├── go.mod                       
-├── makefile                     
-├── readme.md                    
-├── bin/
-│   └── blackdog-web             
+├── bin/                 # Compiled binaries
 ├── cmd/
-│   └── web/
-│       └── main.go              # PACKAGE: main (Composition Root)
-├── data/
-│   ├── blackdog.db              # SQLite Database
-│   └── scripts/                 # Database Migration Scripts
+│   └── web/             # Main entry point (composition root)
+├── data/                # Database migration scripts
 ├── internal/
-│   ├── features/
-│   │   └── application/         # PACKAGE: application (Vertical Slice)
-│   │       ├── models.go        # Domain Entities
-│   │       ├── repository.go    # Repository Interface (Port)
-│   │       ├── service.go       # Application Logic (Use Cases)
-│   │       ├── handlers.go      # HTTP Handlers (Adapter)
-│   │       └── dtos.go          # DTOs
-│   └── infra/                   # PACKAGE: infra
-│       └── memory_repo.go       # In-Memory Database (Adapter)
-└── ui/
-    ├── html/                    # Templates
-    │   ├── base.tmpl            
-    │   ├── pages/
-    │   └── partials/
-    └── static/                  # Assets
-        ├── css/
-        └── js/
+│   ├── features/        # Feature-based packages 
+│   │   └── application/ # Core domain logic 
+│   └── infra/           # Infrastructure adapters 
+└── ui/                  # Web assets 
+````
+## Getting Started
+### Prerequisites
+- **Go**: Version 1.25.4 or higher.
+- **Make**: For running build automation commands.
+- **Tooling**: The project relies on standard Go tools for formatting and linting.
+```shell
+go install golang.org/x/tools/cmd/goimports@latest
+go install mvdan.cc/gofumpt@latest
+go install honnef.co/go/tools/cmd/staticcheck@latest
 ```
-## Module Packages
+### Installation
+1. **Clone the repository:**
+```bash
+git clone https://github.com/drownedsound/blackdog.git
+cd blackdog
+```
+2. **Build the project:**
+Use the provided `makefile` to run static analysis, tests, and compilation in one step.
+```bash
+make build
+```
+This command runs `goimports`, `gofumpt`, `staticcheck`, and `go test` before building.
+### Running the Application
+After a successful build, the binary is placed in `bin/blackdog-web`.
+```bash
+./bin/blackdog-web
+```
+By default, the server listens on `:4000` and serves static assets from `./ui/static/`.
+### Configuration
+The application accepts command-line flags to override default settings:
+| Flag | Default | Description |
+| :--- | :--- | :--- |
+| `-addr` | `:4000` | HTTP network address to listen on. |
+| `-static-dir` | `./ui/static/` | Path to the directory containing static assets. |
+
+**Example:**
+```bash
+./bin/blackdog-web -addr=":8080" -static-dir="/var/www/blackdog/static"
+```
+## Development
+### Running Tests
+To run unit tests specifically for the application domain and infrastructure:
+```bash
+make test
+```
+This targets `./internal/features/application` and `./internal/infra` with coverage enabled.
+### Code Quality
+Enforce code standards and formatting:
+```bash
+make staticcheck  # Runs static analysis
+make gofumpt      # Enforces stricter formatting
+```
+### Domain Model
 ```mermaid
 classDiagram
 namespace application {
@@ -152,7 +184,7 @@ class InMemoryApplicationRepo {
 
 %% RELATIONSHIPS
 Application *-- Applicant : Contains (Slice)
-Application *-- LoanDetail : Has A
+pplication *-- LoanDetail : Has A
 Application *-- CardDetail : Has A
 Applicant *-- Id : Contains (Slice)
 Applicant *-- Address : Contains (Slice)
@@ -163,4 +195,12 @@ Service --> Repository : Uses
 Handler --> Service : Uses
 InMemoryApplicationRepo ..|> Repository : Implements
 ```
+The core domain entity is the **Application**, which acts as the Aggregate Root. It manages the state and invariants of:
+- **Applicant**: Personal details, employment, and identification.
+- **LoanDetail**: Terms, interest rates, and amounts.
+- **CardDetail**: Credit limits and card designs.
+- **Status**: Tracks lifecycle states (e.g., Created, InProgress, Approved).
+
+Current **Status Codes** support the following lifecycle:
+`CREATED` -\> `IN_PROGRESS` -\> `APPROVED` | `DECLINED` | `CANCELLED`
 

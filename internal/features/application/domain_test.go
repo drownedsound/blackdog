@@ -18,7 +18,7 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
 				CategoryCode:      "CARD",
-				StatusCode:        "CREATED",
+				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
 			expectedErr: nil,
@@ -30,7 +30,7 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
 				CategoryCode:      "CARD",
-				StatusCode:        "CREATED",
+				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
 			expectedErr: nil,
@@ -42,7 +42,7 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
 				CategoryCode:      "CARD",
-				StatusCode:        "CREATED",
+				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
 			expectedErr: ErrCreatedAtInFuture,
@@ -74,7 +74,7 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
 				CategoryCode:      "CARD",
-				StatusCode:        "CREATED",
+				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
 			expectedErr: nil,
@@ -86,7 +86,7 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				UpdatedAt:         time.Now().AddDate(0, 0, -1),
 				MemberReferenceNo: "ABCDE12345",
 				CategoryCode:      "CARD",
-				StatusCode:        "CREATED",
+				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
 			expectedErr: nil,
@@ -98,7 +98,7 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				UpdatedAt:         time.Now().AddDate(0, 0, 1),
 				MemberReferenceNo: "ABCDE12345",
 				CategoryCode:      "CARD",
-				StatusCode:        "CREATED",
+				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
 			expectedErr: ErrUpdatedAtInFuture,
@@ -130,7 +130,7 @@ func TestApplication_Validate_MemberReferenceNo(t *testing.T) {
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
 				CategoryCode:      "CARD",
-				StatusCode:        "CREATED",
+				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
 			expectedErr: nil,
@@ -142,7 +142,7 @@ func TestApplication_Validate_MemberReferenceNo(t *testing.T) {
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "",
 				CategoryCode:      "CARD",
-				StatusCode:        "CREATED",
+				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
 			expectedErr: ErrMissingMemberRefNo,
@@ -174,7 +174,7 @@ func TestApplication_Validate_CategoryCode(t *testing.T) {
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
 				CategoryCode:      "CARD",
-				StatusCode:        "CREATED",
+				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
 			expectedErr: nil,
@@ -186,7 +186,7 @@ func TestApplication_Validate_CategoryCode(t *testing.T) {
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
 				CategoryCode:      "LOAN",
-				StatusCode:        "CREATED",
+				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
 			expectedErr: nil,
@@ -198,7 +198,7 @@ func TestApplication_Validate_CategoryCode(t *testing.T) {
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
 				CategoryCode:      "",
-				StatusCode:        "CREATED",
+				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
 			expectedErr: ErrMissingCategoryCode,
@@ -230,7 +230,7 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
 				CategoryCode:      "CARD",
-				StatusCode:        "CREATED",
+				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
 			expectedErr: nil,
@@ -242,7 +242,7 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
 				CategoryCode:      "LOAN",
-				StatusCode:        "CREATED",
+				StatusCode:        StatusCreated,
 				RequestedAmount:   -1,
 			},
 			expectedErr: ErrInvalidRequestedAmount,
@@ -255,6 +255,63 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				t.Errorf(
 					"Validate Error: Expected = %v, Actual = %v",
 					tC.expectedErr, err,
+				)
+			}
+		})
+	}
+}
+
+func TestApplicationStatus_String(t *testing.T) {
+	testCases := []struct {
+		desc     string
+		status   ApplicationStatus
+		expected string
+	}{
+		{
+			desc:     "StatusCreated returns CREATED",
+			status:   StatusCreated,
+			expected: "CREATED",
+		},
+		{
+			desc:     "StatusInProgress returns IN_PROGRESS",
+			status:   StatusInProgress,
+			expected: "IN_PROGRESS",
+		},
+		{
+			desc:     "StatusApproved returns APPROVED",
+			status:   StatusApproved,
+			expected: "APPROVED",
+		},
+		{
+			desc:     "StatusDeclined returns DECLINED",
+			status:   StatusDeclined,
+			expected: "DECLINED",
+		},
+		{
+			desc:     "StatusCancelled returns CANCELLED",
+			status:   StatusCancelled,
+			expected: "CANCELLED",
+		},
+		{
+			desc:     "StatusUnknown (Zero Value) returns UNKNOWN",
+			status:   StatusUnknown,
+			expected: "UNKNOWN",
+		},
+		{
+			desc:     "Arbitrary/Invalid Status returns UNKNOWN",
+			status:   ApplicationStatus(255),
+			expected: "UNKNOWN",
+		},
+	}
+
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			if got := tC.status.String(); got != tC.expected {
+				t.Errorf(
+					"String() mismatch: Status %d, Expected %q, Got %q",
+					tC.status,
+					tC.expected,
+					got,
 				)
 			}
 		})

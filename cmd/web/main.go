@@ -77,7 +77,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:    cfg.addr,
-		Handler: mux,
+		Handler: app.RequestLogger(logger)(mux),
 		// TODO: Create command-line flag to configure idle/read/write timeout
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,

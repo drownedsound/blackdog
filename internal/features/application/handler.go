@@ -36,40 +36,75 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	var req CreateApplicationRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		// TODO: Log error
+	// Limit payload to 1MB (adjust based on requirements)
+	r.Body = http.MaxBytesReader(w, r.Body, 1_048_576)
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	if err := dec.Decode(&req); err != nil {
+		// if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		slog.ErrorContext(
+			r.Context(), "json decoding failed", slog.Any("error", err),
+		)
+
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+
 		return
 	}
 
 	resp, err := h.svc.CreateApplication(r.Context(), req)
 	if err != nil {
-		// TODO: Add ERROR logging
-		// TODO: Return HTTP 400 for validation failures
-		// TODO: Return HTTP 500 for unexpected errors
+		// Handles infrastructure layer concerns
+		if errors.Is(err, ErrConnectionRefused) {
+			slog.ErrorContext(
+				r.Context(), "database error", slog.Any("error", err),
+			)
+
+			http.Error(
+				w, "Internal Server Error", http.StatusInternalServerError,
+			)
+
+			return
+		}
+
+		// Handles domain layer concerns
+		slog.WarnContext(
+			r.Context(), "domain validation failed", slog.Any("error", err),
+		)
+
 		http.Error(w, err.Error(), http.StatusBadRequest)
+
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		// TODO: Add ERROR logging
-	}
 
-	h.svc.logger.Info(
-		"Flushing response body",
-		slog.Any("body", resp),
-	)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		slog.ErrorContext(
+			r.Context(), "json encoding failed", slog.Any("error", err),
+		)
+
+		http.Error(
+			w, "Internal Server Error", http.StatusInternalServerError,
+		)
+
+		return
+	}
 }
 
 // HandleGet processes retrieving an application by Id.
 func (h *Handler) HandleGet(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
+
 	if err != nil || id <= 0 {
-		// TODO: Add ERROR logging
+		slog.WarnContext(
+			r.Context(), "id validation failed", slog.Any("error", err),
+		)
+
 		http.Error(w, "Invalid Id", http.StatusBadRequest)
+
 		return
 	}
 
@@ -77,23 +112,32 @@ func (h *Handler) HandleGet(w http.ResponseWriter, r *http.Request) {
 	resp, err := h.svc.GetApplicationById(r.Context(), req)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			// TODO: Add ERROR logging
-			http.Error(w, "Application not found", http.StatusNotFound)
+			slog.WarnContext(
+				r.Context(), "unknown id", slog.Any("error", err),
+			)
+			http.Error(w, "Application Not Found", http.StatusNotFound)
+
 			return
 		}
 
-		// TODO: Add ERROR logging
+		slog.ErrorContext(
+			r.Context(), "database error", slog.Any("error", err),
+		)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		// TODO: Add ERROR logging
-	}
+		slog.ErrorContext(
+			r.Context(), "json encoding failed", slog.Any("error", err),
+		)
 
-	h.svc.logger.Info(
-		"Flushing response body",
-		slog.Any("body", resp),
-	)
+		http.Error(
+			w, "Internal Server Error", http.StatusInternalServerError,
+		)
+
+		return
+	}
 }
