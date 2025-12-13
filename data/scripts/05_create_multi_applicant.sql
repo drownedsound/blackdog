@@ -2,7 +2,7 @@ BEGIN TRANSACTION;
 
 -- 1. Create the Parent Application
 INSERT INTO APPLICATION (
-    application_number, category_code, status_code, requested_amount
+    member_reference_no, category_code, status_code, requested_amount
     ) VALUES (
     'APP-2023-MULTI', 'CARD', 1, 10000000 -- 100k Shared Limit
     );
@@ -10,7 +10,7 @@ INSERT INTO APPLICATION (
 INSERT INTO CARD_DETAIL (
     application_id, card_design_code, credit_limit
     ) VALUES (
-    (SELECT id FROM APPLICATION WHERE application_number = 'APP-2023-MULTI'),
+    (SELECT id FROM APPLICATION WHERE member_reference_no = 'APP-2023-MULTI'),
     'PMT_BLACK',
     10000000
     );
@@ -22,7 +22,7 @@ INSERT INTO APPLICANT (
     application_id, role_code, product_type_code, 
     first_name, last_name, date_of_birth
     ) VALUES (
-    (SELECT id FROM APPLICATION WHERE application_number = 'APP-2023-MULTI'),
+    (SELECT id FROM APPLICATION WHERE member_reference_no = 'APP-2023-MULTI'),
     'PRIMARY_CARDHOLDER', 'VISA_PLATINUM', 'Maria', 'Clara', '1980-01-01'
     );
 
@@ -67,7 +67,7 @@ INSERT INTO APPLICANT (
     application_id, role_code, product_type_code, 
     first_name, last_name, date_of_birth
     ) VALUES (
-    (SELECT id FROM APPLICATION WHERE application_number = 'APP-2023-MULTI'),
+    (SELECT id FROM APPLICATION WHERE member_reference_no = 'APP-2023-MULTI'),
     'SUPPLEMENTARY_CARDHOLDER', 'VISA_PLATINUM', 'Crisostomo', 'Ibarra', 
     '1978-02-14'
     );
@@ -113,7 +113,7 @@ INSERT INTO APPLICANT (
     application_id, role_code, product_type_code, 
     first_name, last_name, date_of_birth
     ) VALUES (
-    (SELECT id FROM APPLICATION WHERE application_number = 'APP-2023-MULTI'),
+    (SELECT id FROM APPLICATION WHERE member_reference_no = 'APP-2023-MULTI'),
     'SUPPLEMENTARY_CARDHOLDER', 'VISA_PLATINUM', 'Salome', 'Clara', 
     '2002-12-25'
     );

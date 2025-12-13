@@ -81,7 +81,7 @@ SELECT 'Attempting Insert: Application (Standard Visa)...' AS action;
 
 -- A. Insert Parent Application
 INSERT INTO APPLICATION (
-    application_number, category_code, status_code, requested_amount
+    member_reference_no, category_code, status_code, requested_amount
     )
 VALUES ('TEST-APP-001', 'CARD', 1, 5000000); -- 50k PHP
 
@@ -107,7 +107,7 @@ VALUES (
 -- D. Insert Polymorphic Detail (Card)
 INSERT INTO CARD_DETAIL (application_id, card_design_code, credit_limit)
 VALUES (
-    (SELECT id FROM APPLICATION WHERE application_number='TEST-APP-001'), 
+    (SELECT id FROM APPLICATION WHERE member_reference_no='TEST-APP-001'), 
     'STD_BLUE', 5000000
     );
 
@@ -116,7 +116,7 @@ SELECT 'Validation 1: Data Integrity Check' AS info;
 
 -- Verify the Join works
 SELECT 
-    a.application_number, 
+    m.member_reference_no, 
     p.first_name || ' ' || p.last_name AS applicant_name,
     c.description AS card_type,
     cd.credit_limit
@@ -124,7 +124,7 @@ FROM APPLICATION a
 JOIN APPLICANT p ON a.id = p.application_id
 JOIN REF_PRODUCT_TYPE c ON p.product_type_code = c.code
 JOIN CARD_DETAIL cd ON a.id = cd.application_id
-WHERE a.application_number = 'TEST-APP-001';
+WHERE m.member_reference_no = 'TEST-APP-001';
 
 SELECT '----------------------------------------' AS '----------------------';
 SELECT 'Validation 2: Audit Log Trigger Check' AS info;
@@ -136,7 +136,7 @@ SELECT
     new_value 
 FROM AUDIT_LOG 
 WHERE record_id = (
-    SELECT id FROM APPLICATION WHERE application_number='TEST-APP-001'
+    SELECT id FROM APPLICATION WHERE member_reference_no='TEST-APP-001'
 );
 
 SELECT '----------------------------------------' AS '----------------------';

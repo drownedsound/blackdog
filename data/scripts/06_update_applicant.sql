@@ -3,7 +3,7 @@ BEGIN TRANSACTION;
 -- 1. Perform the Update
 UPDATE APPLICATION 
 SET status_code = 2
-WHERE application_number = 'APP-2023-SINGLE';
+WHERE member_reference_no = 'APP-2023-SINGLE';
 
 COMMIT;
 
@@ -20,6 +20,6 @@ SELECT
 FROM AUDIT_LOG 
 WHERE table_name = 'APPLICATION' 
 AND record_id = (
-    SELECT id FROM APPLICATION WHERE application_number = 'APP-2023-SINGLE'
+    SELECT id FROM APPLICATION WHERE member_reference_no = 'APP-2023-SINGLE'
 )
 ORDER BY id DESC LIMIT 1;

@@ -2,7 +2,7 @@
 
 SELECT 
     json_object(
-    'application_number', app.application_number,
+    'member_reference_no', app.member_reference_no,
     'status', app.status_code,
     'requested_amount', app.requested_amount,
     'created_at', app.created_at,
@@ -75,4 +75,4 @@ SELECT
 FROM APPLICATION app
 LEFT JOIN CARD_DETAIL cd ON app.id = cd.application_id
 LEFT JOIN LOAN_DETAIL ld ON app.id = ld.application_id
-WHERE app.application_number IN ('APP-2023-SINGLE', 'APP-2023-MULTI');
+WHERE app.member_reference_no IN ('APP-2023-SINGLE', 'APP-2023-MULTI');

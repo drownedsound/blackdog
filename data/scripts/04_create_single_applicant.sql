@@ -3,7 +3,7 @@ BEGIN TRANSACTION;
 -- 1. Create the Parent Application
 -- ----------------------------------------------------------------------------
 INSERT INTO APPLICATION (
-    application_number, category_code, status_code, requested_amount
+    member_reference_no, category_code, status_code, requested_amount
     ) VALUES (
     'APP-2023-SINGLE', 'CARD', 1, 5000000 -- 50,000.00 PHP
     );
@@ -13,7 +13,7 @@ INSERT INTO APPLICATION (
 INSERT INTO CARD_DETAIL (
     application_id, card_design_code, credit_limit
     ) VALUES (
-    (SELECT id FROM APPLICATION WHERE application_number = 'APP-2023-SINGLE'),
+    (SELECT id FROM APPLICATION WHERE member_reference_no = 'APP-2023-SINGLE'),
     'STD_BLUE',
     5000000
     );
@@ -24,7 +24,7 @@ INSERT INTO APPLICANT (
     application_id, role_code, product_type_code, 
     first_name, last_name, date_of_birth
     ) VALUES (
-    (SELECT id FROM APPLICATION WHERE application_number = 'APP-2023-SINGLE'),
+    (SELECT id FROM APPLICATION WHERE member_reference_no = 'APP-2023-SINGLE'),
     'PRIMARY_CARDHOLDER',
     'VISA_GOLD',
     'Juan',

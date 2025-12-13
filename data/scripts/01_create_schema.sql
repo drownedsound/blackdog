@@ -77,7 +77,7 @@ CREATE TABLE REF_APP_STATUS (
 
 CREATE TABLE APPLICATION (
     id INTEGER PRIMARY KEY, 
-    application_number TEXT NOT NULL UNIQUE,
+    member_reference_no TEXT NOT NULL UNIQUE,
     category_id INTEGER NOT NULL,
     status_id INTEGER NOT NULL,
     requested_amount INTEGER NOT NULL CHECK (requested_amount > 0),
