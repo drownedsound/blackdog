@@ -29,7 +29,7 @@ CREATE TABLE REF_PRODUCT_TYPE (
 );
 
 CREATE TABLE REF_APP_STATUS (
-    code TEXT PRIMARY KEY,
+    code INTEGER PRIMARY KEY,
     description TEXT NOT NULL,
     is_terminal INTEGER NOT NULL DEFAULT 0 
     CHECK (is_terminal IN (0, 1))
@@ -76,7 +76,7 @@ CREATE TABLE APPLICATION (
     id INTEGER PRIMARY KEY, -- Auto-increment
     application_number TEXT NOT NULL UNIQUE,
     category_code TEXT NOT NULL,
-    status_code TEXT NOT NULL,
+    status_code INTEGER NOT NULL,
     requested_amount INTEGER NOT NULL CHECK (requested_amount > 0), -- Centavos
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -85,7 +85,7 @@ SELECT 'Attempting Insert: Application (Standard Visa)...' AS action;
 INSERT INTO APPLICATION (
     application_number, category_code, status_code, requested_amount
     )
-VALUES ('TEST-APP-001', 'CARD', 'CREATED', 5000000); -- 50k PHP
+VALUES ('TEST-APP-001', 'CARD', 1, 5000000); -- 50k PHP
 
 -- B. Insert Applicant (Primary)
 INSERT INTO APPLICANT (

@@ -4,7 +4,7 @@ BEGIN TRANSACTION;
 
 -- 1. Perform the Update
 UPDATE APPLICATION 
-SET status_code = 'IN_PROGRESS'
+SET status_code = 2
 WHERE application_number = 'APP-2023-SINGLE';
 
 COMMIT;

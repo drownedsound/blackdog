@@ -33,11 +33,11 @@ INSERT INTO REF_PRODUCT_TYPE (code, description, category_code) VALUES
 -- 3. APPLICATION STATUS (Strict Workflow)
 -- ============================================================================
 INSERT INTO REF_APP_STATUS (code, description, is_terminal) VALUES 
-    ('CREATED', 'Application draft created but not submitted', 0),
-    ('IN_PROGRESS', 'Under credit review and background investigation', 0),
-    ('APPROVED', 'Credit approved, pending booking', 1), 
-    ('DECLINED', 'Application rejected based on credit policy', 1),
-    ('CANCELLED', 'Application withdrawn or terminated', 1);
+    (1, 'Application draft created but not submitted', 0),
+    (2, 'Under credit review and background investigation', 0),
+    (3, 'Credit approved, pending booking', 1), 
+    (4, 'Application rejected based on credit policy', 1),
+    (5, 'Application withdrawn or terminated', 1);
 
 -- 4. APPLICANT ROLES 
 -- ============================================================================

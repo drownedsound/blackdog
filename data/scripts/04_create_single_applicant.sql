@@ -8,7 +8,7 @@ BEGIN TRANSACTION;
 INSERT INTO APPLICATION (
     application_number, category_code, status_code, requested_amount
     ) VALUES (
-    'APP-2023-SINGLE', 'CARD', 'CREATED', 5000000 -- 50,000.00 PHP
+    'APP-2023-SINGLE', 'CARD', 1, 5000000 -- 50,000.00 PHP
     );
 
 -- 2. Create Product Specifics (Card Details)

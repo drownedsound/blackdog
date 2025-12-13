@@ -7,7 +7,7 @@ BEGIN TRANSACTION;
 INSERT INTO APPLICATION (
     application_number, category_code, status_code, requested_amount
     ) VALUES (
-    'APP-2023-MULTI', 'CARD', 'CREATED', 10000000 -- 100k Shared Limit
+    'APP-2023-MULTI', 'CARD', 1, 10000000 -- 100k Shared Limit
     );
 
 INSERT INTO CARD_DETAIL (
