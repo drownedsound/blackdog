@@ -74,8 +74,8 @@ func (c ProductCategory) String() string {
 type Application struct {
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
-	MemberReferenceNo string // external identifier
-	Id                int64  // internal identifier
+	MemberReferenceNo string // Used as external identifier
+	Id                int64  // Used as internal identifier
 	RequestedAmount   int64  // Shown in centavos
 	CategoryCode      ProductCategory
 	StatusCode        ApplicationStatus

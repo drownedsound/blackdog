@@ -24,6 +24,10 @@ func NewHandler(svc *Service) *Handler {
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /application", h.HandleCreate)
 	mux.HandleFunc("GET /application/{id}", h.HandleGet)
+	// TODO: Add HandleFunc for API
+	//       1. POST /application (new application)
+	//       2. GET /application/{id} (view existing application)
+	//       3. PATCH /application/{id} (update existing application)
 	// TODO: Add HandleFunc for web forms
 	//	     1. /application/new
 	//	     2. /application/100/save
