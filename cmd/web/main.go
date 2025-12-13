@@ -69,7 +69,6 @@ func main() {
 		slog.String("static-dir", cfg.staticDir),
 	)
 
-	// TODO: Pass logger to svc as a dependency
 	svc := app.NewService(repo, logger)
 	mux := http.NewServeMux()
 	handler := app.NewHandler(svc)
