@@ -1,5 +1,3 @@
--- TODO: Rename application_number to member_reference_no
-
 .mode column
 .headers on
 

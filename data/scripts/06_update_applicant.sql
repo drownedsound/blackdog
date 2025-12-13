@@ -1,5 +1,3 @@
--- TODO: Rename application_number to member_reference_no
-
 BEGIN TRANSACTION;
 
 -- 1. Perform the Update
