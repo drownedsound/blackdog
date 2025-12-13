@@ -30,3 +30,4 @@ go.work.sum
 .vscode/
 
 data/*.db
+data/*.db-*

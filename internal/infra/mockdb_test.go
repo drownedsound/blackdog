@@ -17,7 +17,7 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 		CreatedAt:         time.Now(),
 		UpdatedAt:         time.Now(),
 		MemberReferenceNo: "ABCDE12345",
-		CategoryCode:      "CARD",
+		CategoryCode:      app.CategoryCard,
 		StatusCode:        app.StatusCreated,
 		RequestedAmount:   100_000_000,
 	}
@@ -132,7 +132,7 @@ func TestMockDb_ConcurrentSaveAndGetApplication(t *testing.T) {
 		CreatedAt:         time.Now(),
 		UpdatedAt:         time.Now(),
 		MemberReferenceNo: "ABCDE12345",
-		CategoryCode:      "CARD",
+		CategoryCode:      app.CategoryCard,
 		StatusCode:        app.StatusCreated,
 		RequestedAmount:   100000000,
 	}
@@ -215,7 +215,7 @@ func TestMockDb_SimulatedConnectionError(t *testing.T) {
 	// Trigger the specific "ERR-100" condition
 	a := &app.Application{
 		MemberReferenceNo: "ERR-100",
-		CategoryCode:      "CARD",
+		CategoryCode:      app.CategoryCard,
 		RequestedAmount:   100,
 	}
 

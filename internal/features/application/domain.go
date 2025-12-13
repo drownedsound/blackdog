@@ -12,7 +12,8 @@ var (
 	ErrMissingMemberRefNo = errors.New(
 		"member reference number cannot be empty",
 	)
-	ErrMissingCategoryCode = errors.New("category code cannot be empty")
+	ErrInvalidCategoryCode = errors.New("category code is not a valid value")
+	ErrInvalidStatusCode   = errors.New("status code is not a valid value")
 	ErrInvalidId           = errors.New(
 		"id cannot be less than or equal to zero",
 	)
@@ -21,7 +22,10 @@ var (
 	)
 )
 
-type ApplicationStatus uint8
+type (
+	ApplicationStatus byte
+	ProductCategory   byte
+)
 
 const (
 	StatusUnknown ApplicationStatus = iota
@@ -30,6 +34,12 @@ const (
 	StatusApproved
 	StatusDeclined
 	StatusCancelled
+)
+
+const (
+	CategoryUnknown ProductCategory = iota
+	CategoryCard
+	CategoryLoan
 )
 
 func (s ApplicationStatus) String() string {
@@ -49,17 +59,26 @@ func (s ApplicationStatus) String() string {
 	}
 }
 
+func (c ProductCategory) String() string {
+	switch c {
+	case CategoryCard:
+		return "CARD"
+	case CategoryLoan:
+		return "LOAN"
+	default:
+		return "UNKNOWN"
+	}
+}
+
 // Application is the aggregate root
 type Application struct {
-	CreatedAt time.Time
-	UpdatedAt time.Time
-
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 	MemberReferenceNo string // external identifier
-	CategoryCode      string
+	Id                int64  // internal identifier
+	RequestedAmount   int64  // Shown in centavos
+	CategoryCode      ProductCategory
 	StatusCode        ApplicationStatus
-
-	Id              int64 // internal identifier
-	RequestedAmount int64 // Shown in centavos
 }
 
 func (a *Application) Validate() error {
@@ -77,8 +96,12 @@ func (a *Application) Validate() error {
 		return ErrMissingMemberRefNo
 	}
 
-	if strings.TrimSpace(a.CategoryCode) == "" {
-		return ErrMissingCategoryCode
+	if a.CategoryCode == CategoryUnknown || a.CategoryCode > CategoryLoan {
+		return ErrInvalidCategoryCode
+	}
+
+	if a.StatusCode == StatusUnknown || a.StatusCode > StatusCancelled {
+		return ErrInvalidStatusCode
 	}
 
 	if a.RequestedAmount <= 0 {

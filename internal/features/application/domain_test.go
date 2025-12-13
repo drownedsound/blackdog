@@ -17,7 +17,7 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      "CARD",
+				CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
@@ -29,7 +29,7 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				CreatedAt:         time.Now().AddDate(0, 0, -1),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      "CARD",
+				CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
@@ -41,7 +41,7 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				CreatedAt:         time.Now().AddDate(0, 0, 1),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      "CARD",
+				CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
@@ -73,7 +73,7 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      "CARD",
+				CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
@@ -85,7 +85,7 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				CreatedAt:         time.Now().AddDate(0, 0, -1),
 				UpdatedAt:         time.Now().AddDate(0, 0, -1),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      "CARD",
+				CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
@@ -97,7 +97,7 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now().AddDate(0, 0, 1),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      "CARD",
+				CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
@@ -129,7 +129,7 @@ func TestApplication_Validate_MemberReferenceNo(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      "CARD",
+				CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
@@ -141,7 +141,7 @@ func TestApplication_Validate_MemberReferenceNo(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "",
-				CategoryCode:      "CARD",
+				CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
@@ -173,7 +173,7 @@ func TestApplication_Validate_CategoryCode(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      "CARD",
+				CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
@@ -185,23 +185,79 @@ func TestApplication_Validate_CategoryCode(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      "LOAN",
+				CategoryCode:      CategoryLoan,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
 			expectedErr: nil,
 		},
 		{
-			desc: "Application Missing CategoryCode Fails Validation",
+			desc: "Application With Invalid CategoryCode Fails Validation",
 			app: Application{
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      "",
+				CategoryCode:      CategoryUnknown,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
-			expectedErr: ErrMissingCategoryCode,
+			expectedErr: ErrInvalidCategoryCode,
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			err := tC.app.Validate()
+			if err != tC.expectedErr {
+				t.Errorf(
+					"Validate Error: Expected = %v, Actual = %v",
+					tC.expectedErr, err,
+				)
+			}
+		})
+	}
+}
+
+func TestApplication_Validate_StatusCode(t *testing.T) {
+	testCases := []struct {
+		desc        string
+		app         Application
+		expectedErr error
+	}{
+		{
+			desc: "Card Application With Valid StatusCode Passes Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				CategoryCode:      CategoryCard,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
+			},
+			expectedErr: nil,
+		},
+		{
+			desc: "Loan Application With Valid StatusCode Passes Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				CategoryCode:      CategoryLoan,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
+			},
+			expectedErr: nil,
+		},
+		{
+			desc: "Application With Invalid StatusCode Fails Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				CategoryCode:      CategoryCard,
+				StatusCode:        StatusUnknown,
+				RequestedAmount:   100_000_000,
+			},
+			expectedErr: ErrInvalidStatusCode,
 		},
 	}
 	for _, tC := range testCases {
@@ -229,7 +285,7 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      "CARD",
+				CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
 			},
@@ -241,7 +297,7 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      "LOAN",
+				CategoryCode:      CategoryLoan,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   -1,
 			},

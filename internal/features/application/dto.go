@@ -2,10 +2,23 @@ package app
 
 import "time"
 
+type CategoryCode string
+
+func (c CategoryCode) Parse() ProductCategory {
+	switch c {
+	case "CARD":
+		return CategoryCard
+	case "LOAN":
+		return CategoryLoan
+	default:
+		return CategoryUnknown
+	}
+}
+
 type CreateApplicationRequest struct {
-	MemberReferenceNo string `json:"member_reference_no"`
-	CategoryCode      string `json:"category_code"`
-	RequestedAmount   int64  `json:"requested_amount"`
+	MemberReferenceNo string       `json:"member_reference_no"`
+	CategoryCode      CategoryCode `json:"category_code"`
+	RequestedAmount   int64        `json:"requested_amount"`
 }
 
 type CreateApplicationResponse struct {

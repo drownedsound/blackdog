@@ -72,6 +72,7 @@ CREATE TABLE REF_EDUCATION_LEVEL (
 CREATE TABLE APPLICATION (
     id INTEGER PRIMARY KEY, -- Auto-increment
     application_number TEXT NOT NULL UNIQUE,
+    -- FIXME: Convert category_code from TEXT to INTEGER
     category_code TEXT NOT NULL,
     status_code INTEGER NOT NULL,
     requested_amount INTEGER NOT NULL CHECK (requested_amount > 0), -- Centavos
