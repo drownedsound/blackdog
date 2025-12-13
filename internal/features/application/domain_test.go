@@ -317,6 +317,48 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 	}
 }
 
+func TestProductCategory_String(t *testing.T) {
+	testCases := []struct {
+		desc     string
+		category ProductCategory
+		expected string
+	}{
+		{
+			desc:     "CategoryCard returns CARD",
+			category: CategoryCard,
+			expected: "CARD",
+		},
+		{
+			desc:     "CategoryLoan returns LOAN",
+			category: CategoryLoan,
+			expected: "LOAN",
+		},
+		{
+			desc:     "CategoryUnknown returns UNKNOWN",
+			category: CategoryUnknown,
+			expected: "UNKNOWN",
+		},
+		{
+			desc:     "Arbitrary Category returns UNKNOWN",
+			category: ProductCategory(255),
+			expected: "UNKNOWN",
+		},
+	}
+
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			if got := tC.category.String(); got != tC.expected {
+				t.Errorf(
+					"String() mismatch: Category %d, Expected %q, Got %q",
+					tC.category,
+					tC.expected,
+					got,
+				)
+			}
+		})
+	}
+}
+
 func TestApplicationStatus_String(t *testing.T) {
 	testCases := []struct {
 		desc     string

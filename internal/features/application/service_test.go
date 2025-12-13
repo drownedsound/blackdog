@@ -68,27 +68,26 @@ func TestService_CreateApplication(t *testing.T) {
 				ErrInsertFailed,
 			),
 		},
-		// {
-		// 	desc: "Domain Validation Failure (Empty Category)",
-		// 	req: CreateApplicationRequest{
-		// 		MemberReferenceNo: "APP-INVALID",
-		// 		CategoryCode:      "", // Invalid: Causes app.Validate() to fail
-		// 		RequestedAmount:   100_000,
-		// 	},
-		// 	mockSave: func(ctx context.Context, a *Application) error {
-		// 		t.Error(
-		// 			"Repository Save should not be called" +
-		// 				"on validation failure",
-		// 		)
-		// 		return nil
-		// 	},
-		// 	expectedErr: fmt.Errorf(
-		// 		"application.service stopped saving entity: %w",
-		// 		ErrMissingCategoryCode,
-		// 	),
-		// 	expectedId:    0,
-		// 	expectedState: "",
-		// },
+		{
+			desc: "Domain Validation Failure (Invalid Category)",
+			req: CreateApplicationRequest{
+				MemberReferenceNo: "APP-INVALID",
+				CategoryCode:      "INVALID",
+				RequestedAmount:   100_000,
+			},
+			mockSave: func(ctx context.Context, a *Application) error {
+				t.Error(
+					"Repository Save should not be called" +
+						" on validation failure")
+				return nil
+			},
+			expectedErr: fmt.Errorf(
+				"application.service stopped saving entity: %w",
+				ErrInvalidCategoryCode,
+			),
+			expectedId:    0,
+			expectedState: "",
+		},
 	}
 
 	for _, tC := range testCases {
