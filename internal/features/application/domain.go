@@ -21,7 +21,6 @@ var (
 	)
 )
 
-// FIXME: Convert status_code column of application table to INTEGER from TEXT
 type ApplicationStatus uint8
 
 const (
