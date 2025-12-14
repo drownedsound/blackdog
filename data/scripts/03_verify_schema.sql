@@ -1,9 +1,7 @@
 .mode column
 .headers on
 
--- Enforce Foreign Keys (Default is OFF in SQLite)
 PRAGMA foreign_keys = ON;
--- Enable Write-Ahead Logging for concurrency and reliability
 PRAGMA journal_mode = WAL;
 
 SELECT '----------------------------------------' AS '======================';
@@ -35,14 +33,14 @@ FROM sqlite_master
 WHERE type='table' AND name NOT LIKE 'sqlite_%' 
 ORDER BY name;
 
--- -- 3. Check Critical Triggers (Immutability & Audit)
--- SELECT '----------------------------------------' AS '----------------------';
--- SELECT 'Verifying Triggers...' AS info;
---
--- SELECT name AS trigger_name, 'Active' AS status 
--- FROM sqlite_master 
--- WHERE type='trigger' 
--- ORDER BY name;
+-- 3. Check Critical Triggers (Immutability & Audit)
+SELECT '----------------------------------------' AS '----------------------';
+SELECT 'Verifying Triggers...' AS info;
+
+SELECT name AS trigger_name, 'Active' AS status 
+FROM sqlite_master 
+WHERE type='trigger' 
+ORDER BY name;
 
 SELECT '----------------------------------------' AS '======================';
 SELECT 'PHASE 3: REFERENCE DATA HYDRATION' AS 'Step';
@@ -52,8 +50,8 @@ SELECT '----------------------------------------' AS '----------------------';
 SELECT 'REF_PRODUCT_CATEGORY' AS table_name, count(*) AS row_count 
 FROM REF_PRODUCT_CATEGORY
 UNION ALL
-SELECT 'REF_PRODUCT_TYPE', count(*) FROM REF_PRODUCT_TYPE
-UNION ALL
+-- SELECT 'REF_PRODUCT_TYPE', count(*) FROM REF_PRODUCT_TYPE
+-- UNION ALL
 SELECT 'REF_APP_STATUS', count(*) FROM REF_APP_STATUS;
 -- UNION ALL
 -- SELECT 'REF_APPLICANT_ROLE', count(*) FROM REF_APPLICANT_ROLE
@@ -77,13 +75,13 @@ SELECT '----------------------------------------' AS '----------------------';
 
 BEGIN TRANSACTION;
 
-SELECT 'Attempting Insert: Application (Standard Visa)...' AS action;
-
--- A. Insert Parent Application
-INSERT INTO APPLICATION (
-    member_reference_no, category_id, status_id, requested_amount
-    )
-VALUES ('TEST-APP-001', 1, 1, 5000000); -- 50k PHP
+-- SELECT 'Attempting Insert: Application (Standard Visa)...' AS action;
+--
+-- -- A. Insert Parent Application
+-- INSERT INTO APPLICATION (
+--     member_reference_no, category_id, status_id, requested_amount
+--     )
+-- VALUES ('TEST-APP-001', 1, 1, 5000000); -- 50k PHP
 
 -- -- B. Insert Applicant (Primary)
 -- INSERT INTO APPLICANT (
@@ -125,10 +123,10 @@ VALUES ('TEST-APP-001', 1, 1, 5000000); -- 50k PHP
 -- JOIN REF_PRODUCT_TYPE c ON p.product_type_code = c.code
 -- JOIN CARD_DETAIL cd ON a.id = cd.application_id
 -- WHERE m.member_reference_no = 'TEST-APP-001';
---
--- SELECT '----------------------------------------' AS '----------------------';
--- SELECT 'Validation 2: Audit Log Trigger Check' AS info;
---
+
+SELECT '----------------------------------------' AS '----------------------';
+SELECT 'Validation 2: Audit Log Trigger Check' AS info;
+
 -- -- Verify Audit Log captured the INSERT
 -- SELECT 
 --     table_name, 
@@ -138,6 +136,81 @@ VALUES ('TEST-APP-001', 1, 1, 5000000); -- 50k PHP
 -- WHERE record_id = (
 --     SELECT id FROM APPLICATION WHERE member_reference_no='TEST-APP-001'
 -- );
+
+SELECT '=== TEST 1: audit_app_insert ===' AS 'Test Case';
+-- 1. Insert a new record
+-- EXPECTATION: 
+--    a. Record created in APPLICATION
+--    b. Record created in AUDIT_LOG with action 'INSERT'
+INSERT INTO APPLICATION (member_reference_no, category_id, status_id, requested_amount) 
+VALUES ('TEST-TRIGGER-01', 1, 1, 100000);
+
+-- 2. Verify Audit Log
+SELECT 
+    table_name, 
+    action, 
+    json_extract(new_value, '$.status') as status,
+    json_extract(new_value, '$.amount') as amount
+FROM AUDIT_LOG 
+WHERE record_id = (SELECT id FROM APPLICATION WHERE member_reference_no = 'TEST-TRIGGER-01')
+AND action = 'INSERT';
+
+
+SELECT '=== TEST 2: update_timestamp_app & audit_app_update ===' AS 'Test Case';
+-- 1. Capture State BEFORE Update
+SELECT 
+    updated_at AS "Original Time", 
+    status_id AS "Original Status"
+FROM APPLICATION 
+WHERE member_reference_no = 'TEST-TRIGGER-01';
+
+-- Sleep for 1 second to ensure timestamp difference (SQLite specific hack for scripts)
+-- In real app usage, natural latency handles this. 
+-- Note: 'unixepoch' has second precision. If script runs too fast, time might look same.
+
+-- 2. Perform Update
+-- EXPECTATION:
+--    a. status_id changes to 2
+--    b. updated_at increases (trigger: update_timestamp_app)
+--    c. Audit log entry created (trigger: audit_app_update)
+UPDATE APPLICATION 
+SET status_id = 2 
+WHERE member_reference_no = 'TEST-TRIGGER-01';
+
+-- -- 3. Verify Timestamp Change
+-- SELECT 
+--     updated_at AS "New Time", 
+--     CASE 
+--         WHEN updated_at > created_at THEN 'PASS: Timestamp Updated' 
+--         ELSE 'FAIL: Timestamp Unchanged' 
+--     END AS "Time Check"
+-- FROM APPLICATION 
+-- WHERE member_reference_no = 'TEST-TRIGGER-01';
+
+-- 4. Verify Audit Log for UPDATE
+SELECT 
+    action,
+    json_extract(old_value, '$.status') as old_status,
+    json_extract(new_value, '$.status') as new_status
+FROM AUDIT_LOG 
+WHERE record_id = (SELECT id FROM APPLICATION WHERE member_reference_no = 'TEST-TRIGGER-01')
+AND action = 'UPDATE';
+
+
+SELECT '=== TEST 3: no_delete_application ===' AS 'Test Case';
+-- EXPECTATION: This statement must FAIL with "Error: Access Denied: Records are immutable."
+-- Note: This will likely stop the script execution, so we run it last.
+
+DELETE FROM APPLICATION WHERE member_reference_no = 'TEST-TRIGGER-01';
+
+-- If script continues (it shouldn't), we verify record still exists
+SELECT 
+    CASE 
+        WHEN count(*) = 1 THEN 'PASS: Record Still Exists' 
+        ELSE 'FAIL: Record Deleted' 
+    END AS "Immutability Check"
+FROM APPLICATION 
+WHERE member_reference_no = 'TEST-TRIGGER-01';
 
 SELECT '----------------------------------------' AS '----------------------';
 SELECT 'Test Complete. Rolling back changes...' AS info;

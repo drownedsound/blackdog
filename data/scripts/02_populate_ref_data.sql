@@ -6,29 +6,29 @@ BEGIN TRANSACTION;
 -- 1. PRODUCT CATEGORIES
 -- ============================================================================
 INSERT INTO REF_PRODUCT_CATEGORY (id, name, description) VALUES 
-    (1, 'Credit Card', 'A revolving credit facility allowing the holder to make purchases up to a specific limit. Balances can be paid in full monthly or over time with interest.'),
-    (2, 'Personal Loan', 'A fixed-term, lump-sum loan repaid in regular monthly installments (principal + interest) over a set period. Typically unsecured.');
+    (1, 'CREDIT_CARD', 'A revolving credit facility allowing the holder to make purchases up to a specific limit. Balances can be paid in full monthly or over time with interest.'),
+    (2, 'PERSONAL_LOAN', 'A fixed-term, lump-sum loan repaid in regular monthly installments (principal + interest) over a set period. Typically unsecured.');
 
 -- 2. PRODUCT TYPES
 -- ============================================================================
--- Credit Cards
-INSERT INTO REF_PRODUCT_TYPE (id, name, description, category_id) VALUES 
-    (1, 'VISA_CLASSIC', 'Visa Classic', 1),
-    (2, 'VISA_GOLD', 'Visa Gold', 1),
-    (3, 'VISA_PLATINUM', 'Visa Platinum', 1),
-    (4, 'MC_CLASSIC', 'Mastercard Classic', 1),
-    (5, 'MC_GOLD', 'Mastercard Gold', 1),
-    (6, 'MC_PLATINUM', 'Mastercard Platinum', 1);
+-- -- Credit Cards
+-- INSERT INTO REF_PRODUCT_TYPE (id, name, description, category_id) VALUES 
+--     (1, 'VISA_CLASSIC', 'Visa Classic', 1),
+--     (2, 'VISA_GOLD', 'Visa Gold', 1),
+--     (3, 'VISA_PLATINUM', 'Visa Platinum', 1),
+--     (4, 'MC_CLASSIC', 'Mastercard Classic', 1),
+--     (5, 'MC_GOLD', 'Mastercard Gold', 1),
+--     (6, 'MC_PLATINUM', 'Mastercard Platinum', 1);
 
-    -- -- Personal Loans
-    -- INSERT INTO REF_PRODUCT_TYPE (code, description, category_code) VALUES 
-    --     ('PL_STANDARD', 'Standard Personal Loan', 'LOAN'),
-    --     ('PL_SALARY', 'Salary Deduction Loan', 'LOAN'), 
-    --     ('PL_OFW', 'OFW Reintegration Loan', 'LOAN'), 
-    --     ('PL_MICRO', 'Micro-Finance Personal Loan', 'LOAN');
+-- -- Personal Loans
+-- INSERT INTO REF_PRODUCT_TYPE (code, description, category_code) VALUES 
+--     ('PL_STANDARD', 'Standard Personal Loan', 'LOAN'),
+--     ('PL_SALARY', 'Salary Deduction Loan', 'LOAN'), 
+--     ('PL_OFW', 'OFW Reintegration Loan', 'LOAN'), 
+--     ('PL_MICRO', 'Micro-Finance Personal Loan', 'LOAN');
 
-    -- 3. APPLICATION STATUS (Strict Workflow)
-    -- ============================================================================
+-- 3. APPLICATION STATUS (Strict Workflow)
+-- ============================================================================
 INSERT INTO REF_APP_STATUS (id, name, description, is_terminal) VALUES 
     (1, 'CREATED', 'Draft created but not submitted', 0),
     (2, 'IN_PROGRESS', 'Undergoing manual review', 0),

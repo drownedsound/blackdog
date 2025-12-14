@@ -10,29 +10,37 @@ PRAGMA journal_mode = WAL;
 -- ============================================================================
 
 CREATE TABLE REF_PRODUCT_CATEGORY (
-    -- Domain Mapping: 
     -- CategoryCard (1)
     -- CategoryLoan (2)
     id INTEGER PRIMARY KEY, 
-    -- Domain Mapping: 
     -- Credit Card
     -- Personal Loan
     name TEXT NOT NULL UNIQUE,
     description TEXT NOT NULL
 ) STRICT;
 
-CREATE TABLE REF_PRODUCT_TYPE (
-    id INTEGER PRIMARY KEY, 
-    name TEXT NOT NULL UNIQUE,
-    description TEXT NOT NULL,
-    category_id INTEGER NOT NULL,
-
-    FOREIGN KEY (category_id) 
-    REFERENCES REF_PRODUCT_CATEGORY(id)
-) STRICT;
+-- CREATE TABLE REF_PRODUCT_TYPE (
+--     id INTEGER PRIMARY KEY, 
+--     name TEXT NOT NULL UNIQUE,
+--     description TEXT NOT NULL,
+--     category_id INTEGER NOT NULL,
+--
+--     FOREIGN KEY (category_id) 
+--     REFERENCES REF_PRODUCT_CATEGORY(id)
+-- ) STRICT;
 
 CREATE TABLE REF_APP_STATUS (
+    -- StatusCreated (1)
+    -- StatusInProgress (2)
+    -- StatusApproved (3)
+    -- StatusDeclined (4)
+    -- StatusCancelled (5)
     id INTEGER PRIMARY KEY, 
+    -- CREATED
+    -- IN_PROGRESS
+    -- APPROVED
+    -- DECLINED
+    -- CANCELLED
     name TEXT NOT NULL UNIQUE,
     description TEXT NOT NULL,
     is_terminal INTEGER NOT NULL DEFAULT 0 
@@ -92,9 +100,9 @@ CREATE TABLE APPLICATION (
     REFERENCES REF_APP_STATUS(id)
 
     CHECK (requested_amount > 0)
-    -- Ensure valid epoch time (> Jan 1 2020) 
-    CHECK (created_at > 1577836800)
-    CHECK (updated_at > 1577836800)
+-- Ensure valid epoch time (> Jan 1 2020) 
+CHECK (created_at > 1577836800)
+CHECK (updated_at > 1577836800)
 ) STRICT;
 
 -- CREATE TABLE APPLICANT (
@@ -232,29 +240,30 @@ CREATE TABLE APPLICATION (
 --     REFERENCES REF_EDUCATION_LEVEL(code)
 -- );
 --
--- -- 7. AUDIT TRAIL
--- -- ============================================================================
---
--- CREATE TABLE AUDIT_LOG (
---     id INTEGER PRIMARY KEY,
---     table_name TEXT NOT NULL,
---     record_id INTEGER NOT NULL,
---     action TEXT NOT NULL CHECK (action IN ('INSERT', 'UPDATE')),
---     old_value TEXT, -- JSON Payload
---     new_value TEXT, -- JSON Payload
---     changed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
--- );
---
--- -- ============================================================================
--- -- 8. BUSINESS LOGIC TRIGGERS
--- -- ============================================================================
---
--- -- 8.1 IMMUTABILITY 
--- -- ----------------------------------------------------------------------------
--- -- Implementing the requirement that records cannot be deleted.
--- CREATE TRIGGER no_delete_application BEFORE DELETE ON APPLICATION 
--- BEGIN SELECT RAISE(ABORT, 'Access Denied: Records are immutable.'); END;
---
+-- 7. AUDIT TRAIL
+-- ============================================================================
+
+CREATE TABLE AUDIT_LOG (
+    id INTEGER PRIMARY KEY,
+    table_name TEXT NOT NULL,
+    record_id INTEGER NOT NULL,
+    action TEXT NOT NULL CHECK (action IN ('INSERT', 'UPDATE')),
+    old_value TEXT, -- JSON Payload
+    new_value TEXT NOT NULL, -- JSON Payload
+    changed_at INTEGER NOT NULL DEFAULT (unixepoch())
+) STRICT;
+
+-- ============================================================================
+-- 8. BUSINESS LOGIC TRIGGERS
+-- ============================================================================
+
+-- 8.1 IMMUTABILITY 
+-- ----------------------------------------------------------------------------
+-- TODO: Verify deletion is not allowed
+-- Implementing the requirement that records cannot be deleted.
+CREATE TRIGGER no_delete_application BEFORE DELETE ON APPLICATION 
+BEGIN SELECT RAISE(ABORT, 'Access Denied: Records are immutable.'); END;
+
 -- CREATE TRIGGER no_delete_applicant BEFORE DELETE ON APPLICANT 
 -- BEGIN SELECT RAISE(ABORT, 'Access Denied: Records are immutable.'); END;
 --
@@ -317,36 +326,60 @@ CREATE TABLE APPLICATION (
 -- WHERE a.id = NEW.application_id
 -- );
 -- END;
---
--- -- 8.4 AUDIT LOGGING (JSON via SQLite)
--- -- ----------------------------------------------------------------------------
--- -- Capture state changes for key tables.
---
--- -- APPLICATION Audit
--- CREATE TRIGGER audit_app_insert AFTER INSERT ON APPLICATION
--- BEGIN
--- INSERT INTO AUDIT_LOG (table_name, record_id, action, new_value)
---     VALUES ('APPLICATION', NEW.id, 'INSERT', 
--- json_object(
--- 'status', NEW.status_code, 
--- 'amount', NEW.requested_amount
--- ));
--- END;
---
+
+-- 8.4 AUDIT LOGGING (JSON via SQLite)
+-- ----------------------------------------------------------------------------
+-- Capture state changes for key tables.
+
+-- APPLICATION Audit
+CREATE TRIGGER audit_app_insert AFTER INSERT ON APPLICATION
+BEGIN
+INSERT INTO AUDIT_LOG (table_name, record_id, action, new_value)
+    VALUES ('APPLICATION', NEW.id, 'INSERT', 
+json_object(
+'member_reference_no', NEW.member_reference_no,
+'category', NEW.category_id, 
+'status', NEW.status_id, 
+'amount', NEW.requested_amount
+));
+END;
+
 -- CREATE TRIGGER audit_app_update AFTER UPDATE ON APPLICATION
 -- BEGIN
--- INSERT INTO AUDIT_LOG (table_name, record_id, action, old_value, new_value)
+--     INSERT INTO AUDIT_LOG (table_name, record_id, action, old_value, new_value)
 --     VALUES ('APPLICATION', NEW.id, 'UPDATE', 
--- json_object(
--- 'status', OLD.status_code, 
--- 'amount', OLD.requested_amount
--- ),
--- json_object(
--- 'status', NEW.status_code, 
--- 'amount', NEW.requested_amount
--- ));
+--         json_object(
+--         'member_reference_no', OLD.member_reference_no,
+--         'category', OLD.category_id, 
+--         'status', OLD.status_id, 
+--         'amount', OLD.requested_amount
+--         ),
+--         json_object(
+--         'member_reference_no', NEW.member_reference_no,
+--         'category', NEW.category_id, 
+--         'status', NEW.status_id, 
+--         'amount', NEW.requested_amount
+--         ));
 -- END;
---
+
+CREATE TRIGGER audit_app_update AFTER UPDATE ON APPLICATION
+-- Add this guard clause:
+WHEN OLD.status_id IS NOT NEW.status_id 
+OR OLD.requested_amount IS NOT NEW.requested_amount
+BEGIN
+INSERT INTO AUDIT_LOG (table_name, record_id, action, old_value, new_value)
+VALUES ('APPLICATION', NEW.id, 'UPDATE', 
+json_object(
+'status', OLD.status_id, 
+'amount', OLD.requested_amount
+),
+json_object(
+'status', NEW.status_id, 
+'amount', NEW.requested_amount
+)
+);
+END;
+
 -- -- APPLICANT Audit
 -- CREATE TRIGGER audit_applicant_update AFTER UPDATE ON APPLICANT
 -- BEGIN
@@ -362,8 +395,8 @@ CREATE TABLE APPLICATION (
 --         ));
 -- END;
 --
--- -- Timestamp Maintenance
--- CREATE TRIGGER update_timestamp_app AFTER UPDATE ON APPLICATION
--- BEGIN
--- UPDATE APPLICATION SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
--- END;
+-- Timestamp Maintenance
+CREATE TRIGGER update_timestamp_app AFTER UPDATE ON APPLICATION
+BEGIN
+UPDATE APPLICATION SET updated_at = unixepoch() WHERE id = NEW.id;
+END;

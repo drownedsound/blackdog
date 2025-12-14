@@ -62,9 +62,9 @@ func (s ApplicationStatus) String() string {
 func (c ProductCategory) String() string {
 	switch c {
 	case CategoryCard:
-		return "CARD"
+		return "CREDIT_CARD"
 	case CategoryLoan:
-		return "LOAN"
+		return "PERSONAL_LOAN"
 	default:
 		return "UNKNOWN"
 	}
