@@ -42,7 +42,7 @@ func TestService_CreateApplication(t *testing.T) {
 			desc: "Repository Save Succeeds",
 			req: CreateApplicationRequest{
 				MemberReferenceNo: "APP-001",
-				CategoryCode:      "LOAN",
+				CategoryCode:      "PERSONAL_LOAN",
 				RequestedAmount:   500_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
@@ -57,7 +57,7 @@ func TestService_CreateApplication(t *testing.T) {
 			desc: "Repository Save Fails",
 			req: CreateApplicationRequest{
 				MemberReferenceNo: "APP-002",
-				CategoryCode:      "CARD",
+				CategoryCode:      "CREDIT_CARD",
 				RequestedAmount:   100_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {

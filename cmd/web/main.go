@@ -14,9 +14,10 @@ import (
 type config struct {
 	addr      string
 	staticDir string
+	dbPath    string
 }
 
-func initSrvDependencies() (logger *slog.Logger, repo app.Repository) {
+func initSrvDependencies(cfg config) (logger *slog.Logger, repo app.Repository) {
 	// TODO: Replicate command-line flags in a TOML file
 	// TODO: Create command-line flag to direct log output to file or stdout
 	// TODO: Create command-line flag to set log format
@@ -33,8 +34,19 @@ func initSrvDependencies() (logger *slog.Logger, repo app.Repository) {
 		},
 	))
 
-	repo = infra.NewMockDb()
-	logger.Debug("Initialized in-memory database")
+	// repo = infra.NewMockDb()
+	// logger.Debug("Initialized in-memory database")
+
+	// Wiring: Use the real SQLite implementation
+	db, err := infra.NewSQLiteConnection(cfg.dbPath)
+	if err != nil {
+		logger.Error("Failed to initialize database", slog.Any("error", err))
+		os.Exit(1)
+	}
+	logger.Debug("Initialized SQLite database", slog.String("path", cfg.dbPath))
+
+	// Wiring: Inject the DB connection into the Repo
+	repo = infra.NewSqliteDb(db)
 
 	return
 }
@@ -54,19 +66,23 @@ func loadConfig() (cfg config) {
 		"Path to static assets",
 	)
 
+	// Default to local file, can be overridden by env vars or flags in production
+	flag.StringVar(&cfg.dbPath, "db-path", "./data/blackdog.db", "Path to SQLite database file")
+
 	flag.Parse()
 	return
 }
 
 func main() {
-	logger, repo := initSrvDependencies()
-	logger.Debug("Initialized server dependencies")
-
 	cfg := loadConfig()
+	logger, repo := initSrvDependencies(cfg)
+	// logger.Debug("Initialized server dependencies")
+
 	logger.Debug(
 		"Retrieved server configuration",
 		slog.String("addr", cfg.addr),
 		slog.String("static-dir", cfg.staticDir),
+		slog.String("db-path", cfg.dbPath),
 	)
 
 	svc := app.NewService(repo, logger)

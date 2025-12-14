@@ -326,12 +326,12 @@ func TestProductCategory_String(t *testing.T) {
 		{
 			desc:     "CategoryCard returns CARD",
 			category: CategoryCard,
-			expected: "CARD",
+			expected: "CREDIT_CARD",
 		},
 		{
 			desc:     "CategoryLoan returns LOAN",
 			category: CategoryLoan,
-			expected: "LOAN",
+			expected: "PERSONAL_LOAN",
 		},
 		{
 			desc:     "CategoryUnknown returns UNKNOWN",

@@ -6,9 +6,9 @@ type CategoryCode string
 
 func (c CategoryCode) Parse() ProductCategory {
 	switch c {
-	case "CARD":
+	case "CREDIT_CARD":
 		return CategoryCard
-	case "LOAN":
+	case "PERSONAL_LOAN":
 		return CategoryLoan
 	default:
 		return CategoryUnknown
