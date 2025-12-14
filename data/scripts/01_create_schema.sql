@@ -26,6 +26,7 @@ CREATE TABLE REF_PRODUCT_TYPE (
     name TEXT NOT NULL UNIQUE,
     description TEXT NOT NULL,
     category_id INTEGER NOT NULL,
+
     FOREIGN KEY (category_id) 
     REFERENCES REF_PRODUCT_CATEGORY(id)
 ) STRICT;
@@ -35,6 +36,7 @@ CREATE TABLE REF_APP_STATUS (
     name TEXT NOT NULL UNIQUE,
     description TEXT NOT NULL,
     is_terminal INTEGER NOT NULL DEFAULT 0 
+
     CHECK (is_terminal IN (0, 1))
 ) STRICT;
 
@@ -80,7 +82,7 @@ CREATE TABLE APPLICATION (
     member_reference_no TEXT NOT NULL UNIQUE,
     category_id INTEGER NOT NULL,
     status_id INTEGER NOT NULL,
-    requested_amount INTEGER NOT NULL CHECK (requested_amount > 0),
+    requested_amount INTEGER NOT NULL,
     created_at INTEGER NOT NULL DEFAULT (unixepoch()),
     updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
 
@@ -88,8 +90,11 @@ CREATE TABLE APPLICATION (
     REFERENCES REF_PRODUCT_CATEGORY(id),
     FOREIGN KEY (status_id) 
     REFERENCES REF_APP_STATUS(id)
+
+    CHECK (requested_amount > 0)
     -- Ensure valid epoch time (> Jan 1 2020) 
     CHECK (created_at > 1577836800)
+    CHECK (updated_at > 1577836800)
 ) STRICT;
 
 -- CREATE TABLE APPLICANT (
