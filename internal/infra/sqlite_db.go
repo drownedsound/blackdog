@@ -7,13 +7,10 @@ import (
 	"fmt"
 	"time"
 
-	// Import the feature package to access Domain Entities and Interfaces
 	app "github.com/drownedsound/blackdog/internal/features/application"
 	"github.com/mattn/go-sqlite3"
 )
 
-// SqliteDb implements app.Repository for a SQLite backend.
-// It resides in the infra layer, keeping the app layer clean of SQL details.
 type SqliteDb struct {
 	db *sql.DB
 }
@@ -25,14 +22,21 @@ func NewSqliteDb(db *sql.DB) *SqliteDb {
 	}
 }
 
-// NewSQLiteConnection initializes the database connection with performance-tuned PRAGMAs.
+// NewSQLiteConnection initializes the database connection
+// with performance-tuned PRAGMAs.
 func NewSQLiteConnection(dbPath string) (*sql.DB, error) {
-	// DSN Query Parameters for Performance & Concurrency:
-	// _journal_mode=WAL:   Enables Write-Ahead Logging. Non-blocking reads.
-	// _busy_timeout=5000:  The "Buffer". Waits 5s for the write lock before failing.
-	// _synchronous=NORMAL: Faster writes, safe against app crashes (OS crash risk only).
-	// _foreign_keys=on:    Enforce schema constraints (Strictness).
-	dsn := fmt.Sprintf("file:%s?_journal_mode=WAL&_busy_timeout=5000&_synchronous=NORMAL&_foreign_keys=on", dbPath)
+	dsn := fmt.Sprintf(
+		"file:%s"+"?"+
+			// _journal_mode=WAL: Enables Write-Ahead Logging. Non-blocking reads.
+			"_journal_mode=WAL&"+"&"+
+			// _busy_timeout=5000:  Waits 5s for the write lock before failing.
+			"_busy_timeout=5000"+"&"+
+			// _synchronous=NORMAL: Faster writes, safe against app crashes.
+			"_synchronous=NORMAL"+"&"+
+			// _foreign_keys=on:    Enforce schema constraints.
+			"_foreign_keys=on",
+		dbPath,
+	)
 
 	db, err := sql.Open("sqlite3", dsn)
 	if err != nil {
@@ -40,11 +44,12 @@ func NewSQLiteConnection(dbPath string) (*sql.DB, error) {
 	}
 
 	// Connection Pool Settings for High Throughput
-	// We limit open connections to prevent "database is locked" contention,
+	// Limit open connections to prevent "database is locked" contention
 	// even with WAL mode.
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(5)
-	db.SetConnMaxLifetime(0) // Reuse connections indefinitely
+	db.SetMaxOpenConns(10) // TODO: Create configuration item
+	db.SetMaxIdleConns(5)  // TODO: Create configuration item
+	// Reuse connections indefinitely
+	db.SetConnMaxLifetime(0) // TODO: Create configuration item
 
 	if err := db.Ping(); err != nil {
 		return nil, err
@@ -53,7 +58,7 @@ func NewSQLiteConnection(dbPath string) (*sql.DB, error) {
 	return db, nil
 }
 
-// Save persists the Application entity.
+// Save persists the Application entity in the SQLite database
 func (r *SqliteDb) Save(ctx context.Context, a *app.Application) error {
 	const query = `
 		INSERT INTO APPLICATION (
@@ -65,15 +70,14 @@ func (r *SqliteDb) Save(ctx context.Context, a *app.Application) error {
 		updated_at
 		) VALUES (?, ?, ?, ?, ?, ?)`
 
+	// FIXME: Use transactions
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return fmt.Errorf("prepare statement: %w", err)
 	}
 	defer stmt.Close()
 
-	// Mechanical Sympathy:
-	// We cast custom types (CategoryCode) to int directly.
-	// We convert time.Time to Unix Epoch (int64) for compact storage.
+	// Need to case enums to int and time.Time to Unix Epoch (int64)
 	res, err := stmt.ExecContext(
 		ctx,
 		a.MemberReferenceNo,
@@ -103,7 +107,6 @@ func (r *SqliteDb) Save(ctx context.Context, a *app.Application) error {
 }
 
 // GetById retrieves the Application entity by ID.
-// Ideally, this will eventually use JOINs to fetch nested objects.
 func (r *SqliteDb) GetById(ctx context.Context, id int64) (app.Application, error) {
 	const query = `
 		SELECT 
@@ -117,7 +120,6 @@ func (r *SqliteDb) GetById(ctx context.Context, id int64) (app.Application, erro
 		FROM APPLICATION
 		WHERE id = ?`
 
-	// Data-Oriented Design:
 	// Scan directly into stack-allocated variables.
 	// This avoids allocating a map or intermediate interface{}.
 	var (
@@ -144,7 +146,7 @@ func (r *SqliteDb) GetById(ctx context.Context, id int64) (app.Application, erro
 		return app.Application{}, fmt.Errorf("query failed: %w", err)
 	}
 
-	// Rehydrate Domain Objects
+	// Rehydrate domain objects
 	// Convert optimized storage types (int/int64) back to Domain types.
 	appEntity.CreatedAt = time.Unix(createdAtUnix, 0).UTC()
 	appEntity.UpdatedAt = time.Unix(updatedAtUnix, 0).UTC()

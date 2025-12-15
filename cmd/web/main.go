@@ -34,6 +34,7 @@ func initSrvDependencies(cfg config) (logger *slog.Logger, repo app.Repository) 
 		},
 	))
 
+	// TODO: Dynamically determine which repository to use based on flag
 	// repo = infra.NewMockDb()
 	// logger.Debug("Initialized in-memory database")
 
@@ -67,7 +68,12 @@ func loadConfig() (cfg config) {
 	)
 
 	// Default to local file, can be overridden by env vars or flags in production
-	flag.StringVar(&cfg.dbPath, "db-path", "./data/blackdog.db", "Path to SQLite database file")
+	flag.StringVar(
+		&cfg.dbPath,
+		"db-path",
+		"./data/blackdog.db",
+		"Path to SQLite database file",
+	)
 
 	flag.Parse()
 	return
