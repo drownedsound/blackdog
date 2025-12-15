@@ -259,8 +259,6 @@ CREATE TABLE AUDIT_LOG (
 
 -- 8.1 IMMUTABILITY 
 -- ----------------------------------------------------------------------------
--- TODO: Verify deletion is not allowed
--- Implementing the requirement that records cannot be deleted.
 CREATE TRIGGER no_delete_application BEFORE DELETE ON APPLICATION 
 BEGIN SELECT RAISE(ABORT, 'Access Denied: Records are immutable.'); END;
 
