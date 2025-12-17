@@ -38,7 +38,6 @@ func initSrvDependencies(cfg config) (logger *slog.Logger, repo app.Repository) 
 	// repo = infra.NewMockDb()
 	// logger.Debug("Initialized in-memory database")
 
-	// Wiring: Use the real SQLite implementation
 	db, err := infra.NewSQLiteConnection(cfg.dbPath)
 	if err != nil {
 		logger.Error("Failed to initialize database", slog.Any("error", err))
@@ -46,7 +45,6 @@ func initSrvDependencies(cfg config) (logger *slog.Logger, repo app.Repository) 
 	}
 	logger.Debug("Initialized SQLite database", slog.String("path", cfg.dbPath))
 
-	// Wiring: Inject the DB connection into the Repo
 	repo = infra.NewSqliteDb(db)
 
 	return
@@ -67,7 +65,8 @@ func loadConfig() (cfg config) {
 		"Path to static assets",
 	)
 
-	// Default to local file, can be overridden by env vars or flags in production
+	// Default to local file
+	// Overridden by env vars or flags in production
 	flag.StringVar(
 		&cfg.dbPath,
 		"db-path",

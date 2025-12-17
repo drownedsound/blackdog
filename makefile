@@ -1,7 +1,8 @@
 .DEFAULT_GOAL := build
 
+# TODO: Combine formatting and linting steps
 # TODO: Create switch to run unit tests
-# TODO: Create switch to run unit tests and compile code
+# TODO: Create switch to run all steps. Exclude redundant steps.
 .PHONY:goimports gofumpt staticcheck test build clean
 
 goimports:
