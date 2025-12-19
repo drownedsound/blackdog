@@ -72,6 +72,10 @@ func (c ProductCategory) String() string {
 
 // Application is the aggregate root
 type Application struct {
+	// TODO: Embed Applicant (principal cardholder)
+	// TODO: Attach []Applicant (supplementary cardholders)
+	CreditCard
+	// TODO: Embed Loan
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	MemberReferenceNo string // Used as external identifier
@@ -108,14 +112,26 @@ func (a *Application) Validate() error {
 		return ErrInvalidRequestedAmount
 	}
 
+	if a.CreditLimit <= 1 {
+		return errors.New("invalid credit limit")
+	}
+
 	return nil
 }
 
-// TODO: Create Applicant entity
+type CreditCard struct {
+	CardDesignCode string
+	CreditLimit int
+}
+
+func (c * CreditCard) Validate() error {
+	return nil
+}
+
 // TODO: Create Loan value object
-// TODO: Create CreditCard value object
+// TODO: Create Applicant entity
 // TODO: Create Contact value object
-// TODO: Create Address value object
 // TODO: Create Identification value object
+// TODO: Create Address value object
 // TODO: Create Education value object
 // TODO: Create Employment value object
