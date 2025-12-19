@@ -165,6 +165,8 @@ CHECK (updated_at > 1577836800)
 --     REFERENCES APPLICATION(id)
 -- );
 --
+-- FIXME: card_design_code needs to be a key that looks up actual product
+--        from a lookup table
 -- CREATE TABLE CARD_DETAIL (
 --     application_id INTEGER PRIMARY KEY,
 --     card_design_code TEXT NOT NULL,
