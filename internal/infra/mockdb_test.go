@@ -134,7 +134,7 @@ func TestMockDb_ConcurrentSaveAndGetApplication(t *testing.T) {
 		MemberReferenceNo: "ABCDE12345",
 		CategoryCode:      app.CategoryCard,
 		StatusCode:        app.StatusCreated,
-		RequestedAmount:   100000000,
+		RequestedAmount:   10_0000_000,
 	}
 	repo.Save(ctx, app)
 	targetId := app.Id
@@ -182,7 +182,7 @@ func TestMockDb_SerializationErrors(t *testing.T) {
 		//    masking the error.
 		invalidApp := &app.Application{
 			Id:                1,
-			CreatedAt:         time.Date(10001, 1, 1, 0, 0, 0, 0, time.UTC),
+			CreatedAt:         time.Date(10_001, 1, 1, 0, 0, 0, 0, time.UTC),
 			MemberReferenceNo: "INVALID",
 		}
 

@@ -97,7 +97,7 @@ func TestSqliteDb_Save(t *testing.T) {
 			MemberReferenceNo: "REF-001",
 			CategoryCode:      app.CategoryCard,
 			StatusCode:        app.StatusCreated,
-			RequestedAmount:   500000,
+			RequestedAmount:   500_000,
 			CreatedAt:         time.Now().UTC(),
 			UpdatedAt:         time.Now().UTC(),
 		}
@@ -171,7 +171,7 @@ func TestSqliteDb_GetById(t *testing.T) {
 		MemberReferenceNo: "GET-001",
 		CategoryCode:      app.CategoryCard,
 		StatusCode:        app.StatusCreated,
-		RequestedAmount:   75000,
+		RequestedAmount:   75_000,
 		CreatedAt:         time.Now().UTC().Truncate(time.Second),
 		UpdatedAt:         time.Now().UTC().Truncate(time.Second),
 	}

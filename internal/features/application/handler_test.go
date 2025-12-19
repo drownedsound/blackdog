@@ -28,7 +28,7 @@ func TestHandler_CreateApplication(t *testing.T) {
 			reqBody: CreateApplicationRequest{
 				MemberReferenceNo: "REF-123",
 				CategoryCode:      "PERSONAL_LOAN",
-				RequestedAmount:   50000,
+				RequestedAmount:   50_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
 				a.Id = 101
@@ -49,7 +49,7 @@ func TestHandler_CreateApplication(t *testing.T) {
 			reqBody: CreateApplicationRequest{
 				MemberReferenceNo: "REF-FAIL",
 				CategoryCode:      "PERSONAL_LOAN",
-				RequestedAmount:   50000,
+				RequestedAmount:   50_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
 				return errors.New("db error")
@@ -62,7 +62,7 @@ func TestHandler_CreateApplication(t *testing.T) {
 			reqBody: CreateApplicationRequest{
 				MemberReferenceNo: "ERR-100",
 				CategoryCode:      "PERSONAL_LOAN",
-				RequestedAmount:   50000,
+				RequestedAmount:   50_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
 				return ErrConnectionRefused
@@ -238,7 +238,7 @@ func TestHandler_JsonEncodingFailure(t *testing.T) {
 		reqBody := CreateApplicationRequest{
 			MemberReferenceNo: "REF-123",
 			CategoryCode:      "PERSONAL_LOAN",
-			RequestedAmount:   50000,
+			RequestedAmount:   50_000,
 		}
 		body, _ := json.Marshal(reqBody)
 		req := httptest.NewRequest(
