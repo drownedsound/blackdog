@@ -129,7 +129,8 @@ func TestService_CreateApplication(t *testing.T) {
 			}
 			if resp.StatusCode != tC.expectedState {
 				t.Errorf(
-					"CreateApplication Error: StatusCode Expected %s, Actual %s",
+					"CreateApplication Error: StatusCode Expected %s,"+
+						"Actual %s",
 					tC.expectedState,
 					resp.StatusCode,
 				)

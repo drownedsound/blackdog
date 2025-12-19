@@ -9,11 +9,12 @@ import (
 	"time"
 
 	app "github.com/drownedsound/blackdog/internal/features/application"
-	_ "github.com/mattn/go-sqlite3" // Register SQLite driver
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // minimalSchema mirrors the production schema required for these tests.
-// Keeping this local ensures tests are atomic and don't break if external SQL files move.
+// Keeping this local ensures tests are atomic and don't break
+// if external SQL files move.
 const minimalSchema = `
 	PRAGMA foreign_keys = ON;
 	PRAGMA journal_mode = WAL;
@@ -46,16 +47,20 @@ const minimalSchema = `
 	) STRICT;
 
 	-- Seed Reference Data
-	INSERT INTO REF_PRODUCT_CATEGORY (id, name, description) VALUES (1, 'Credit Card', 'CC');
-	INSERT INTO REF_APP_STATUS (id, name, description) VALUES (1, 'CREATED', 'New');
+	INSERT INTO REF_PRODUCT_CATEGORY (id, name, description) 
+	VALUES (1, 'Credit Card', 'CC');
+	
+	INSERT INTO REF_APP_STATUS (id, name, description) 
+	VALUES (1, 'CREATED', 'New');
 	`
 
-// setupTestDb initializes a fresh SQLite DB in a temp directory for valid isolation.
+// setupTestDb initializes a fresh SQLite DB in a temp directory
+// for valid isolation.
 func setupTestDb(t *testing.T) (*SqliteDb, func()) {
 	t.Helper()
 
-	// Use t.TempDir for isolation. On Linux, this is often tmpfs (RAM), providing
-	// high performance while still testing file I/O mechanics.
+	// Use t.TempDir for isolation. On Linux, this is often tmpfs (RAM),
+	// providing high performance while still testing file I/O mechanics.
 	tmpDir := t.TempDir()
 	dbPath := filepath.Join(tmpDir, "test_blackdog.db")
 
@@ -126,7 +131,11 @@ func TestSqliteDb_Save(t *testing.T) {
 		// Verify we are wrapping the error correctly
 		expectedMsg := "duplicate application"
 		if err != nil && len(err.Error()) < len(expectedMsg) {
-			t.Errorf("Expected error containing %q, got %q", expectedMsg, err.Error())
+			t.Errorf(
+				"Expected error containing %q, got %q",
+				expectedMsg,
+				err.Error(),
+			)
 		}
 	})
 
@@ -163,7 +172,7 @@ func TestSqliteDb_GetById(t *testing.T) {
 		CategoryCode:      app.CategoryCard,
 		StatusCode:        app.StatusCreated,
 		RequestedAmount:   75000,
-		CreatedAt:         time.Now().UTC().Truncate(time.Second), // SQLite stores unix sec
+		CreatedAt:         time.Now().UTC().Truncate(time.Second),
 		UpdatedAt:         time.Now().UTC().Truncate(time.Second),
 	}
 	if err := repo.Save(ctx, savedApp); err != nil {
@@ -180,7 +189,10 @@ func TestSqliteDb_GetById(t *testing.T) {
 			t.Errorf("Expected ID %d, got %d", savedApp.Id, fetched.Id)
 		}
 		if fetched.MemberReferenceNo != savedApp.MemberReferenceNo {
-			t.Errorf("Expected Ref %s, got %s", savedApp.MemberReferenceNo, fetched.MemberReferenceNo)
+			t.Errorf(
+				"Expected Ref %s, got %s",
+				savedApp.MemberReferenceNo,
+				fetched.MemberReferenceNo)
 		}
 		// Verify Enum Mapping
 		if fetched.CategoryCode != app.CategoryCard {
@@ -188,7 +200,10 @@ func TestSqliteDb_GetById(t *testing.T) {
 		}
 		// Verify Timestamp Rehydration
 		if !fetched.CreatedAt.Equal(savedApp.CreatedAt) {
-			t.Errorf("Expected CreatedAt %v, got %v", savedApp.CreatedAt, fetched.CreatedAt)
+			t.Errorf(
+				"Expected CreatedAt %v, got %v",
+				savedApp.CreatedAt,
+				fetched.CreatedAt)
 		}
 	})
 
@@ -215,40 +230,6 @@ func TestNewSQLiteConnection_Errors(t *testing.T) {
 		t.Error("Expected error opening DB on top of directory, got nil")
 	}
 }
-
-// func TestNewSQLiteConnection_Errors(t *testing.T) {
-// 	// Test handling of invalid paths to cover error branches in NewSQLiteConnection
-// 	// Using a path that likely cannot be written to or created.
-// 	// Note: SQLite is robust; pure path errors are hard to trigger without permission issues.
-// 	// We rely on creating a directory conflict.
-// 	tmpDir := t.TempDir()
-//
-// 	// Create a subdirectory to act as a "file" conflict
-// 	conflictPath := filepath.Join(tmpDir, "bad_db")
-// 	if err := osMkdir(conflictPath, 0o755); err != nil {
-// 		t.Fatal(err)
-// 	}
-//
-// 	// Attempt to open a DB where a directory exists with the same name
-// 	_, err := NewSQLiteConnection(conflictPath)
-// 	if err == nil {
-// 		t.Error("Expected error opening DB on top of directory, got nil")
-// 	}
-// }
-//
-// // Helper to mock mkdir for the test above if needed,
-// // strictly we can just use os.Mkdir in the test body.
-// func osMkdir(name string, perm os.FileMode) error {
-// 	return filepath.WalkDir(filepath.Dir(name), func(path string, d os.DirEntry, err error) error {
-// 		if err != nil {
-// 			return err
-// 		}
-// 		if path == name {
-// 			return fmt.Errorf("exists")
-// 		}
-// 		return nil
-// 	})
-// }
 
 func TestSqliteDb_Save_EdgeCases(t *testing.T) {
 	t.Parallel()

@@ -16,8 +16,9 @@ import (
 
 func TestHandler_CreateApplication(t *testing.T) {
 	testCases := []struct {
-		desc           string
-		reqBody        interface{} // Use interface{} to test invalid JSON payloads
+		desc string
+		// reqBody uses interface{} to test invalid JSON payloads
+		reqBody        interface{}
 		mockSave       func(context.Context, *Application) error
 		expectedStatus int
 		expectedBody   string // Partial match or specific check
@@ -240,7 +241,10 @@ func TestHandler_JsonEncodingFailure(t *testing.T) {
 			RequestedAmount:   50000,
 		}
 		body, _ := json.Marshal(reqBody)
-		req := httptest.NewRequest(http.MethodPost, "/application", bytes.NewReader(body))
+		req := httptest.NewRequest(
+			http.MethodPost,
+			"/application",
+			bytes.NewReader(body))
 
 		// Use failWriter to trigger the json.Encode error
 		rec := httptest.NewRecorder()

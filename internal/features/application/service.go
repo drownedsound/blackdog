@@ -22,7 +22,8 @@ func NewService(repo Repository, logger *slog.Logger) *Service {
 // FIXME: Implement slog.LogValuer to log complex object graphs
 // FIXME: Group related fields using slog.GroupValue
 func (s *Service) CreateApplication(
-	ctx context.Context, req CreateApplicationRequest,
+	ctx context.Context,
+	req CreateApplicationRequest,
 ) (CreateApplicationResponse, error) {
 	app := &Application{
 		CreatedAt:         time.Now(),

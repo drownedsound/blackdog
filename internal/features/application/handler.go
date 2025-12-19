@@ -24,10 +24,12 @@ func NewHandler(svc *Service) *Handler {
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /application", h.HandleCreate)
 	mux.HandleFunc("GET /application/{id}", h.HandleGet)
+
 	// TODO: Add HandleFunc for API
 	//       1. POST /application (new application)
 	//       2. GET /application/{id} (view existing application)
 	//       3. PATCH /application/{id} (update existing application)
+
 	// TODO: Add HandleFunc for web forms
 	//	     1. /application/new
 	//	     2. /application/100/save
@@ -46,7 +48,6 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	dec.DisallowUnknownFields()
 
 	if err := dec.Decode(&req); err != nil {
-		// if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		slog.ErrorContext(
 			r.Context(), "json decoding failed", slog.Any("error", err),
 		)

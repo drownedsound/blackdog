@@ -193,19 +193,22 @@ func TestMockDb_SerializationErrors(t *testing.T) {
 		}
 	})
 
-	t.Run("GetById Returns Error on Json.Unmarshal Failure", func(t *testing.T) {
-		// 1. Manually inject corrupted JSON into the private store.
-		badID := int64(999)
-		repo.store[badID] = []byte(`{"truncated_json":`)
+	t.Run(
+		"GetById Returns Error on Json.Unmarshal Failure",
+		func(t *testing.T) {
+			// 1. Manually inject corrupted JSON into the private store.
+			badID := int64(999)
+			repo.store[badID] = []byte(`{"truncated_json":`)
 
-		// 2. Attempt to retrieve it.
-		_, err := repo.GetById(ctx, badID)
-		if err == nil {
-			t.Error(
-				"Expected Json.Unmarshal Error Due to Corrupt Data, Got Nil",
-			)
-		}
-	})
+			// 2. Attempt to retrieve it.
+			_, err := repo.GetById(ctx, badID)
+			if err == nil {
+				t.Error(
+					"Expected Json.Unmarshal Error" +
+						"Due to Corrupt Data, Got Nil",
+				)
+			}
+		})
 }
 
 func TestMockDb_SimulatedConnectionError(t *testing.T) {

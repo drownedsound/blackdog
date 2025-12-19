@@ -17,7 +17,10 @@ type config struct {
 	dbPath    string
 }
 
-func initSrvDependencies(cfg config) (logger *slog.Logger, repo app.Repository) {
+func initSrvDependencies(cfg config) (
+	logger *slog.Logger,
+	repo app.Repository,
+) {
 	// TODO: Replicate command-line flags in a TOML file
 	// TODO: Create command-line flag to direct log output to file or stdout
 	// TODO: Create command-line flag to set log format
@@ -43,7 +46,9 @@ func initSrvDependencies(cfg config) (logger *slog.Logger, repo app.Repository) 
 		logger.Error("Failed to initialize database", slog.Any("error", err))
 		os.Exit(1)
 	}
-	logger.Debug("Initialized SQLite database", slog.String("path", cfg.dbPath))
+	logger.Debug(
+		"Initialized SQLite database",
+		slog.String("path", cfg.dbPath))
 
 	repo = infra.NewSqliteDb(db)
 
@@ -81,7 +86,6 @@ func loadConfig() (cfg config) {
 func main() {
 	cfg := loadConfig()
 	logger, repo := initSrvDependencies(cfg)
-	// logger.Debug("Initialized server dependencies")
 
 	logger.Debug(
 		"Retrieved server configuration",
