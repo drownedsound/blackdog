@@ -18,7 +18,7 @@ func (c CategoryCode) Parse() ProductCategory {
 type CreateApplicationRequest struct {
 	MemberReferenceNo string       `json:"member_reference_no"`
 	CategoryCode      CategoryCode `json:"category_code"`
-	RequestedAmount   int64        `json:"requested_amount"`
+	RequestedAmount   int          `json:"requested_amount"`
 }
 
 type CreateApplicationResponse struct {
@@ -28,7 +28,7 @@ type CreateApplicationResponse struct {
 	CategoryCode      string    `json:"category_code"`
 	StatusCode        string    `json:"status_code"`
 	Id                int64     `json:"id"`
-	RequestedAmount   int64     `json:"requested_amount"`
+	RequestedAmount   int       `json:"requested_amount"`
 }
 
 type GetApplicationRequest struct {
@@ -42,5 +42,5 @@ type GetApplicationResponse struct {
 	CategoryCode      string    `json:"category_code"`
 	StatusCode        string    `json:"status_code"`
 	Id                int64     `json:"id"`
-	RequestedAmount   int64     `json:"requested_amount"`
+	RequestedAmount   int       `json:"requested_amount"`
 }

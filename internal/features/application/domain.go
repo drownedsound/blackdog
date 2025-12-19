@@ -76,7 +76,7 @@ type Application struct {
 	UpdatedAt         time.Time
 	MemberReferenceNo string // Used as external identifier
 	Id                int64  // Used as internal identifier
-	RequestedAmount   int64  // Shown in centavos
+	RequestedAmount   int    // Shown in centavos
 	CategoryCode      ProductCategory
 	StatusCode        ApplicationStatus
 }
