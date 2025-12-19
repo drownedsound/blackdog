@@ -31,9 +31,9 @@ func NewSQLiteConnection(dbPath string) (*sql.DB, error) {
 		dbPath,
 	)
 
-	// sql.Open only validates arguments. With a hardcoded driver and DSN format,
-	// this cannot fail. We ignore the error and rely on Ping to verify the
-	// actual connection and file permissions.
+	// sql.Open only validates arguments. With a hardcoded driver and
+	// DSN format, this cannot fail. We ignore the error and rely on Ping
+	// to verify the actual connection and file permissions.
 	db, _ := sql.Open("sqlite3", dsn)
 
 	// Connection Pool Settings
@@ -51,7 +51,8 @@ func NewSQLiteConnection(dbPath string) (*sql.DB, error) {
 func (r *SqliteDb) Save(ctx context.Context, a *app.Application) error {
 	const query = `
 		INSERT INTO APPLICATION (
-		member_reference_no, category_id, status_id, requested_amount, created_at, updated_at
+		member_reference_no, category_id, status_id, 
+		requested_amount, created_at, updated_at
 		) VALUES (?, ?, ?, ?, ?, ?)`
 
 	// Use ExecContext directly. Previously, PrepareContext+Close
@@ -82,7 +83,10 @@ func (r *SqliteDb) Save(ctx context.Context, a *app.Application) error {
 	return nil
 }
 
-func (r *SqliteDb) GetById(ctx context.Context, id int64) (app.Application, error) {
+func (r *SqliteDb) GetById(ctx context.Context, id int64) (
+	app.Application,
+	error,
+) {
 	const query = `
 		SELECT 
 		id, member_reference_no, category_id, status_id, 

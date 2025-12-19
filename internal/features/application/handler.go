@@ -100,8 +100,8 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 
 // HandleGet processes retrieving an application by Id.
 func (h *Handler) HandleGet(w http.ResponseWriter, r *http.Request) {
-	idStr := r.PathValue("id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
+	s := r.PathValue("id")
+	id, err := strconv.ParseInt(s, 10, 64)
 
 	if err != nil || id <= 0 {
 		slog.WarnContext(
