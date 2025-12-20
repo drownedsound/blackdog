@@ -22,9 +22,9 @@ var (
 		"member reference number cannot be empty",
 	)
 	// ErrInvalidCategoryCode = errors.New("category code is not a valid value")
-	// ErrInvalidId           = errors.New(
-	// 	"id cannot be less than or equal to zero",
-	// )
+	ErrInvalidId = errors.New(
+		"id cannot be less than or equal to zero",
+	)
 	ErrInvalidRequestedAmount = errors.New(
 		"requested amount cannot be less than or equal to zero",
 	)
@@ -93,10 +93,15 @@ type Application struct {
 	RequestedAmount   int    // Shown in centavos
 	// CategoryCode      ProductCategory
 	StatusCode ApplicationStatus
+	// TODO: Add ApprovedAmount
 }
 
 func (a *Application) Validate() error {
-	if strings.TrimSpace(a.CardProfileCode) == "" {
+	// if strings.TrimSpace(a.CardProfileCode) == "" {
+	// 	return ErrInvalidCardProfileCode
+	// }
+
+	if a.CardProfileCode <= 0 {
 		return ErrInvalidCardProfileCode
 	}
 
@@ -138,7 +143,7 @@ func (a *Application) Validate() error {
 }
 
 type CreditCard struct {
-	CardProfileCode string
+	CardProfileCode int64
 	CreditLimit     int
 	// InterestRate represents the rate in basis points
 	// Example: 1 bps == 0.01% or 1250 bps == 12.50%

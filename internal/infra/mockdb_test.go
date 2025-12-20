@@ -14,10 +14,15 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 	ctx := context.Background()
 
 	newApp := &app.Application{
+		CreditCard: app.CreditCard{
+			CardProfileCode: req.CardProfileCode,
+			// TODO: Retrieve matching InterestRate based on CardProfileCode
+			InterestRate: 1_250,
+		},
 		CreatedAt:         time.Now(),
 		UpdatedAt:         time.Now(),
 		MemberReferenceNo: "ABCDE12345",
-		CategoryCode:      app.CategoryCard,
+		// CategoryCode:      app.CategoryCard,
 		StatusCode:        app.StatusCreated,
 		RequestedAmount:   100_000_000,
 	}

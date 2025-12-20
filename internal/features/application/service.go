@@ -26,12 +26,17 @@ func (s *Service) CreateApplication(
 	req CreateApplicationRequest,
 ) (CreateApplicationResponse, error) {
 	app := &Application{
+		CreditCard: CreditCard{
+			CardProfileCode: req.CardProfileCode,
+			// TODO: Retrieve matching InterestRate based on CardProfileCode
+			InterestRate: 1_250,
+		},
 		CreatedAt:         time.Now(),
 		UpdatedAt:         time.Now(),
 		MemberReferenceNo: req.MemberReferenceNo,
-		CategoryCode:      req.CategoryCode.Parse(),
-		StatusCode:        StatusCreated,
-		RequestedAmount:   req.RequestedAmount,
+		// CategoryCode:      req.CategoryCode.Parse(),
+		StatusCode:      StatusCreated,
+		RequestedAmount: req.RequestedAmount,
 	}
 
 	if err := app.Validate(); err != nil {
@@ -46,19 +51,24 @@ func (s *Service) CreateApplication(
 		)
 	}
 
+	// FIXME: Just return the Id?
 	return CreateApplicationResponse{
 		CreatedAt:         app.CreatedAt,
 		UpdatedAt:         app.UpdatedAt,
 		MemberReferenceNo: app.MemberReferenceNo,
-		CategoryCode:      app.CategoryCode.String(),
-		StatusCode:        app.StatusCode.String(),
-		Id:                app.Id,
-		RequestedAmount:   app.RequestedAmount,
+		CardProfileCode:   app.CardProfileCode,
+		// CategoryCode:      app.CategoryCode.String(),
+		StatusCode: app.StatusCode,
+		// StatusCode:      app.StatusCode.String(),
+		Id:              app.Id,
+		RequestedAmount: app.RequestedAmount,
+		InterestRate:    app.InterestRate,
 	}, nil
 }
 
 func (s *Service) GetApplicationById(
-	ctx context.Context, req GetApplicationRequest,
+	ctx context.Context,
+	req GetApplicationRequest,
 ) (GetApplicationResponse, error) {
 	app, err := s.repo.GetById(ctx, req.Id)
 	if err != nil {
@@ -71,9 +81,11 @@ func (s *Service) GetApplicationById(
 		CreatedAt:         app.CreatedAt,
 		UpdatedAt:         app.UpdatedAt,
 		MemberReferenceNo: app.MemberReferenceNo,
-		CategoryCode:      app.CategoryCode.String(),
-		StatusCode:        app.StatusCode.String(),
-		Id:                app.Id,
-		RequestedAmount:   app.RequestedAmount,
+		CardProfileCode:   app.CardProfileCode,
+		// CategoryCode:      app.CategoryCode.String(),
+		StatusCode:      app.StatusCode,
+		Id:              app.Id,
+		RequestedAmount: app.RequestedAmount,
+		InterestRate:    app.InterestRate,
 	}, nil
 }

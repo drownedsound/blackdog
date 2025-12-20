@@ -21,7 +21,7 @@ func TestApplication_Validate_CardProfileCode(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -38,7 +38,7 @@ func TestApplication_Validate_CardProfileCode(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "",
+					CardProfileCode: 0,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -75,7 +75,7 @@ func TestApplication_Validate_CreditLimit(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -92,7 +92,7 @@ func TestApplication_Validate_CreditLimit(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     -1_000,
 					InterestRate:    1_000,
 				},
@@ -129,7 +129,7 @@ func TestApplication_Validate_InterestRate(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -146,7 +146,7 @@ func TestApplication_Validate_InterestRate(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    -1_000,
 				},
@@ -183,7 +183,7 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -200,7 +200,7 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -217,7 +217,7 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -254,7 +254,7 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -271,7 +271,7 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -288,7 +288,7 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -326,7 +326,7 @@ func TestApplication_Validate_MemberReferenceNumber(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -344,7 +344,7 @@ func TestApplication_Validate_MemberReferenceNumber(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -381,7 +381,7 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -398,7 +398,7 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: -1,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -477,7 +477,7 @@ func TestApplication_Validate_StatusCode(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -494,7 +494,7 @@ func TestApplication_Validate_StatusCode(t *testing.T) {
 				StatusCode:      StatusCreated,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},
@@ -511,7 +511,7 @@ func TestApplication_Validate_StatusCode(t *testing.T) {
 				StatusCode:      StatusUnknown,
 				RequestedAmount: 100_000_000,
 				CreditCard: CreditCard{
-					CardProfileCode: "VISA_GOLD",
+					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
 					InterestRate:    1_000,
 				},

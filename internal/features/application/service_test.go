@@ -36,14 +36,14 @@ func TestService_CreateApplication(t *testing.T) {
 		mockSave      func(ctx context.Context, a *Application) error
 		expectedErr   error
 		expectedId    int64
-		expectedState string
+		expectedState ApplicationStatus
 	}{
 		{
 			desc: "Repository Save Succeeds",
 			req: CreateApplicationRequest{
 				MemberReferenceNo: "APP-001",
-				CategoryCode:      "PERSONAL_LOAN",
-				RequestedAmount:   500_000,
+				// CategoryCode:      "PERSONAL_LOAN",
+				RequestedAmount: 500_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
 				a.Id = 101
@@ -51,14 +51,14 @@ func TestService_CreateApplication(t *testing.T) {
 			},
 			expectedErr:   nil,
 			expectedId:    101,
-			expectedState: "CREATED",
+			expectedState: StatusCreated,
 		},
 		{
 			desc: "Repository Save Fails",
 			req: CreateApplicationRequest{
 				MemberReferenceNo: "APP-002",
-				CategoryCode:      "CREDIT_CARD",
-				RequestedAmount:   100_000,
+				// CategoryCode:      "CREDIT_CARD",
+				RequestedAmount: 100_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
 				return ErrInsertFailed
@@ -68,26 +68,26 @@ func TestService_CreateApplication(t *testing.T) {
 				ErrInsertFailed,
 			),
 		},
-		{
-			desc: "Domain Validation Failure (Invalid Category)",
-			req: CreateApplicationRequest{
-				MemberReferenceNo: "APP-INVALID",
-				CategoryCode:      "INVALID",
-				RequestedAmount:   100_000,
-			},
-			mockSave: func(ctx context.Context, a *Application) error {
-				t.Error(
-					"Repository Save should not be called" +
-						" on validation failure")
-				return nil
-			},
-			expectedErr: fmt.Errorf(
-				"application.service stopped saving entity: %w",
-				ErrInvalidCategoryCode,
-			),
-			expectedId:    0,
-			expectedState: "",
-		},
+		// {
+		// 	desc: "Domain Validation Failure (Invalid Category)",
+		// 	req: CreateApplicationRequest{
+		// 		MemberReferenceNo: "APP-INVALID",
+		// 		// CategoryCode:      "INVALID",
+		// 		RequestedAmount: 100_000,
+		// 	},
+		// 	mockSave: func(ctx context.Context, a *Application) error {
+		// 		t.Error(
+		// 			"Repository Save should not be called" +
+		// 				" on validation failure")
+		// 		return nil
+		// 	},
+		// 	expectedErr: fmt.Errorf(
+		// 		"application.service stopped saving entity: %w",
+		// 		ErrInvalidCategoryCode,
+		// 	),
+		// 	expectedId:    0,
+		// 	expectedState: "",
+		// },
 	}
 
 	for _, tC := range testCases {
@@ -147,7 +147,7 @@ func TestService_GetApplicationById(t *testing.T) {
 		req           GetApplicationRequest
 		mockGetById   func(ctx context.Context, id int64) (Application, error)
 		expectedErr   error
-		expectedState string
+		expectedState ApplicationStatus
 	}{
 		{
 			desc: "Get Existing Application Succeeds",
@@ -160,16 +160,16 @@ func TestService_GetApplicationById(t *testing.T) {
 						CreatedAt:         now,
 						UpdatedAt:         now,
 						MemberReferenceNo: "APP-99",
-						CategoryCode:      CategoryCard,
-						StatusCode:        StatusApproved,
-						Id:                99,
-						RequestedAmount:   1_000_000,
+						// CategoryCode:      CategoryCard,
+						StatusCode:      StatusApproved,
+						Id:              99,
+						RequestedAmount: 1_000_000,
 					}, nil
 				}
 				return Application{}, ErrNotFound
 			},
 			expectedErr:   nil,
-			expectedState: "APPROVED",
+			expectedState: StatusApproved,
 		},
 		{
 			desc: "Get Non-Existent Application Fails",
