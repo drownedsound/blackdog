@@ -20,6 +20,12 @@ var (
 	ErrInvalidRequestedAmount = errors.New(
 		"requested amount cannot be less than or equal to zero",
 	)
+	ErrInvalidCardDesignCode = errors.New(
+		"card design code is not a valid value",
+	)
+	ErrInvalidCreditLimit = errors.New(
+		"credit limit cannot be less than or equal to zero",
+	)
 )
 
 type (
@@ -112,8 +118,12 @@ func (a *Application) Validate() error {
 		return ErrInvalidRequestedAmount
 	}
 
+	// if strings.TrimSpace(a.CardDesignCode) == "" {
+	// 	return ErrInvalidCardDesignCode
+	// }
+
 	if a.CreditLimit <= 1 {
-		return errors.New("invalid credit limit")
+		return ErrInvalidCreditLimit
 	}
 
 	return nil
@@ -121,11 +131,7 @@ func (a *Application) Validate() error {
 
 type CreditCard struct {
 	CardDesignCode string
-	CreditLimit int
-}
-
-func (c * CreditCard) Validate() error {
-	return nil
+	CreditLimit    int
 }
 
 // TODO: Create Loan value object
