@@ -23,6 +23,7 @@ func TestApplication_Validate_CardProfileCode(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: nil,
@@ -39,6 +40,7 @@ func TestApplication_Validate_CardProfileCode(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: ErrInvalidCardProfileCode,
@@ -75,6 +77,7 @@ func TestApplication_Validate_CreditLimit(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: nil,
@@ -91,6 +94,7 @@ func TestApplication_Validate_CreditLimit(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: -1_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: ErrInvalidCreditLimit,
@@ -108,6 +112,61 @@ func TestApplication_Validate_CreditLimit(t *testing.T) {
 		})
 	}
 }
+
+func TestApplication_Validate_InterestRate(t *testing.T) {
+	testCases := []struct {
+		desc        string
+		app         Application
+		expectedErr error
+	}{
+		{
+			desc: "Credit Card With Valid InterestRate Passes Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				// CategoryCode:      CategoryCard,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
+					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
+				},
+			},
+			expectedErr: nil,
+		},
+		{
+			desc: "Credit Card With Invalid InterestRate Fails Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				// CategoryCode:      CategoryCard,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
+					CreditLimit: 1_000_000,
+					InterestRate: -1_000,
+				},
+			},
+			expectedErr: ErrInvalidInterestRate,
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			err := tC.app.Validate()
+			if err != tC.expectedErr {
+				t.Errorf(
+					"Validate Error: Expected = %v, Actual = %v",
+					tC.expectedErr, err,
+				)
+			}
+		})
+	}
+}
+
 
 func TestApplication_Validate_CreatedAt(t *testing.T) {
 	testCases := []struct {
@@ -127,6 +186,7 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: nil,
@@ -143,6 +203,7 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: nil,
@@ -159,6 +220,7 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: ErrCreatedAtInFuture,
@@ -195,6 +257,7 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: nil,
@@ -211,6 +274,7 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: nil,
@@ -227,6 +291,7 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: ErrUpdatedAtInFuture,
@@ -264,6 +329,7 @@ func TestApplication_Validate_MemberReferenceNumber(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: nil,
@@ -281,6 +347,7 @@ func TestApplication_Validate_MemberReferenceNumber(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: ErrMissingMemberRefNo,
@@ -317,6 +384,7 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: nil,
@@ -333,6 +401,7 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: ErrInvalidRequestedAmount,
@@ -411,6 +480,7 @@ func TestApplication_Validate_StatusCode(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: nil,
@@ -427,6 +497,7 @@ func TestApplication_Validate_StatusCode(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: nil,
@@ -443,6 +514,7 @@ func TestApplication_Validate_StatusCode(t *testing.T) {
 				CreditCard: CreditCard{
 					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
+					InterestRate: 1_000,
 				},
 			},
 			expectedErr: ErrInvalidStatusCode,
