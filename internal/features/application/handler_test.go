@@ -28,6 +28,7 @@ func TestHandler_CreateApplication(t *testing.T) {
 			reqBody: CreateApplicationRequest{
 				MemberReferenceNo: "REF-123",
 				// CategoryCode:      "PERSONAL_LOAN",
+				CardProfileCode: 1,
 				RequestedAmount: 50_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
@@ -49,6 +50,7 @@ func TestHandler_CreateApplication(t *testing.T) {
 			reqBody: CreateApplicationRequest{
 				MemberReferenceNo: "REF-FAIL",
 				// CategoryCode:      "PERSONAL_LOAN",
+				CardProfileCode: 1,
 				RequestedAmount: 50_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
@@ -62,6 +64,7 @@ func TestHandler_CreateApplication(t *testing.T) {
 			reqBody: CreateApplicationRequest{
 				MemberReferenceNo: "ERR-100",
 				// CategoryCode:      "PERSONAL_LOAN",
+				CardProfileCode: 1,
 				RequestedAmount: 50_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {

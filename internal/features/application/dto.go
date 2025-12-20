@@ -27,8 +27,8 @@ import "time"
 type CreateApplicationRequest struct {
 	MemberReferenceNo string `json:"member_reference_no"`
 	// CategoryCode      CategoryCode `json:"category_code"`
-	CardProfileCode string `json:"card_profile_code"`
-	RequestedAmount int    `json:"requested_amount"`
+	CardProfileCode int64 `json:"card_profile_code"`
+	RequestedAmount int   `json:"requested_amount"`
 }
 
 type CreateApplicationResponse struct {
@@ -36,8 +36,8 @@ type CreateApplicationResponse struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 	MemberReferenceNo string    `json:"member_reference_no"`
 	// CategoryCode      string    `json:"category_code"`
-	CardProfileCode string            `json:"card_profile_code"`
 	StatusCode      ApplicationStatus `json:"status_code"`
+	CardProfileCode int64             `json:"card_profile_code"`
 	Id              int64             `json:"id"`
 	RequestedAmount int               `json:"requested_amount"`
 	InterestRate    int               `json:"interest_rate"`
@@ -52,8 +52,8 @@ type GetApplicationResponse struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 	MemberReferenceNo string    `json:"member_reference_no"`
 	// CategoryCode      string    `json:"category_code"`
-	CardProfileCode string            `json:"card_profile_code"`
 	StatusCode      ApplicationStatus `json:"status_code"`
+	CardProfileCode int64             `json:"card_profile_code"`
 	Id              int64             `json:"id"`
 	RequestedAmount int               `json:"requested_amount"`
 	InterestRate    int               `json:"interest_rate"`

@@ -105,7 +105,12 @@ func (a *Application) Validate() error {
 		return ErrInvalidCardProfileCode
 	}
 
-	if a.CreditLimit <= 1 {
+	// if a.CreditLimit <= 1 {
+	// 	return ErrInvalidCreditLimit
+	// }
+
+	// Accounts for CreditLimit zero value
+	if a.CreditLimit != 0 && a.CreditLimit < 1 {
 		return ErrInvalidCreditLimit
 	}
 

@@ -43,6 +43,7 @@ func TestService_CreateApplication(t *testing.T) {
 			req: CreateApplicationRequest{
 				MemberReferenceNo: "APP-001",
 				// CategoryCode:      "PERSONAL_LOAN",
+				CardProfileCode: 1,
 				RequestedAmount: 500_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
@@ -58,6 +59,7 @@ func TestService_CreateApplication(t *testing.T) {
 			req: CreateApplicationRequest{
 				MemberReferenceNo: "APP-002",
 				// CategoryCode:      "CREDIT_CARD",
+				CardProfileCode: 1,
 				RequestedAmount: 100_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
@@ -68,26 +70,27 @@ func TestService_CreateApplication(t *testing.T) {
 				ErrInsertFailed,
 			),
 		},
-		// {
-		// 	desc: "Domain Validation Failure (Invalid Category)",
-		// 	req: CreateApplicationRequest{
-		// 		MemberReferenceNo: "APP-INVALID",
-		// 		// CategoryCode:      "INVALID",
-		// 		RequestedAmount: 100_000,
-		// 	},
-		// 	mockSave: func(ctx context.Context, a *Application) error {
-		// 		t.Error(
-		// 			"Repository Save should not be called" +
-		// 				" on validation failure")
-		// 		return nil
-		// 	},
-		// 	expectedErr: fmt.Errorf(
-		// 		"application.service stopped saving entity: %w",
-		// 		ErrInvalidCategoryCode,
-		// 	),
-		// 	expectedId:    0,
-		// 	expectedState: "",
-		// },
+		{
+			desc: "Domain Validation Failure (Invalid CardProfileCode)",
+			req: CreateApplicationRequest{
+				MemberReferenceNo: "APP-INVALID",
+				// CategoryCode:      "INVALID",
+				CardProfileCode: -1,
+				RequestedAmount: 100_000,
+			},
+			mockSave: func(ctx context.Context, a *Application) error {
+				t.Error(
+					"Repository Save should not be called" +
+						" on validation failure")
+				return nil
+			},
+			expectedErr: fmt.Errorf(
+				"application.service stopped saving entity: %w",
+				ErrInvalidCardProfileCode,
+			),
+			expectedId:    0,
+			expectedState: StatusUnknown,
+		},
 	}
 
 	for _, tC := range testCases {
@@ -161,6 +164,9 @@ func TestService_GetApplicationById(t *testing.T) {
 						UpdatedAt:         now,
 						MemberReferenceNo: "APP-99",
 						// CategoryCode:      CategoryCard,
+						CreditCard: CreditCard{
+							CardProfileCode: 1,
+						},
 						StatusCode:      StatusApproved,
 						Id:              99,
 						RequestedAmount: 1_000_000,
