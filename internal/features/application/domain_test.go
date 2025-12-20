@@ -83,6 +83,22 @@ func TestApplication_Validate_CreditLimit(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
+			desc: "Credit Card With Zero CreditLimit Passes Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
+				CreditCard: CreditCard{
+					CardProfileCode: 1,
+					CreditLimit:     0,
+					InterestRate:    1_000,
+				},
+			},
+			expectedErr: nil,
+		},
+		{
 			desc: "Credit Card With Invalid CreditLimit Fails Validation",
 			app: Application{
 				CreatedAt:         time.Now(),
@@ -502,7 +518,8 @@ func TestApplication_Validate_StatusCode(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
-			desc: "Application With Invalid StatusCode Fails Validation",
+			desc: "Application With Invalid StatusCode (Unknown)" +
+				"Fails Validation",
 			app: Application{
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
@@ -510,6 +527,23 @@ func TestApplication_Validate_StatusCode(t *testing.T) {
 				// CategoryCode:      CategoryCard,
 				StatusCode:      StatusUnknown,
 				RequestedAmount: 100_000_000,
+				CreditCard: CreditCard{
+					CardProfileCode: 1,
+					CreditLimit:     1_000_000,
+					InterestRate:    1_000,
+				},
+			},
+			expectedErr: ErrInvalidStatusCode,
+		},
+		{
+			desc: "Application With Invalid StatusCode (Out of Range)" +
+				"Fails Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				StatusCode:        StatusCancelled + 1,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
