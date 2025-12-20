@@ -41,23 +41,6 @@ const (
 	StatusCancelled
 )
 
-// func (s ApplicationStatus) String() string {
-// 	switch s {
-// 	case StatusCreated:
-// 		return "CREATED"
-// 	case StatusInProgress:
-// 		return "IN_PROGRESS"
-// 	case StatusApproved:
-// 		return "APPROVED"
-// 	case StatusDeclined:
-// 		return "DECLINED"
-// 	case StatusCancelled:
-// 		return "CANCELLED"
-// 	default:
-// 		return "UNKNOWN"
-// 	}
-// }
-
 // Application is the aggregate root
 type Application struct {
 	// TODO: Embed Applicant (principal cardholder)

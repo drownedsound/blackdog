@@ -227,9 +227,15 @@ func TestMockDb_SimulatedConnectionError(t *testing.T) {
 
 	// Trigger the specific "ERR-100" condition
 	a := &app.Application{
+		CreditCard: app.CreditCard{
+			CardProfileCode: 1,
+			InterestRate:    1_250,
+		},
+		CreatedAt:         time.Now(),
+		UpdatedAt:         time.Now(),
 		MemberReferenceNo: "ERR-100",
-		// CategoryCode:      app.CategoryCard,
-		RequestedAmount: 100,
+		StatusCode:        app.StatusCreated,
+		RequestedAmount:   10_0000_000,
 	}
 
 	err := repo.Save(ctx, a)

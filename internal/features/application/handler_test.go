@@ -135,6 +135,12 @@ func TestHandler_GetApplication(t *testing.T) {
 					MemberReferenceNo: "REF-101",
 					CreatedAt:         now,
 					UpdatedAt:         now,
+					CreditCard: CreditCard{
+						CardProfileCode: 1,
+						InterestRate:    1250,
+					},
+					StatusCode:      StatusCreated,
+					RequestedAmount: 1_000_000,
 				}, nil
 			},
 			expectedStatus: http.StatusOK,
