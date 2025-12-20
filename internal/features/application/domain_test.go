@@ -153,6 +153,22 @@ func TestApplication_Validate_InterestRate(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
+			desc: "Credit Card With Zero InterestRate Fails Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
+				CreditCard: CreditCard{
+					CardProfileCode: 1,
+					CreditLimit:     1_000_000,
+					InterestRate:    0,
+				},
+			},
+			expectedErr: ErrInvalidInterestRate,
+		},
+		{
 			desc: "Credit Card With Invalid InterestRate Fails Validation",
 			app: Application{
 				CreatedAt:         time.Now(),
@@ -403,6 +419,22 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				},
 			},
 			expectedErr: nil,
+		},
+		{
+			desc: "Application With Zero RequestedAmount Fails Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				StatusCode:        StatusCreated,
+				RequestedAmount:   0,
+				CreditCard: CreditCard{
+					CardProfileCode: 1,
+					CreditLimit:     1_000_000,
+					InterestRate:    1_000,
+				},
+			},
+			expectedErr: ErrInvalidRequestedAmount,
 		},
 		{
 			desc: "Application With Invalid RequestedAmount Fails Validation",

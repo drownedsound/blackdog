@@ -242,6 +242,7 @@ func TestHandler_JsonEncodingFailure(t *testing.T) {
 			MemberReferenceNo: "REF-123",
 			// CategoryCode:      "PERSONAL_LOAN",
 			RequestedAmount: 50_000,
+			CardProfileCode: 1,
 		}
 		body, _ := json.Marshal(reqBody)
 		req := httptest.NewRequest(
