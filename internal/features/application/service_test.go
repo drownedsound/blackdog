@@ -42,9 +42,8 @@ func TestService_CreateApplication(t *testing.T) {
 			desc: "Repository Save Succeeds",
 			req: CreateApplicationRequest{
 				MemberReferenceNo: "APP-001",
-				// CategoryCode:      "PERSONAL_LOAN",
-				CardProfileCode: 1,
-				RequestedAmount: 500_000,
+				CardProfileCode:   1,
+				RequestedAmount:   500_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
 				a.Id = 101
@@ -58,9 +57,8 @@ func TestService_CreateApplication(t *testing.T) {
 			desc: "Repository Save Fails",
 			req: CreateApplicationRequest{
 				MemberReferenceNo: "APP-002",
-				// CategoryCode:      "CREDIT_CARD",
-				CardProfileCode: 1,
-				RequestedAmount: 100_000,
+				CardProfileCode:   1,
+				RequestedAmount:   100_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
 				return ErrInsertFailed
@@ -74,9 +72,8 @@ func TestService_CreateApplication(t *testing.T) {
 			desc: "Domain Validation Failure (Invalid CardProfileCode)",
 			req: CreateApplicationRequest{
 				MemberReferenceNo: "APP-INVALID",
-				// CategoryCode:      "INVALID",
-				CardProfileCode: -1,
-				RequestedAmount: 100_000,
+				CardProfileCode:   -1,
+				RequestedAmount:   100_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
 				t.Error(
@@ -132,8 +129,8 @@ func TestService_CreateApplication(t *testing.T) {
 			}
 			if resp.StatusCode != tC.expectedState {
 				t.Errorf(
-					"CreateApplication Error: StatusCode Expected %s,"+
-						"Actual %s",
+					"CreateApplication Error: StatusCode Expected %d,"+
+						"Actual %d",
 					tC.expectedState,
 					resp.StatusCode,
 				)
@@ -163,7 +160,6 @@ func TestService_GetApplicationById(t *testing.T) {
 						CreatedAt:         now,
 						UpdatedAt:         now,
 						MemberReferenceNo: "APP-99",
-						// CategoryCode:      CategoryCard,
 						CreditCard: CreditCard{
 							CardProfileCode: 1,
 						},
@@ -234,7 +230,7 @@ func TestService_GetApplicationById(t *testing.T) {
 
 			if resp.StatusCode != tC.expectedState {
 				t.Errorf(
-					"Status: Expected %s, Actual %s",
+					"Status: Expected %d, Actual %d",
 					tC.expectedState, resp.StatusCode,
 				)
 				t.Errorf(

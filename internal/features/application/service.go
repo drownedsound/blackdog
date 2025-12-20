@@ -34,9 +34,8 @@ func (s *Service) CreateApplication(
 		CreatedAt:         time.Now(),
 		UpdatedAt:         time.Now(),
 		MemberReferenceNo: req.MemberReferenceNo,
-		// CategoryCode:      req.CategoryCode.Parse(),
-		StatusCode:      StatusCreated,
-		RequestedAmount: req.RequestedAmount,
+		StatusCode:        StatusCreated,
+		RequestedAmount:   req.RequestedAmount,
 	}
 
 	if err := app.Validate(); err != nil {
@@ -51,18 +50,16 @@ func (s *Service) CreateApplication(
 		)
 	}
 
-	// FIXME: Just return the Id?
+	// FIXME: Just return the Id
 	return CreateApplicationResponse{
 		CreatedAt:         app.CreatedAt,
 		UpdatedAt:         app.UpdatedAt,
 		MemberReferenceNo: app.MemberReferenceNo,
 		CardProfileCode:   app.CardProfileCode,
-		// CategoryCode:      app.CategoryCode.String(),
-		StatusCode: app.StatusCode,
-		// StatusCode:      app.StatusCode.String(),
-		Id:              app.Id,
-		RequestedAmount: app.RequestedAmount,
-		InterestRate:    app.InterestRate,
+		StatusCode:        app.StatusCode,
+		Id:                app.Id,
+		RequestedAmount:   app.RequestedAmount,
+		InterestRate:      app.InterestRate,
 	}, nil
 }
 
@@ -82,10 +79,9 @@ func (s *Service) GetApplicationById(
 		UpdatedAt:         app.UpdatedAt,
 		MemberReferenceNo: app.MemberReferenceNo,
 		CardProfileCode:   app.CardProfileCode,
-		// CategoryCode:      app.CategoryCode.String(),
-		StatusCode:      app.StatusCode,
-		Id:              app.Id,
-		RequestedAmount: app.RequestedAmount,
-		InterestRate:    app.InterestRate,
+		StatusCode:        app.StatusCode,
+		Id:                app.Id,
+		RequestedAmount:   app.RequestedAmount,
+		InterestRate:      app.InterestRate,
 	}, nil
 }

@@ -17,9 +17,8 @@ func TestApplication_Validate_CardProfileCode(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -34,9 +33,8 @@ func TestApplication_Validate_CardProfileCode(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 0,
 					CreditLimit:     1_000_000,
@@ -71,9 +69,8 @@ func TestApplication_Validate_CreditLimit(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -104,9 +101,8 @@ func TestApplication_Validate_CreditLimit(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     -1_000,
@@ -141,9 +137,8 @@ func TestApplication_Validate_InterestRate(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -174,9 +169,8 @@ func TestApplication_Validate_InterestRate(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -211,9 +205,8 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -228,9 +221,8 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				CreatedAt:         time.Now().AddDate(0, 0, -1),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -245,9 +237,8 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				CreatedAt:         time.Now().AddDate(0, 0, 1),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -282,9 +273,8 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -299,9 +289,8 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				CreatedAt:         time.Now().AddDate(0, 0, -1),
 				UpdatedAt:         time.Now().AddDate(0, 0, -1),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -316,9 +305,8 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now().AddDate(0, 0, 1),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -354,9 +342,8 @@ func TestApplication_Validate_MemberReferenceNumber(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -372,9 +359,8 @@ func TestApplication_Validate_MemberReferenceNumber(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "",
-				// CategoryCode:      CategoryLoan,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -409,9 +395,8 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -442,9 +427,8 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryLoan,
-				StatusCode:      StatusCreated,
-				RequestedAmount: -1,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   -1,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -467,48 +451,6 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 	}
 }
 
-// func TestProductCategory_String(t *testing.T) {
-// 	testCases := []struct {
-// 		desc     string
-// 		category ProductCategory
-// 		expected string
-// 	}{
-// 		{
-// 			desc:     "CategoryCard returns CARD",
-// 			category: CategoryCard,
-// 			expected: "CREDIT_CARD",
-// 		},
-// 		{
-// 			desc:     "CategoryLoan returns LOAN",
-// 			category: CategoryLoan,
-// 			expected: "PERSONAL_LOAN",
-// 		},
-// 		{
-// 			desc:     "CategoryUnknown returns UNKNOWN",
-// 			category: CategoryUnknown,
-// 			expected: "UNKNOWN",
-// 		},
-// 		{
-// 			desc:     "Arbitrary Category returns UNKNOWN",
-// 			category: ProductCategory(255),
-// 			expected: "UNKNOWN",
-// 		},
-// 	}
-//
-// 	for _, tC := range testCases {
-// 		t.Run(tC.desc, func(t *testing.T) {
-// 			if got := tC.category.String(); got != tC.expected {
-// 				t.Errorf(
-// 					"String() mismatch: Category %d, Expected %q, Got %q",
-// 					tC.category,
-// 					tC.expected,
-// 					got,
-// 				)
-// 			}
-// 		})
-// 	}
-// }
-
 func TestApplication_Validate_StatusCode(t *testing.T) {
 	testCases := []struct {
 		desc        string
@@ -521,9 +463,8 @@ func TestApplication_Validate_StatusCode(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -538,9 +479,8 @@ func TestApplication_Validate_StatusCode(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryLoan,
-				StatusCode:      StatusCreated,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -556,9 +496,8 @@ func TestApplication_Validate_StatusCode(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				// CategoryCode:      CategoryCard,
-				StatusCode:      StatusUnknown,
-				RequestedAmount: 100_000_000,
+				StatusCode:        StatusUnknown,
+				RequestedAmount:   100_000_000,
 				CreditCard: CreditCard{
 					CardProfileCode: 1,
 					CreditLimit:     1_000_000,
@@ -598,59 +537,59 @@ func TestApplication_Validate_StatusCode(t *testing.T) {
 	}
 }
 
-func TestApplicationStatus_String(t *testing.T) {
-	testCases := []struct {
-		desc     string
-		status   ApplicationStatus
-		expected string
-	}{
-		{
-			desc:     "StatusCreated returns CREATED",
-			status:   StatusCreated,
-			expected: "CREATED",
-		},
-		{
-			desc:     "StatusInProgress returns IN_PROGRESS",
-			status:   StatusInProgress,
-			expected: "IN_PROGRESS",
-		},
-		{
-			desc:     "StatusApproved returns APPROVED",
-			status:   StatusApproved,
-			expected: "APPROVED",
-		},
-		{
-			desc:     "StatusDeclined returns DECLINED",
-			status:   StatusDeclined,
-			expected: "DECLINED",
-		},
-		{
-			desc:     "StatusCancelled returns CANCELLED",
-			status:   StatusCancelled,
-			expected: "CANCELLED",
-		},
-		{
-			desc:     "StatusUnknown (Zero Value) returns UNKNOWN",
-			status:   StatusUnknown,
-			expected: "UNKNOWN",
-		},
-		{
-			desc:     "Arbitrary/Invalid Status returns UNKNOWN",
-			status:   ApplicationStatus(255),
-			expected: "UNKNOWN",
-		},
-	}
-
-	for _, tC := range testCases {
-		t.Run(tC.desc, func(t *testing.T) {
-			if got := tC.status.String(); got != tC.expected {
-				t.Errorf(
-					"String() mismatch: Status %d, Expected %q, Got %q",
-					tC.status,
-					tC.expected,
-					got,
-				)
-			}
-		})
-	}
-}
+// func TestApplicationStatus_String(t *testing.T) {
+// 	testCases := []struct {
+// 		desc     string
+// 		status   ApplicationStatus
+// 		expected string
+// 	}{
+// 		{
+// 			desc:     "StatusCreated returns CREATED",
+// 			status:   StatusCreated,
+// 			expected: "CREATED",
+// 		},
+// 		{
+// 			desc:     "StatusInProgress returns IN_PROGRESS",
+// 			status:   StatusInProgress,
+// 			expected: "IN_PROGRESS",
+// 		},
+// 		{
+// 			desc:     "StatusApproved returns APPROVED",
+// 			status:   StatusApproved,
+// 			expected: "APPROVED",
+// 		},
+// 		{
+// 			desc:     "StatusDeclined returns DECLINED",
+// 			status:   StatusDeclined,
+// 			expected: "DECLINED",
+// 		},
+// 		{
+// 			desc:     "StatusCancelled returns CANCELLED",
+// 			status:   StatusCancelled,
+// 			expected: "CANCELLED",
+// 		},
+// 		{
+// 			desc:     "StatusUnknown (Zero Value) returns UNKNOWN",
+// 			status:   StatusUnknown,
+// 			expected: "UNKNOWN",
+// 		},
+// 		{
+// 			desc:     "Arbitrary/Invalid Status returns UNKNOWN",
+// 			status:   ApplicationStatus(255),
+// 			expected: "UNKNOWN",
+// 		},
+// 	}
+//
+// 	for _, tC := range testCases {
+// 		t.Run(tC.desc, func(t *testing.T) {
+// 			if got := tC.status.String(); got != tC.expected {
+// 				t.Errorf(
+// 					"String() mismatch: Status %d, Expected %q, Got %q",
+// 					tC.status,
+// 					tC.expected,
+// 					got,
+// 				)
+// 			}
+// 		})
+// 	}
+// }

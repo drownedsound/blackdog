@@ -21,7 +21,6 @@ var (
 	ErrMissingMemberRefNo = errors.New(
 		"member reference number cannot be empty",
 	)
-	// ErrInvalidCategoryCode = errors.New("category code is not a valid value")
 	ErrInvalidId = errors.New(
 		"id cannot be less than or equal to zero",
 	)
@@ -31,11 +30,7 @@ var (
 	ErrInvalidStatusCode = errors.New("status code is not a valid value")
 )
 
-type (
-	ApplicationStatus byte
-
-// ProductCategory   byte
-)
+type ApplicationStatus byte
 
 const (
 	StatusUnknown ApplicationStatus = iota
@@ -46,35 +41,18 @@ const (
 	StatusCancelled
 )
 
-// const (
-// 	CategoryUnknown ProductCategory = iota
-// 	CategoryCard
-// 	CategoryLoan
-// )
-
-func (s ApplicationStatus) String() string {
-	switch s {
-	case StatusCreated:
-		return "CREATED"
-	case StatusInProgress:
-		return "IN_PROGRESS"
-	case StatusApproved:
-		return "APPROVED"
-	case StatusDeclined:
-		return "DECLINED"
-	case StatusCancelled:
-		return "CANCELLED"
-	default:
-		return "UNKNOWN"
-	}
-}
-
-// func (c ProductCategory) String() string {
-// 	switch c {
-// 	case CategoryCard:
-// 		return "CREDIT_CARD"
-// 	case CategoryLoan:
-// 		return "PERSONAL_LOAN"
+// func (s ApplicationStatus) String() string {
+// 	switch s {
+// 	case StatusCreated:
+// 		return "CREATED"
+// 	case StatusInProgress:
+// 		return "IN_PROGRESS"
+// 	case StatusApproved:
+// 		return "APPROVED"
+// 	case StatusDeclined:
+// 		return "DECLINED"
+// 	case StatusCancelled:
+// 		return "CANCELLED"
 // 	default:
 // 		return "UNKNOWN"
 // 	}
@@ -91,25 +69,16 @@ type Application struct {
 	MemberReferenceNo string // Used as external identifier
 	Id                int64  // Used as internal identifier
 	RequestedAmount   int    // Shown in centavos
-	// CategoryCode      ProductCategory
-	StatusCode ApplicationStatus
+	StatusCode        ApplicationStatus
 	// TODO: Add ApprovedAmount
 }
 
 func (a *Application) Validate() error {
-	// if strings.TrimSpace(a.CardProfileCode) == "" {
-	// 	return ErrInvalidCardProfileCode
-	// }
-
 	if a.CardProfileCode <= 0 {
 		return ErrInvalidCardProfileCode
 	}
 
-	// if a.CreditLimit <= 1 {
-	// 	return ErrInvalidCreditLimit
-	// }
-
-	// Accounts for CreditLimit zero value
+	// Handles CreditLimit zero value passed by service via DTO
 	if a.CreditLimit != 0 && a.CreditLimit < 1 {
 		return ErrInvalidCreditLimit
 	}
@@ -131,10 +100,6 @@ func (a *Application) Validate() error {
 	if strings.TrimSpace(a.MemberReferenceNo) == "" {
 		return ErrMissingMemberRefNo
 	}
-
-	// if a.CategoryCode == CategoryUnknown || a.CategoryCode > CategoryLoan {
-	// 	return ErrInvalidCategoryCode
-	// }
 
 	if a.RequestedAmount <= 0 {
 		return ErrInvalidRequestedAmount
