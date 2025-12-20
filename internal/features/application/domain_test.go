@@ -5,6 +5,110 @@ import (
 	"time"
 )
 
+func TestApplication_Validate_CardProfileCode(t *testing.T) {
+	testCases := []struct {
+		desc        string
+		app         Application
+		expectedErr error
+	}{
+		{
+			desc: "Credit Card With Valid CardProfileCode Passes Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				// CategoryCode:      CategoryCard,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
+					CreditLimit: 1_000_000,
+				},
+			},
+			expectedErr: nil,
+		},
+		{
+			desc: "Credit Card With Invalid CardProfileCode Fails Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				// CategoryCode:      CategoryCard,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
+				CreditCard: CreditCard{
+					CardProfileCode: "",
+					CreditLimit: 1_000_000,
+				},
+			},
+			expectedErr: ErrInvalidCardProfileCode,
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			err := tC.app.Validate()
+			if err != tC.expectedErr {
+				t.Errorf(
+					"Validate Error: Expected = %v, Actual = %v",
+					tC.expectedErr, err,
+				)
+			}
+		})
+	}
+}
+
+func TestApplication_Validate_CreditLimit(t *testing.T) {
+	testCases := []struct {
+		desc        string
+		app         Application
+		expectedErr error
+	}{
+		{
+			desc: "Credit Card With Valid CreditLimit Passes Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				// CategoryCode:      CategoryCard,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
+					CreditLimit: 1_000_000,
+				},
+			},
+			expectedErr: nil,
+		},
+		{
+			desc: "Credit Card With Invalid CreditLimit Fails Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				// CategoryCode:      CategoryCard,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
+					CreditLimit: -1_000,
+				},
+			},
+			expectedErr: ErrInvalidCreditLimit,
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			err := tC.app.Validate()
+			if err != tC.expectedErr {
+				t.Errorf(
+					"Validate Error: Expected = %v, Actual = %v",
+					tC.expectedErr, err,
+				)
+			}
+		})
+	}
+}
+
 func TestApplication_Validate_CreatedAt(t *testing.T) {
 	testCases := []struct {
 		desc        string
@@ -17,10 +121,11 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
+				// CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
 				},
 			},
@@ -32,10 +137,11 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				CreatedAt:         time.Now().AddDate(0, 0, -1),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
+				// CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
 				},
 			},
@@ -47,10 +153,11 @@ func TestApplication_Validate_CreatedAt(t *testing.T) {
 				CreatedAt:         time.Now().AddDate(0, 0, 1),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
+				// CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
 				},
 			},
@@ -82,10 +189,11 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
+				// CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
 				},
 			},
@@ -97,25 +205,27 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 				CreatedAt:         time.Now().AddDate(0, 0, -1),
 				UpdatedAt:         time.Now().AddDate(0, 0, -1),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
+				// CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
 				},
 			},
 			expectedErr: nil,
 		},
 		{
-			desc: "Application Updated Tomorrow Fails Validation",
+			desc: "Application Upadated Tomorrow Fails Validation",
 			app: Application{
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now().AddDate(0, 0, 1),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
+				// CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
 				},
 			},
@@ -135,171 +245,45 @@ func TestApplication_Validate_UpdatedAt(t *testing.T) {
 	}
 }
 
-func TestApplication_Validate_MemberReferenceNo(t *testing.T) {
+func TestApplication_Validate_MemberReferenceNumber(t *testing.T) {
 	testCases := []struct {
 		desc        string
 		app         Application
 		expectedErr error
 	}{
 		{
-			desc: "Application With Valid MemberReferenceNo Passes Validation",
+			desc: "Application With Valid MemberReferenceNumber" +
+			"Passes Validation",
 			app: Application{
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
+				// CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
 				},
 			},
 			expectedErr: nil,
 		},
 		{
-			desc: "Application Missing MemberReferenceNo Fails Validation",
+			desc: "Application With Invalid MemberReferenceNumber" +
+			"Fails Validation",
 			app: Application{
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "",
-				CategoryCode:      CategoryCard,
+				// CategoryCode:      CategoryLoan,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
 				},
 			},
 			expectedErr: ErrMissingMemberRefNo,
-		},
-	}
-	for _, tC := range testCases {
-		t.Run(tC.desc, func(t *testing.T) {
-			err := tC.app.Validate()
-			if err != tC.expectedErr {
-				t.Errorf(
-					"Validate Error: Expected = %v, Actual = %v",
-					tC.expectedErr, err,
-				)
-			}
-		})
-	}
-}
-
-func TestApplication_Validate_CategoryCode(t *testing.T) {
-	testCases := []struct {
-		desc        string
-		app         Application
-		expectedErr error
-	}{
-		{
-			desc: "Card Application With Valid CategoryCode Passes Validation",
-			app: Application{
-				CreatedAt:         time.Now(),
-				UpdatedAt:         time.Now(),
-				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
-				StatusCode:        StatusCreated,
-				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
-					CreditLimit: 1_000_000,
-				},
-			},
-			expectedErr: nil,
-		},
-		{
-			desc: "Loan Application With Valid CategoryCode Passes Validation",
-			app: Application{
-				CreatedAt:         time.Now(),
-				UpdatedAt:         time.Now(),
-				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryLoan,
-				StatusCode:        StatusCreated,
-				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
-					CreditLimit: 1_000_000,
-				},
-			},
-			expectedErr: nil,
-		},
-		{
-			desc: "Application With Invalid CategoryCode Fails Validation",
-			app: Application{
-				CreatedAt:         time.Now(),
-				UpdatedAt:         time.Now(),
-				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryUnknown,
-				StatusCode:        StatusCreated,
-				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
-					CreditLimit: 1_000_000,
-				},
-			},
-			expectedErr: ErrInvalidCategoryCode,
-		},
-	}
-	for _, tC := range testCases {
-		t.Run(tC.desc, func(t *testing.T) {
-			err := tC.app.Validate()
-			if err != tC.expectedErr {
-				t.Errorf(
-					"Validate Error: Expected = %v, Actual = %v",
-					tC.expectedErr, err,
-				)
-			}
-		})
-	}
-}
-
-func TestApplication_Validate_StatusCode(t *testing.T) {
-	testCases := []struct {
-		desc        string
-		app         Application
-		expectedErr error
-	}{
-		{
-			desc: "Card Application With Valid StatusCode Passes Validation",
-			app: Application{
-				CreatedAt:         time.Now(),
-				UpdatedAt:         time.Now(),
-				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
-				StatusCode:        StatusCreated,
-				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
-					CreditLimit: 1_000_000,
-				},
-			},
-			expectedErr: nil,
-		},
-		{
-			desc: "Loan Application With Valid StatusCode Passes Validation",
-			app: Application{
-				CreatedAt:         time.Now(),
-				UpdatedAt:         time.Now(),
-				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryLoan,
-				StatusCode:        StatusCreated,
-				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
-					CreditLimit: 1_000_000,
-				},
-			},
-			expectedErr: nil,
-		},
-		{
-			desc: "Application With Invalid StatusCode Fails Validation",
-			app: Application{
-				CreatedAt:         time.Now(),
-				UpdatedAt:         time.Now(),
-				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
-				StatusCode:        StatusUnknown,
-				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
-					CreditLimit: 1_000_000,
-				},
-			},
-			expectedErr: ErrInvalidStatusCode,
 		},
 	}
 	for _, tC := range testCases {
@@ -327,10 +311,11 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
+				// CategoryCode:      CategoryCard,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
 				},
 			},
@@ -342,10 +327,11 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 				CreatedAt:         time.Now(),
 				UpdatedAt:         time.Now(),
 				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryLoan,
+				// CategoryCode:      CategoryLoan,
 				StatusCode:        StatusCreated,
 				RequestedAmount:   -1,
-				CreditCard: CreditCard {
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
 					CreditLimit: 1_000_000,
 				},
 			},
@@ -365,42 +351,110 @@ func TestApplication_Validate_RequestedAmount(t *testing.T) {
 	}
 }
 
-func TestProductCategory_String(t *testing.T) {
+// func TestProductCategory_String(t *testing.T) {
+// 	testCases := []struct {
+// 		desc     string
+// 		category ProductCategory
+// 		expected string
+// 	}{
+// 		{
+// 			desc:     "CategoryCard returns CARD",
+// 			category: CategoryCard,
+// 			expected: "CREDIT_CARD",
+// 		},
+// 		{
+// 			desc:     "CategoryLoan returns LOAN",
+// 			category: CategoryLoan,
+// 			expected: "PERSONAL_LOAN",
+// 		},
+// 		{
+// 			desc:     "CategoryUnknown returns UNKNOWN",
+// 			category: CategoryUnknown,
+// 			expected: "UNKNOWN",
+// 		},
+// 		{
+// 			desc:     "Arbitrary Category returns UNKNOWN",
+// 			category: ProductCategory(255),
+// 			expected: "UNKNOWN",
+// 		},
+// 	}
+//
+// 	for _, tC := range testCases {
+// 		t.Run(tC.desc, func(t *testing.T) {
+// 			if got := tC.category.String(); got != tC.expected {
+// 				t.Errorf(
+// 					"String() mismatch: Category %d, Expected %q, Got %q",
+// 					tC.category,
+// 					tC.expected,
+// 					got,
+// 				)
+// 			}
+// 		})
+// 	}
+// }
+
+func TestApplication_Validate_StatusCode(t *testing.T) {
 	testCases := []struct {
-		desc     string
-		category ProductCategory
-		expected string
+		desc        string
+		app         Application
+		expectedErr error
 	}{
 		{
-			desc:     "CategoryCard returns CARD",
-			category: CategoryCard,
-			expected: "CREDIT_CARD",
+			desc: "Card Application With Valid StatusCode Passes Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				// CategoryCode:      CategoryCard,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
+					CreditLimit: 1_000_000,
+				},
+			},
+			expectedErr: nil,
 		},
 		{
-			desc:     "CategoryLoan returns LOAN",
-			category: CategoryLoan,
-			expected: "PERSONAL_LOAN",
+			desc: "Loan Application With Valid StatusCode Passes Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				// CategoryCode:      CategoryLoan,
+				StatusCode:        StatusCreated,
+				RequestedAmount:   100_000_000,
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
+					CreditLimit: 1_000_000,
+				},
+			},
+			expectedErr: nil,
 		},
 		{
-			desc:     "CategoryUnknown returns UNKNOWN",
-			category: CategoryUnknown,
-			expected: "UNKNOWN",
-		},
-		{
-			desc:     "Arbitrary Category returns UNKNOWN",
-			category: ProductCategory(255),
-			expected: "UNKNOWN",
+			desc: "Application With Invalid StatusCode Fails Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				MemberReferenceNo: "ABCDE12345",
+				// CategoryCode:      CategoryCard,
+				StatusCode:        StatusUnknown,
+				RequestedAmount:   100_000_000,
+				CreditCard: CreditCard{
+					CardProfileCode: "VISA_GOLD",
+					CreditLimit: 1_000_000,
+				},
+			},
+			expectedErr: ErrInvalidStatusCode,
 		},
 	}
-
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			if got := tC.category.String(); got != tC.expected {
+			err := tC.app.Validate()
+			if err != tC.expectedErr {
 				t.Errorf(
-					"String() mismatch: Category %d, Expected %q, Got %q",
-					tC.category,
-					tC.expected,
-					got,
+					"Validate Error: Expected = %v, Actual = %v",
+					tC.expectedErr, err,
 				)
 			}
 		})
@@ -458,107 +512,6 @@ func TestApplicationStatus_String(t *testing.T) {
 					tC.status,
 					tC.expected,
 					got,
-				)
-			}
-		})
-	}
-}
-
-func TestApplication_Validate_CreditLimit(t *testing.T) {
-	testCases := []struct {
-		desc        string
-		app         Application
-		expectedErr error
-	}{
-		{
-			desc: "Application With Valid Credit Limit Passes Validation",
-			app: Application{
-				CreatedAt:         time.Now(),
-				UpdatedAt:         time.Now(),
-				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
-				StatusCode:        StatusCreated,
-				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
-					CreditLimit: 1_000_000,
-				},
-			},
-			expectedErr: nil,
-		},
-		{
-			desc: "Application With Invalid Credit Limit Fails Validation",
-			app: Application{
-				CreatedAt:         time.Now(),
-				UpdatedAt:         time.Now(),
-				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
-				StatusCode:        StatusCreated,
-				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
-					CreditLimit: -1_000,
-				},
-			},
-			expectedErr: ErrInvalidCreditLimit,
-		},
-	}
-	for _, tC := range testCases {
-		t.Run(tC.desc, func(t *testing.T) {
-			err := tC.app.Validate()
-			if err != tC.expectedErr {
-				t.Errorf(
-					"Validate Error: Expected = %v, Actual = %v",
-					tC.expectedErr, err,
-				)
-			}
-		})
-	}
-}
-
-func TestApplication_Validate_CardDesignCode(t *testing.T) {
-	testCases := []struct {
-		desc        string
-		app         Application
-		expectedErr error
-	}{
-		{
-			desc: "Application With Valid Credit Limit Passes Validation",
-			app: Application{
-				CreatedAt:         time.Now(),
-				UpdatedAt:         time.Now(),
-				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
-				StatusCode:        StatusCreated,
-				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
-					// CardDesignCode: "",
-					CreditLimit: 1_000_000,
-				},
-			},
-			expectedErr: nil,
-		},
-		{
-			desc: "Application With Invalid Credit Limit Fails Validation",
-			app: Application{
-				CreatedAt:         time.Now(),
-				UpdatedAt:         time.Now(),
-				MemberReferenceNo: "ABCDE12345",
-				CategoryCode:      CategoryCard,
-				StatusCode:        StatusCreated,
-				RequestedAmount:   100_000_000,
-				CreditCard: CreditCard {
-					CreditLimit: -1_000,
-				},
-			},
-			expectedErr: ErrInvalidCreditLimit,
-		},
-	}
-	for _, tC := range testCases {
-		t.Run(tC.desc, func(t *testing.T) {
-			err := tC.app.Validate()
-			if err != tC.expectedErr {
-				t.Errorf(
-					"Validate Error: Expected = %v, Actual = %v",
-					tC.expectedErr, err,
 				)
 			}
 		})

@@ -7,30 +7,30 @@ import (
 )
 
 var (
+	ErrInvalidCardProfileCode = errors.New(
+		"card profile code is not a valid value",
+	)
+	ErrInvalidCreditLimit = errors.New(
+		"credit limit cannot be less than or equal to zero",
+	)
 	ErrCreatedAtInFuture  = errors.New("created at cannot be in the future")
 	ErrUpdatedAtInFuture  = errors.New("updated at cannot be in the future")
 	ErrMissingMemberRefNo = errors.New(
 		"member reference number cannot be empty",
 	)
-	ErrInvalidCategoryCode = errors.New("category code is not a valid value")
-	ErrInvalidStatusCode   = errors.New("status code is not a valid value")
-	ErrInvalidId           = errors.New(
-		"id cannot be less than or equal to zero",
-	)
+	// ErrInvalidCategoryCode = errors.New("category code is not a valid value")
+	// ErrInvalidId           = errors.New(
+	// 	"id cannot be less than or equal to zero",
+	// )
 	ErrInvalidRequestedAmount = errors.New(
 		"requested amount cannot be less than or equal to zero",
 	)
-	ErrInvalidCardDesignCode = errors.New(
-		"card design code is not a valid value",
-	)
-	ErrInvalidCreditLimit = errors.New(
-		"credit limit cannot be less than or equal to zero",
-	)
+	ErrInvalidStatusCode   = errors.New("status code is not a valid value")
 )
 
 type (
 	ApplicationStatus byte
-	ProductCategory   byte
+	// ProductCategory   byte
 )
 
 const (
@@ -42,11 +42,11 @@ const (
 	StatusCancelled
 )
 
-const (
-	CategoryUnknown ProductCategory = iota
-	CategoryCard
-	CategoryLoan
-)
+// const (
+// 	CategoryUnknown ProductCategory = iota
+// 	CategoryCard
+// 	CategoryLoan
+// )
 
 func (s ApplicationStatus) String() string {
 	switch s {
@@ -65,16 +65,16 @@ func (s ApplicationStatus) String() string {
 	}
 }
 
-func (c ProductCategory) String() string {
-	switch c {
-	case CategoryCard:
-		return "CREDIT_CARD"
-	case CategoryLoan:
-		return "PERSONAL_LOAN"
-	default:
-		return "UNKNOWN"
-	}
-}
+// func (c ProductCategory) String() string {
+// 	switch c {
+// 	case CategoryCard:
+// 		return "CREDIT_CARD"
+// 	case CategoryLoan:
+// 		return "PERSONAL_LOAN"
+// 	default:
+// 		return "UNKNOWN"
+// 	}
+// }
 
 // Application is the aggregate root
 type Application struct {
@@ -87,11 +87,19 @@ type Application struct {
 	MemberReferenceNo string // Used as external identifier
 	Id                int64  // Used as internal identifier
 	RequestedAmount   int    // Shown in centavos
-	CategoryCode      ProductCategory
+	// CategoryCode      ProductCategory
 	StatusCode        ApplicationStatus
 }
 
 func (a *Application) Validate() error {
+	if strings.TrimSpace(a.CardProfileCode) == "" {
+		return ErrInvalidCardProfileCode
+	}
+
+	if a.CreditLimit <= 1 {
+		return ErrInvalidCreditLimit
+	}
+
 	now := time.Now()
 
 	if a.CreatedAt.After(now) {
@@ -106,32 +114,25 @@ func (a *Application) Validate() error {
 		return ErrMissingMemberRefNo
 	}
 
-	if a.CategoryCode == CategoryUnknown || a.CategoryCode > CategoryLoan {
-		return ErrInvalidCategoryCode
+	// if a.CategoryCode == CategoryUnknown || a.CategoryCode > CategoryLoan {
+	// 	return ErrInvalidCategoryCode
+	// }
+
+	if a.RequestedAmount <= 0 {
+		return ErrInvalidRequestedAmount
 	}
 
 	if a.StatusCode == StatusUnknown || a.StatusCode > StatusCancelled {
 		return ErrInvalidStatusCode
 	}
 
-	if a.RequestedAmount <= 0 {
-		return ErrInvalidRequestedAmount
-	}
-
-	// if strings.TrimSpace(a.CardDesignCode) == "" {
-	// 	return ErrInvalidCardDesignCode
-	// }
-
-	if a.CreditLimit <= 1 {
-		return ErrInvalidCreditLimit
-	}
-
 	return nil
 }
 
 type CreditCard struct {
-	CardDesignCode string
+	CardProfileCode string
 	CreditLimit    int
+	// TODO: Add Interest Rate
 }
 
 // TODO: Create Loan value object
