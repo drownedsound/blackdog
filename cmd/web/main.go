@@ -38,19 +38,19 @@ func initSrvDependencies(cfg config) (
 	))
 
 	// TODO: Dynamically determine which repository to use based on flag
-	// repo = infra.NewMockDb()
-	// logger.Debug("Initialized in-memory database")
+	repo = infra.NewMockDb()
+	logger.Debug("Initialized in-memory database")
 
-	db, err := infra.NewSQLiteConnection(cfg.dbPath)
-	if err != nil {
-		logger.Error("Failed to initialize database", slog.Any("error", err))
-		os.Exit(1)
-	}
-	logger.Debug(
-		"Initialized SQLite database",
-		slog.String("path", cfg.dbPath))
-
-	repo = infra.NewSqliteDb(db)
+	// db, err := infra.NewSQLiteConnection(cfg.dbPath)
+	// if err != nil {
+	// 	logger.Error("Failed to initialize database", slog.Any("error", err))
+	// 	os.Exit(1)
+	// }
+	// logger.Debug(
+	// 	"Initialized SQLite database",
+	// 	slog.String("path", cfg.dbPath))
+	//
+	// repo = infra.NewSqliteDb(db)
 
 	return
 }

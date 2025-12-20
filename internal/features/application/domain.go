@@ -9,32 +9,33 @@ import (
 var (
 	ErrInvalidCardProfileCode = errors.New(
 		"card profile code is not a valid value",
-		)
+	)
 	ErrInvalidCreditLimit = errors.New(
 		"credit limit cannot be less than or equal to zero",
-		)
+	)
 	ErrInvalidInterestRate = errors.New(
 		"interest rate cannot be less than or equal to zero",
-		)
+	)
 	ErrCreatedAtInFuture  = errors.New("created at cannot be in the future")
 	ErrUpdatedAtInFuture  = errors.New("updated at cannot be in the future")
 	ErrMissingMemberRefNo = errors.New(
 		"member reference number cannot be empty",
-		)
+	)
 	// ErrInvalidCategoryCode = errors.New("category code is not a valid value")
 	// ErrInvalidId           = errors.New(
 	// 	"id cannot be less than or equal to zero",
 	// )
 	ErrInvalidRequestedAmount = errors.New(
 		"requested amount cannot be less than or equal to zero",
-		)
-	ErrInvalidStatusCode   = errors.New("status code is not a valid value")
+	)
+	ErrInvalidStatusCode = errors.New("status code is not a valid value")
 )
 
 type (
 	ApplicationStatus byte
-	// ProductCategory   byte
-	)
+
+// ProductCategory   byte
+)
 
 const (
 	StatusUnknown ApplicationStatus = iota
@@ -91,7 +92,7 @@ type Application struct {
 	Id                int64  // Used as internal identifier
 	RequestedAmount   int    // Shown in centavos
 	// CategoryCode      ProductCategory
-	StatusCode        ApplicationStatus
+	StatusCode ApplicationStatus
 }
 
 func (a *Application) Validate() error {
@@ -138,7 +139,7 @@ func (a *Application) Validate() error {
 
 type CreditCard struct {
 	CardProfileCode string
-	CreditLimit    int
+	CreditLimit     int
 	// InterestRate represents the rate in basis points
 	// Example: 1 bps == 0.01% or 1250 bps == 12.50%
 	InterestRate int
