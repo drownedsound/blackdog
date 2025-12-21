@@ -41,7 +41,6 @@ const (
 	StatusCancelled
 )
 
-// Application is the aggregate root
 type Application struct {
 	// TODO: Embed Applicant (principal cardholder)
 	// TODO: Attach []Applicant (supplementary cardholders)
