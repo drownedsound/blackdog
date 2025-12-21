@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	ErrInvalidCardProfileCode = errors.New(
-		"card profile code is not a valid value",
+	ErrInvalidCardProfile = errors.New(
+		"card profile is not a valid value",
 	)
 	ErrInvalidCreditLimit = errors.New(
 		"credit limit cannot be less than or equal to zero",
@@ -27,7 +27,7 @@ var (
 	ErrInvalidRequestedAmount = errors.New(
 		"requested amount cannot be less than or equal to zero",
 	)
-	ErrInvalidStatusCode = errors.New("status code is not a valid value")
+	ErrInvalidStatus = errors.New("status is not a valid value")
 )
 
 type ApplicationStatus byte
@@ -52,13 +52,13 @@ type Application struct {
 	MemberReferenceNo string // Used as external identifier
 	Id                int64  // Used as internal identifier
 	RequestedAmount   int    // Shown in centavos
-	StatusCode        ApplicationStatus
+	Status            ApplicationStatus
 	// TODO: Add ApprovedAmount
 }
 
 func (a *Application) Validate() error {
-	if a.CardProfileCode <= 0 {
-		return ErrInvalidCardProfileCode
+	if a.CardProfile <= 0 {
+		return ErrInvalidCardProfile
 	}
 
 	// Handles CreditLimit zero value passed by service via DTO
@@ -88,16 +88,16 @@ func (a *Application) Validate() error {
 		return ErrInvalidRequestedAmount
 	}
 
-	if a.StatusCode == StatusUnknown || a.StatusCode > StatusCancelled {
-		return ErrInvalidStatusCode
+	if a.Status == StatusUnknown || a.Status > StatusCancelled {
+		return ErrInvalidStatus
 	}
 
 	return nil
 }
 
 type CreditCard struct {
-	CardProfileCode int64
-	CreditLimit     int
+	CardProfile int64
+	CreditLimit int
 	// InterestRate represents the rate in basis points
 	// Example: 1 bps == 0.01% or 1250 bps == 12.50%
 	InterestRate int

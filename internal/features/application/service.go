@@ -27,14 +27,14 @@ func (s *Service) CreateApplication(
 ) (CreateApplicationResponse, error) {
 	app := &Application{
 		CreditCard: CreditCard{
-			CardProfileCode: req.CardProfileCode,
-			// TODO: Retrieve matching InterestRate based on CardProfileCode
+			CardProfile: req.CardProfile,
+			// TODO: Retrieve matching InterestRate based on CardProfile
 			InterestRate: 1_250,
 		},
 		CreatedAt:         time.Now(),
 		UpdatedAt:         time.Now(),
 		MemberReferenceNo: req.MemberReferenceNo,
-		StatusCode:        StatusCreated,
+		Status:            StatusCreated,
 		RequestedAmount:   req.RequestedAmount,
 	}
 
@@ -55,8 +55,8 @@ func (s *Service) CreateApplication(
 		CreatedAt:         app.CreatedAt,
 		UpdatedAt:         app.UpdatedAt,
 		MemberReferenceNo: app.MemberReferenceNo,
-		CardProfileCode:   app.CardProfileCode,
-		StatusCode:        app.StatusCode,
+		CardProfile:       app.CardProfile,
+		Status:            app.Status,
 		Id:                app.Id,
 		RequestedAmount:   app.RequestedAmount,
 		InterestRate:      app.InterestRate,
@@ -78,8 +78,8 @@ func (s *Service) GetApplicationById(
 		CreatedAt:         app.CreatedAt,
 		UpdatedAt:         app.UpdatedAt,
 		MemberReferenceNo: app.MemberReferenceNo,
-		CardProfileCode:   app.CardProfileCode,
-		StatusCode:        app.StatusCode,
+		CardProfile:       app.CardProfile,
+		Status:            app.Status,
 		Id:                app.Id,
 		RequestedAmount:   app.RequestedAmount,
 		InterestRate:      app.InterestRate,

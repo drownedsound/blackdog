@@ -42,7 +42,7 @@ func TestService_CreateApplication(t *testing.T) {
 			desc: "Repository Save Succeeds",
 			req: CreateApplicationRequest{
 				MemberReferenceNo: "APP-001",
-				CardProfileCode:   1,
+				CardProfile:       1,
 				RequestedAmount:   500_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
@@ -57,7 +57,7 @@ func TestService_CreateApplication(t *testing.T) {
 			desc: "Repository Save Fails",
 			req: CreateApplicationRequest{
 				MemberReferenceNo: "APP-002",
-				CardProfileCode:   1,
+				CardProfile:       1,
 				RequestedAmount:   100_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
@@ -69,10 +69,10 @@ func TestService_CreateApplication(t *testing.T) {
 			),
 		},
 		{
-			desc: "Domain Validation Failure (Invalid CardProfileCode)",
+			desc: "Domain Validation Failure (Invalid CardProfile)",
 			req: CreateApplicationRequest{
 				MemberReferenceNo: "APP-INVALID",
-				CardProfileCode:   -1,
+				CardProfile:       -1,
 				RequestedAmount:   100_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
@@ -83,7 +83,7 @@ func TestService_CreateApplication(t *testing.T) {
 			},
 			expectedErr: fmt.Errorf(
 				"application.service stopped saving entity: %w",
-				ErrInvalidCardProfileCode,
+				ErrInvalidCardProfile,
 			),
 			expectedId:    0,
 			expectedState: StatusUnknown,
@@ -127,12 +127,12 @@ func TestService_CreateApplication(t *testing.T) {
 					resp.Id,
 				)
 			}
-			if resp.StatusCode != tC.expectedState {
+			if resp.Status != tC.expectedState {
 				t.Errorf(
-					"CreateApplication Error: StatusCode Expected %d,"+
+					"CreateApplication Error: Status Expected %d,"+
 						"Actual %d",
 					tC.expectedState,
-					resp.StatusCode,
+					resp.Status,
 				)
 			}
 		})
@@ -161,9 +161,9 @@ func TestService_GetApplicationById(t *testing.T) {
 						UpdatedAt:         now,
 						MemberReferenceNo: "APP-99",
 						CreditCard: CreditCard{
-							CardProfileCode: 1,
+							CardProfile: 1,
 						},
-						StatusCode:      StatusApproved,
+						Status:          StatusApproved,
 						Id:              99,
 						RequestedAmount: 1_000_000,
 					}, nil
@@ -228,16 +228,16 @@ func TestService_GetApplicationById(t *testing.T) {
 				t.Errorf("Unexpected Error: %v", err)
 			}
 
-			if resp.StatusCode != tC.expectedState {
+			if resp.Status != tC.expectedState {
 				t.Errorf(
 					"Status: Expected %d, Actual %d",
-					tC.expectedState, resp.StatusCode,
+					tC.expectedState, resp.Status,
 				)
 				t.Errorf(
-					"GetApplicationById Error: StatusCode "+
+					"GetApplicationById Error: Status "+
 						"Expected: %q, Actual: %q",
 					tC.expectedState,
-					resp.StatusCode,
+					resp.Status,
 				)
 			}
 		})

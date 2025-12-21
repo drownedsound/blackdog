@@ -1,6 +1,6 @@
 package infra
 
-// FIXME: Include CreditCard.CardProfileCode
+// FIXME: Include CreditCard.CardProfile
 // FIXME: Include CreditCard.InterestRate. Retrieved from database.
 
 // import (

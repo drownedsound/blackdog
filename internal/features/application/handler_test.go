@@ -27,7 +27,7 @@ func TestHandler_CreateApplication(t *testing.T) {
 			desc: "Success_Returns_201_And_JSON",
 			reqBody: CreateApplicationRequest{
 				MemberReferenceNo: "REF-123",
-				CardProfileCode:   1,
+				CardProfile:       1,
 				RequestedAmount:   50_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
@@ -48,7 +48,7 @@ func TestHandler_CreateApplication(t *testing.T) {
 			desc: "Service_Error_Returns_400",
 			reqBody: CreateApplicationRequest{
 				MemberReferenceNo: "REF-FAIL",
-				CardProfileCode:   1,
+				CardProfile:       1,
 				RequestedAmount:   50_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
@@ -61,7 +61,7 @@ func TestHandler_CreateApplication(t *testing.T) {
 			desc: "Infrastructure_Error_Returns_500",
 			reqBody: CreateApplicationRequest{
 				MemberReferenceNo: "ERR-100",
-				CardProfileCode:   1,
+				CardProfile:       1,
 				RequestedAmount:   50_000,
 			},
 			mockSave: func(ctx context.Context, a *Application) error {
@@ -136,10 +136,10 @@ func TestHandler_GetApplication(t *testing.T) {
 					CreatedAt:         now,
 					UpdatedAt:         now,
 					CreditCard: CreditCard{
-						CardProfileCode: 1,
-						InterestRate:    1250,
+						CardProfile:  1,
+						InterestRate: 1250,
 					},
-					StatusCode:      StatusCreated,
+					Status:          StatusCreated,
 					RequestedAmount: 1_000_000,
 				}, nil
 			},
@@ -244,7 +244,7 @@ func TestHandler_JsonEncodingFailure(t *testing.T) {
 		reqBody := CreateApplicationRequest{
 			MemberReferenceNo: "REF-123",
 			RequestedAmount:   50_000,
-			CardProfileCode:   1,
+			CardProfile:       1,
 		}
 		body, _ := json.Marshal(reqBody)
 		req := httptest.NewRequest(

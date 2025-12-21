@@ -15,15 +15,15 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 
 	newApp := &app.Application{
 		CreditCard: app.CreditCard{
-			CardProfileCode: 1,
-			// TODO: Retrieve matching InterestRate based on CardProfileCode
+			CardProfile: 1,
+			// TODO: Retrieve matching InterestRate based on CardProfile
 			InterestRate: 1_250,
 		},
 		CreatedAt:         time.Now(),
 		UpdatedAt:         time.Now(),
 		MemberReferenceNo: "ABCDE12345",
 		// CategoryCode:      app.CategoryCard,
-		StatusCode:      app.StatusCreated,
+		Status:          app.StatusCreated,
 		RequestedAmount: 100_000_000,
 	}
 
@@ -135,15 +135,15 @@ func TestMockDb_ConcurrentSaveAndGetApplication(t *testing.T) {
 	// Create initial record
 	app := &app.Application{
 		CreditCard: app.CreditCard{
-			CardProfileCode: 1,
-			// TODO: Retrieve matching InterestRate based on CardProfileCode
+			CardProfile: 1,
+			// TODO: Retrieve matching InterestRate based on CardProfile
 			InterestRate: 1_250,
 		},
 		CreatedAt:         time.Now(),
 		UpdatedAt:         time.Now(),
 		MemberReferenceNo: "ABCDE12345",
 		// CategoryCode:      app.CategoryCard,
-		StatusCode:      app.StatusCreated,
+		Status:          app.StatusCreated,
 		RequestedAmount: 10_0000_000,
 	}
 	repo.Save(ctx, app)
@@ -228,13 +228,13 @@ func TestMockDb_SimulatedConnectionError(t *testing.T) {
 	// Trigger the specific "ERR-100" condition
 	a := &app.Application{
 		CreditCard: app.CreditCard{
-			CardProfileCode: 1,
-			InterestRate:    1_250,
+			CardProfile:  1,
+			InterestRate: 1_250,
 		},
 		CreatedAt:         time.Now(),
 		UpdatedAt:         time.Now(),
 		MemberReferenceNo: "ERR-100",
-		StatusCode:        app.StatusCreated,
+		Status:            app.StatusCreated,
 		RequestedAmount:   10_0000_000,
 	}
 
