@@ -1,15 +1,16 @@
 .mode column
 .headers on
+
 -- ============================================================================
 -- 1. CONFIGURATION
 -- ============================================================================
 PRAGMA foreign_keys = ON;
-
 PRAGMA journal_mode = WAL;
 
 -- ============================================================================
 -- 2. REFERENCES
 -- ============================================================================
+
 CREATE TABLE REF_APPLICATION_STATUS (
     id integer PRIMARY KEY,
     name text NOT NULL UNIQUE,
@@ -53,6 +54,7 @@ STRICT;
 -- ============================================================================
 -- 3. PRODUCT
 -- ============================================================================
+
 CREATE TABLE CREDIT_CARD (
     id integer PRIMARY KEY,
     profile_id integer NOT NULL,
@@ -76,6 +78,7 @@ STRICT;
 -- ============================================================================
 -- 4. APPLICATION
 -- ============================================================================
+
 CREATE TABLE APPLICATION (
     id integer PRIMARY KEY,
     member_reference_no text NOT NULL UNIQUE,
@@ -99,6 +102,7 @@ STRICT;
 -- ============================================================================
 -- 5. APPLICANT
 -- ============================================================================
+
 CREATE TABLE APPLICANT (
     id integer PRIMARY KEY,
     application_id integer NOT NULL,
@@ -122,6 +126,7 @@ CREATE INDEX idx_applicant_lookup ON APPLICANT (application_id, is_principal);
 -- ============================================================================
 -- 6. CONTACT NUMBER
 -- ============================================================================
+
 CREATE TABLE CONTACT_NUMBER (
     id integer PRIMARY KEY,
     applicant_id integer NOT NULL,
