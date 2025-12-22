@@ -50,7 +50,6 @@ func (s *Service) CreateApplication(
 		)
 	}
 
-	// FIXME: Just return the Id
 	return CreateApplicationResponse{
 		CreatedAt:         app.CreatedAt,
 		UpdatedAt:         app.UpdatedAt,
