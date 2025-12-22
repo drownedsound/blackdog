@@ -25,7 +25,7 @@ CREATE TABLE REF_APPLICATION_STATUS (
     -- CANCELLED
     name TEXT NOT NULL UNIQUE,
     description TEXT NOT NULL,
-    is_terminal INTEGER NOT NULL DEFAULT 0 
+    is_terminal INTEGER NOT NULL DEFAULT 0,
 
     CHECK (is_terminal IN (0, 1))
 ) STRICT;
@@ -34,7 +34,15 @@ CREATE TABLE REF_CREDIT_CARD (
     id  INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
     description TEXT NOT NULL,
-    credit_limit INTEGER NOT NULL CHECK (credit_limit > 0), 
+    product_ceiling INTEGER NOT NULL CHECK (product_ceiling > 0), 
+    interest_rate INTEGER NOT NULL CHECK (interest_rate > 0) 
+) STRICT;
+
+CREATE TABLE REF_PERSONAL_LOAN (
+    id  INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    description TEXT NOT NULL,
+    product_ceiling INTEGER NOT NULL CHECK (product_ceiling > 0), 
     interest_rate INTEGER NOT NULL CHECK (interest_rate > 0) 
 ) STRICT;
 
@@ -47,21 +55,21 @@ CREATE TABLE APPLICATION (
     member_reference_no TEXT NOT NULL UNIQUE,
     status_id INTEGER NOT NULL,
     credit_card_id INTEGER,
-    loan_id INTEGER,
+    personal_loan_id INTEGER,
     requested_amount INTEGER NOT NULL,
     created_at INTEGER NOT NULL DEFAULT (unixepoch()),
     updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
 
     FOREIGN KEY (status_id) 
-    REFERENCES REF_APPLICATION_STATUS(id)
+    REFERENCES REF_APPLICATION_STATUS(id),
     FOREIGN KEY (credit_card_id) 
     REFERENCES CREDIT_CARD(id)
 
-    CHECK (requested_amount > 0)
+    CHECK (requested_amount > 0),
     -- Ensures that an application will have at least one product
-    CHECK (credit_card_id IS NOT NULL OR loan_id IS NOT NULL)
+    CHECK (credit_card_id IS NOT NULL OR personal_loan_id IS NOT NULL),
     -- Ensure valid epoch time (> Jan 1 2020) 
-    CHECK (created_at > 1577836800)
+    CHECK (created_at > 1577836800),
     CHECK (updated_at > 1577836800)
 ) STRICT;
 
@@ -72,9 +80,18 @@ CREATE TABLE APPLICATION (
 CREATE TABLE CREDIT_CARD (
     id INTEGER PRIMARY KEY,
     profile_id INTEGER NOT NULL,
-    credit_limit INTEGER NOT NULL CHECK (credit_limit > 0), 
+    credit_limit INTEGER NOT NULL DEFAULT 0,
 
     FOREIGN KEY (profile_id)
     REFERENCES REF_CREDIT_CARD(id)
+) STRICT;
+
+CREATE TABLE PERSONAL_LOAN (
+    id INTEGER PRIMARY KEY,
+    profile_id INTEGER NOT NULL,
+    loan_amount INTEGER NOT NULL DEFAULT 0,
+
+    FOREIGN KEY (profile_id)
+    REFERENCES REF_PERSONAL_LOAN(id)
 ) STRICT;
 
