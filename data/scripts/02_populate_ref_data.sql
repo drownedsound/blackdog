@@ -91,6 +91,7 @@ INSERT INTO REF_PERSONAL_LOAN (
 
 INSERT INTO REF_CONTACT_TYPE (id, name, description) VALUES
     (1, 'Mobile', 'Personal mobile phone number'),
-    (2, 'Landline', 'Fixed-line residential or office number');
+    (2, 'Home', 'Fixed-line home phone number');
+    (3, 'Office', 'Fixed-line office phone number');
 
 COMMIT;
