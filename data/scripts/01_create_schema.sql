@@ -29,8 +29,10 @@ CREATE TABLE REF_CREDIT_CARD (
     id integer PRIMARY KEY,
     name text NOT NULL UNIQUE,
     description text NOT NULL,
+    currency_id integer NOT NULL,
     product_ceiling integer NOT NULL,
     interest_rate integer NOT NULL,
+    FOREIGN KEY (currency_id) REFERENCES REF_CURRENCY (id),
     CONSTRAINT ck_ref_cc_ceiling CHECK (product_ceiling > 0),
     CONSTRAINT ck_ref_cc_rate CHECK (interest_rate > 0))
 STRICT;
@@ -39,8 +41,10 @@ CREATE TABLE REF_PERSONAL_LOAN (
     id integer PRIMARY KEY,
     name text NOT NULL UNIQUE,
     description text NOT NULL,
+    currency_id integer NOT NULL,
     product_ceiling integer NOT NULL,
     interest_rate integer NOT NULL,
+    FOREIGN KEY (currency_id) REFERENCES REF_CURRENCY (id),
     CONSTRAINT ck_ref_pl_ceiling CHECK (product_ceiling > 0),
     CONSTRAINT ck_ref_pl_rate CHECK (interest_rate > 0))
 STRICT;
@@ -58,20 +62,16 @@ STRICT;
 CREATE TABLE CREDIT_CARD (
     id integer PRIMARY KEY,
     profile_id integer NOT NULL,
-    currency_id integer NOT NULL,
     credit_limit integer NOT NULL DEFAULT 0,
     FOREIGN KEY (profile_id) REFERENCES REF_CREDIT_CARD (id),
-    FOREIGN KEY (currency_id) REFERENCES REF_CURRENCY (id),
     CONSTRAINT ck_cc_limit CHECK (credit_limit > 0))
 STRICT;
 
 CREATE TABLE PERSONAL_LOAN (
     id integer PRIMARY KEY,
     profile_id integer NOT NULL,
-    currency_id integer NOT NULL,
     loan_amount integer NOT NULL DEFAULT 0,
     FOREIGN KEY (profile_id) REFERENCES REF_PERSONAL_LOAN (id),
-    FOREIGN KEY (currency_id) REFERENCES REF_CURRENCY (id),
     CONSTRAINT ck_pl_amount CHECK (loan_amount > 0))
 STRICT;
 

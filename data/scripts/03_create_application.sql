@@ -14,11 +14,7 @@ BEGIN TRANSACTION;
 -- 2. SINGLE APPLICANT CREDIT CARD APPLICATION
 -- ============================================================================
 
-INSERT INTO CREDIT_CARD (
-    profile_id, currency_id, credit_limit
-) VALUES (
-    1, 1, 5000000
-);
+INSERT INTO CREDIT_CARD (profile_id, credit_limit) VALUES (1, 5000000);
 
 INSERT INTO APPLICATION (
     member_reference_no,
@@ -64,11 +60,7 @@ INSERT INTO CONTACT_NUMBER (
 -- 3. SINGLE APPLICANT PERSONAL LOAN APPLICATION
 -- ============================================================================
 
-INSERT INTO PERSONAL_LOAN (
-    profile_id, currency_id, loan_amount
-) VALUES (
-    1, 1, 200000000
-);
+INSERT INTO PERSONAL_LOAN (profile_id, loan_amount) VALUES (1,200000000);
 
 INSERT INTO APPLICATION (
     member_reference_no,
@@ -115,11 +107,7 @@ INSERT INTO CONTACT_NUMBER (
 -- 4. MULTI APPLICANT CREDIT CARD APPLICATION
 -- ============================================================================
 
-INSERT INTO CREDIT_CARD (
-    profile_id, currency_id, credit_limit
-) VALUES (
-    2, 1, 30000000 
-);
+INSERT INTO CREDIT_CARD (profile_id, credit_limit) VALUES (2, 30000000);
 
 INSERT INTO APPLICATION (
     member_reference_no,
