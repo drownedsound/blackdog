@@ -7,26 +7,26 @@ import (
 )
 
 var (
-	ErrInvalidCardProfile = errors.New(
-		"card profile is not a valid value",
-	)
+	ErrInvalidProduct = errors.New(
+		"product applied for is not valid",
+		)
 	ErrInvalidCreditLimit = errors.New(
 		"credit limit cannot be less than or equal to zero",
-	)
+		)
 	ErrInvalidInterestRate = errors.New(
 		"interest rate cannot be less than or equal to zero",
-	)
+		)
 	ErrCreatedAtInFuture  = errors.New("created at cannot be in the future")
 	ErrUpdatedAtInFuture  = errors.New("updated at cannot be in the future")
 	ErrMissingMemberRefNo = errors.New(
 		"member reference number cannot be empty",
-	)
+		)
 	ErrInvalidId = errors.New(
 		"id cannot be less than or equal to zero",
-	)
+		)
 	ErrInvalidRequestedAmount = errors.New(
 		"requested amount cannot be less than or equal to zero",
-	)
+		)
 	ErrInvalidStatus = errors.New("status is not a valid value")
 )
 
@@ -42,25 +42,24 @@ const (
 )
 
 type Application struct {
-	// TODO: Embed Applicant (principal cardholder)
-	// TODO: Attach []Applicant (supplementary cardholders)
-	CreditCard
-	// TODO: Embed Loan
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
+	OtherApplicants []Applicant
 	MemberReferenceNo string // Used as external identifier
+	Applicant
+	CreditCard CreditCard
+	PersonalLoan PersonalLoan
 	Id                int64  // Used as internal identifier
 	RequestedAmount   int    // Shown in centavos
 	Status            ApplicationStatus
-	// TODO: Add ApprovedAmount
 }
 
 func (a *Application) Validate() error {
-	if a.CardProfile <= 0 {
-		return ErrInvalidCardProfile
+	if a.ProfileId <= 0 {
+		return ErrInvalidProduct
 	}
 
-	// Handles CreditLimit zero value passed by service via DTO
+	// Handles CreditLimit zero value passed by service 
 	if a.CreditLimit != 0 && a.CreditLimit < 1 {
 		return ErrInvalidCreditLimit
 	}
@@ -95,17 +94,34 @@ func (a *Application) Validate() error {
 }
 
 type CreditCard struct {
-	CardProfile int64
+	ProfileId int64
+	CurrencyId int64
 	CreditLimit int
 	// InterestRate represents the rate in basis points
 	// Example: 1 bps == 0.01% or 1250 bps == 12.50%
 	InterestRate int
 }
 
-// TODO: Create Loan value object
-// TODO: Create Applicant entity
-// TODO: Create Contact value object
-// TODO: Create Identification value object
-// TODO: Create Address value object
-// TODO: Create Education value object
-// TODO: Create Employment value object
+type PersonalLoan struct {
+	ProfileId int64
+	CurrencyId int64
+	LoanAmount int
+	// InterestRate represents the rate in basis points
+	// Example: 1 bps == 0.01% or 1250 bps == 12.50%
+	InterestRate int
+}
+
+type Applicant struct {
+	Birthday time.Time
+	ContactNumbers []ContactNumer
+	LastName string
+	FirstName string
+	MiddleName string
+	IsPrincipal bool
+}
+
+type ContactNumber struct {
+	Value string
+	TypeId int64
+}
+
