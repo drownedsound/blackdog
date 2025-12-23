@@ -33,6 +33,16 @@ func Test_CreditCard_Validate(t *testing.T) {
 			expectedErr: ErrInvalidCreditCard,
 		},
 		{
+			desc: "Credit Card With Invalid Currency Id Fails Validation",
+			card: CreditCard{
+				ProfileId:    1,
+				CurrencyId:   -1, 
+				CreditLimit:  1_000_000,
+				InterestRate: 300,
+			},
+			expectedErr: ErrInvalidCurrency,
+		},
+		{
 			desc: "Credit Card With Invalid Credit Limit Fails Validation",
 			card: CreditCard{
 				ProfileId: 1,
@@ -91,6 +101,16 @@ func Test_PersonaLoan_Validate(t *testing.T) {
 				InterestRate: 300,
 			},
 			expectedErr: ErrInvalidPersonalLoan,
+		},
+		{
+			desc: "Personal Loan With Invalid Currency Id Fails Validation",
+			loan: PersonalLoan{
+				ProfileId:    1,
+				CurrencyId:   -1, 
+				LoanAmount:   1_000_000,
+				InterestRate: 300,
+			},
+			expectedErr: ErrInvalidCurrency,
 		},
 		{
 			desc: "Personal Loan With Invalid Loan Amount Fails Validation",
@@ -155,6 +175,14 @@ func Test_ContactNumber_Validate(t *testing.T) {
 				Type: TypeHome,
 			},
 			expectedErr: ErrInvalidContactNumber,
+		},
+		{
+			desc: "Contact Number With Invalid Type Fails Validation",
+			contact: ContactNumber{
+				Value: "9171234567",
+				Type:  TypeUnknown, 
+			},
+			expectedErr: ErrInvalidContactNumberType,
 		},
 	}
 	for _, tC := range testCases {
@@ -339,6 +367,14 @@ func Test_Applicant_Validate(t *testing.T) {
 					)
 			}
 		})
+	}
+}
+
+func Test_Application_Validate(t *testing.T) {
+	// This ensures the function is called, covering the function signature and 'return nil'
+	app := Application{}
+	if err := app.Validate(); err != nil {
+		t.Errorf("Expected nil error for empty application validate (stub), got %v", err)
 	}
 }
 
