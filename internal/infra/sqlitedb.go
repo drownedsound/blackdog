@@ -2,6 +2,7 @@ package infra
 
 // FIXME: Include CreditCard.CardProfile
 // FIXME: Include CreditCard.InterestRate. Retrieved from database.
+// FIXME: Use UTC()
 
 // import (
 // 	"context"
