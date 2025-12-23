@@ -10,8 +10,11 @@ var (
 	ErrInvalidProduct = errors.New(
 		"product applied for is not valid",
 		)
+	ErrInvalidCurrency = errors.New(
+		"currency used cannot be less than zero"	
+		)
 	ErrInvalidCreditLimit = errors.New(
-		"credit limit cannot be less than or equal to zero",
+		"credit limit cannot be less than zero",
 		)
 	ErrInvalidInterestRate = errors.New(
 		"interest rate cannot be less than or equal to zero",
@@ -100,6 +103,24 @@ type CreditCard struct {
 	// InterestRate represents the rate in basis points
 	// Example: 1 bps == 0.01% or 1250 bps == 12.50%
 	InterestRate int
+}
+
+func (c *CreditCard) Validate() error {
+	if c.ProfileId <= 0 {
+		return ErrInvalidProduct
+	}
+
+	if c.CurrencyId < 0 {
+		return ErrInvalidCurrency	
+	}
+
+	if c.CreditLimit < 0 {
+		return ErrInvalidCreditLimit
+	}
+
+	if c.InterestRate < 0 {
+		return ErrInvalidInterestRate
+	}
 }
 
 type PersonalLoan struct {
