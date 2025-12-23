@@ -25,14 +25,16 @@ func (s *Service) CreateApplication(
 	ctx context.Context,
 	req CreateApplicationRequest,
 ) (CreateApplicationResponse, error) {
+
+	now := time.Now().UTC()
 	app := &Application{
 		CreditCard: CreditCard{
 			CardProfile: req.CardProfile,
 			// TODO: Retrieve matching InterestRate based on CardProfile
 			InterestRate: 1_250,
 		},
-		CreatedAt:         time.Now(),
-		UpdatedAt:         time.Now(),
+		CreatedAt:         now,
+		UpdatedAt:         now,
 		MemberReferenceNo: req.MemberReferenceNo,
 		Status:            StatusCreated,
 		RequestedAmount:   req.RequestedAmount,
