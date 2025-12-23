@@ -46,7 +46,9 @@ INSERT INTO APPLICANT (
 );
 
 INSERT INTO CONTACT_NUMBER (
-    applicant_id, type_id, value
+    applicant_id, 
+    type_id, 
+    value
 ) VALUES (
     last_insert_rowid(),
     1,
@@ -92,7 +94,9 @@ INSERT INTO APPLICANT (
 );
 
 INSERT INTO CONTACT_NUMBER (
-    applicant_id, type_id, value
+    applicant_id, 
+    type_id, 
+    value
 ) VALUES (
     last_insert_rowid(), 
     1,                  
@@ -123,7 +127,11 @@ INSERT INTO APPLICATION (
 );
 
 INSERT INTO APPLICANT (
-    application_id, is_principal, last_name, first_name, birthday
+    application_id, 
+    is_principal, 
+    last_name, 
+    first_name, 
+    birthday
 ) VALUES (
     last_insert_rowid(), -- Links to APPLICATION
     1,
@@ -134,7 +142,9 @@ INSERT INTO APPLICANT (
 
 -- Principal Contact 1: Mobile
 INSERT INTO CONTACT_NUMBER (
-    applicant_id, type_id, value
+    applicant_id, 
+    type_id, 
+    value
 ) VALUES (
     last_insert_rowid(), -- Links to PRINCIPAL
     1,
@@ -144,7 +154,9 @@ INSERT INTO CONTACT_NUMBER (
 -- Principal Contact 2: Landline
 -- Note: We must lookup the ID again because last_insert_rowid changed above
 INSERT INTO CONTACT_NUMBER (
-    applicant_id, type_id, value
+    applicant_id, 
+    type_id, 
+    value
 ) VALUES (
     (SELECT id FROM APPLICANT WHERE last_name = 'SANTOS' AND is_principal = 1),
     2,
@@ -152,7 +164,11 @@ INSERT INTO CONTACT_NUMBER (
 );
 
 INSERT INTO APPLICANT (
-    application_id, is_principal, last_name, first_name, birthday
+    application_id, 
+    is_principal, 
+    last_name, 
+    first_name, 
+    birthday
 ) VALUES (
     -- We cannot use last_insert_rowid() here; it points to a contact number.
     -- We lookup the Application ID by its unique reference number.
@@ -165,7 +181,9 @@ INSERT INTO APPLICANT (
 
 -- Supplementary Contact: Mobile
 INSERT INTO CONTACT_NUMBER (
-    applicant_id, type_id, value
+    applicant_id, 
+    type_id, 
+    value
 ) VALUES (
     last_insert_rowid(), -- Links to SUPPLEMENTARY
     1,

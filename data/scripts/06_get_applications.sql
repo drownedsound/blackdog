@@ -1,5 +1,5 @@
 -- ============================================================================
--- 1. GET ALL APPLICATIONS (WITH PAGING, FILTERING AND SORTING)
+-- 1. GET APPLICATIONS (WITH PAGING, FILTERING AND SORTING)
 -- ============================================================================
 -- Returns flat rows: App -> Product -> Applicant -> Contact
 
@@ -56,10 +56,6 @@ JOIN APPLICANT a                ON app.id = a.application_id
 -- Join Contacts
 LEFT JOIN CONTACT_NUMBER c      ON a.id = c.applicant_id
 LEFT JOIN REF_CONTACT_TYPE rct  ON c.type_id = rct.id
-
--- ============================================================================
--- DYNAMIC PREDICATES
--- ============================================================================
 
 -- HOW TO FILTER:
 -- * CC Only: WHERE app.credit_card_id IS NOT NULL
