@@ -188,17 +188,17 @@ func (a *Applicant) Validate() error {
 	
 	// Same approach as LastName above
     if len(a.FirstName) > maxNameLength {
-        // Incur the O(N) CPU cost of decoding UTF-8 if the byte count
-        // exceeds the limit. 
         if utf8.RuneCountInString(a.FirstName) > maxNameLength {
 		return ErrFirstNameTooLong
         }
     }
 
 	// TODO: Ensure that service trims the string
-	// Does not use len() in case non-ASCII characters are used
-	if utf8.RuneCountInString(a.MiddleName) > 30 {
-		return ErrMiddleNameTooLong
+	// Same approach as LastName above
+	if len(a.MiddleName) > maxNameLength {
+		if utf8.RuneCountInString(a.MiddleName) > maxNameLength {
+			return ErrMiddleNameTooLong
+		}
 	}
 
 	if len(a.ContactNumbers) == 0 {

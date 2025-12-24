@@ -79,7 +79,7 @@ func Test_PersonaLoan_Validate(t *testing.T) {
 
 	testCases := []struct {
 		desc        string
-		mutate func(p *PersonalLoan)
+		mutate func(*PersonalLoan)
 		expectedErr error
 	}{
 		{
@@ -133,47 +133,49 @@ func Test_PersonaLoan_Validate(t *testing.T) {
 }
 
 func Test_ContactNumber_Validate(t *testing.T) {
+	base := ContactNumber {
+		Value: "9171234567",
+		Type: TypeMobile,
+	}
+
 	testCases := []struct {
 		desc        string
-		contact         ContactNumber
+		mutate func (*ContactNumber)
 		expectedErr error
 	}{
 		{
 			desc: "Contact Number With Valid Details Passes Validation",
-			contact: ContactNumber{
-				Value: "9171234567",
-				Type: TypeMobile,
-			},
+			mutate: func(c *ContactNumber) {},
 			expectedErr: nil,
 		},
 		{
 			desc: "Contact Number With No Phone Number Fails Validation",
-			contact: ContactNumber{
-				Value: "",
-				Type: TypeHome,
+			mutate: func(c *ContactNumber) {
+				c.Value = ""
 			},
 			expectedErr: ErrInvalidContactNumber,
 		},
 		{
 			desc: "Contact Number With Invalid Phone Number Fails Validation",
-			contact: ContactNumber{
-				Value: "21234567",
-				Type: TypeHome,
+			mutate: func (c *ContactNumber) {
+				c.Value ="21234567" 
 			},
 			expectedErr: ErrInvalidContactNumber,
 		},
 		{
 			desc: "Contact Number With Invalid Type Fails Validation",
-			contact: ContactNumber{
-				Value: "9171234567",
-				Type:  TypeUnknown, 
+			mutate: func(c *ContactNumber) {
+				c.Type = TypeUnknown
 			},
 			expectedErr: ErrInvalidContactNumberType,
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			err := tC.contact.Validate()
+			contact := base
+			tC.mutate(&contact)
+			err := contact.Validate()
+
 			if !errors.Is(err, tC.expectedErr) {
 				t.Errorf(
 					"Validate Error: Expected = %v, Actual = %v",
