@@ -2,8 +2,6 @@ package app
 
 import (
 	"fmt"
-	// "errors"
-	// "strings"
 	"time"
 	"unicode/utf8"
 )
@@ -44,40 +42,28 @@ type Application struct {
 }
 
 func (a *Application) Validate() error {
-	// if a.ProfileId <= 0 {
-	// 	return ErrInvalidProduct
-	// }
-	//
-	// // Handles CreditLimit zero value passed by service 
-	// if a.CreditLimit != 0 && a.CreditLimit < 1 {
-	// 	return ErrInvalidCreditLimit
-	// }
-	//
-	// if a.InterestRate <= 0 {
-	// 	return ErrInvalidInterestRate
-	// }
-
 	now := time.Now().UTC()
 
 	if a.CreatedAt.After(now) {
 		return ErrCreatedAtInFuture
 	}
 
-	// if a.UpdatedAt.After(now) {
-	// 	return ErrUpdatedAtInFuture
-	// }
-	//
-	// if strings.TrimSpace(a.MemberReferenceNo) == "" {
-	// 	return ErrMissingMemberRefNo
-	// }
-	//
-	// if a.RequestedAmount <= 0 {
-	// 	return ErrInvalidRequestedAmount
-	// }
-	//
-	// if a.Status == StatusUnknown || a.Status > StatusCancelled {
-	// 	return ErrInvalidStatus
-	// }
+	if a.UpdatedAt.After(now) {
+		return ErrUpdatedAtInFuture
+	}
+
+	// TODO: Ensure that service trims the string
+	if a.MemberReferenceNo == "" {
+		return ErrMissingMemberRefNo
+	}
+
+	if a.RequestedAmount <= 0 {
+		return ErrInvalidRequestedAmount
+	}
+
+	if a.Status == StatusUnknown || a.Status > StatusCancelled {
+		return ErrInvalidStatus
+	}
 
 	return nil
 }
