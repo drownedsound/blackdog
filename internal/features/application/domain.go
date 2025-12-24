@@ -8,6 +8,8 @@ import (
 	"unicode/utf8"
 )
 
+const maxNameLength int = 30
+
 type ApplicationStatus byte
 
 const (
@@ -54,13 +56,13 @@ func (a *Application) Validate() error {
 	// if a.InterestRate <= 0 {
 	// 	return ErrInvalidInterestRate
 	// }
-	//
-	// now := time.Now()
-	//
-	// if a.CreatedAt.After(now) {
-	// 	return ErrCreatedAtInFuture
-	// }
-	//
+
+	now := time.Now().UTC()
+
+	if a.CreatedAt.After(now) {
+		return ErrCreatedAtInFuture
+	}
+
 	// if a.UpdatedAt.After(now) {
 	// 	return ErrUpdatedAtInFuture
 	// }
@@ -166,21 +168,32 @@ func (a *Applicant) Validate() error {
 	if a.LastName == "" {
 		return ErrMissingLastName
 	}
-	
-	// Does not use len() in case non-ASCII characters are used
-	if utf8.RuneCountInString(a.LastName) > 30 {
-		return ErrLastNameTooLong
-	}
+
+	// Fast Path - len(a.LastName) reads the length from the 
+	// slice header (stack). This is an O(1) operation costing ~1 nanosecond.
+    // If the byte count is within the limit, the rune count is guaranteed 
+	// to be safe.
+    if len(a.LastName) > maxNameLength {
+		// Slow Path - Handles non-ASCII. Incur the O(N) CPU cost of decoding 
+		// UTF-8 if the byte count exceeds the limit. 
+        if utf8.RuneCountInString(a.LastName) > maxNameLength {
+            return ErrLastNameTooLong
+        }
+    }
 	
 	// TODO: Ensure that service trims the string
 	if a.FirstName == "" {
 		return ErrMissingFirstName
 	}
 	
-	// Does not use len() in case non-ASCII characters are used
-	if utf8.RuneCountInString(a.FirstName) > 30 {
+	// Same approach as LastName above
+    if len(a.FirstName) > maxNameLength {
+        // Incur the O(N) CPU cost of decoding UTF-8 if the byte count
+        // exceeds the limit. 
+        if utf8.RuneCountInString(a.FirstName) > maxNameLength {
 		return ErrFirstNameTooLong
-	}
+        }
+    }
 
 	// TODO: Ensure that service trims the string
 	// Does not use len() in case non-ASCII characters are used

@@ -7,65 +7,58 @@ import (
 )
 
 func Test_CreditCard_Validate(t *testing.T) {
+	base := CreditCard{
+		ProfileId:    1,
+		CurrencyId:   1, 
+		CreditLimit:  1_000_000,
+		InterestRate: 300, 
+	}
+
 	testCases := []struct {
 		desc        string
-		card         CreditCard
+		mutate func(*CreditCard)
 		expectedErr error
 	}{
 		{
 			desc: "Credit Card With Valid Details Passes Validation",
-			card: CreditCard{
-				ProfileId: 1,
-				CurrencyId: 1,
-				CreditLimit: 1_000_000,
-				InterestRate: 300,
-			},
+			mutate: func(c *CreditCard) {}, 
 			expectedErr: nil,
 		},
 		{
 			desc: "Credit Card With Invalid Profile Id Fails Validation",
-			card: CreditCard{
-				ProfileId: 0,
-				CurrencyId: 1,
-				CreditLimit: 1_000_000,
-				InterestRate: 300,
+			mutate: func (c *CreditCard)  {
+				c.ProfileId = 0
 			},
 			expectedErr: ErrInvalidCreditCard,
 		},
 		{
 			desc: "Credit Card With Invalid Currency Id Fails Validation",
-			card: CreditCard{
-				ProfileId:    1,
-				CurrencyId:   -1, 
-				CreditLimit:  1_000_000,
-				InterestRate: 300,
+			mutate: func(c * CreditCard) {
+				c.CurrencyId = -1
 			},
 			expectedErr: ErrInvalidCurrency,
 		},
 		{
 			desc: "Credit Card With Invalid Credit Limit Fails Validation",
-			card: CreditCard{
-				ProfileId: 1,
-				CurrencyId: 1,
-				CreditLimit: -1_000_000,
-				InterestRate: 300,
+			mutate: func(c * CreditCard) {
+				c.CreditLimit = -1_000_000
 			},
 			expectedErr: ErrInvalidCreditLimit,
 		},
 		{
 			desc: "Credit Card With Invalid Interest Rate Fails Validation",
-			card: CreditCard{
-				ProfileId: 1,
-				CurrencyId: 1,
-				CreditLimit: 1_000_000,
-				InterestRate: -300,
+			mutate: func(c * CreditCard) {
+				c.InterestRate = -300
 			},
 			expectedErr: ErrInvalidInterestRate,
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			err := tC.card.Validate()
+			card := base
+			tC.mutate(&card)
+			err := card.Validate()
+
 			if !errors.Is(err, tC.expectedErr) {
 				t.Errorf(
 					"Validate Error: Expected = %v, Actual = %v",
@@ -77,65 +70,58 @@ func Test_CreditCard_Validate(t *testing.T) {
 }
 
 func Test_PersonaLoan_Validate(t *testing.T) {
+	base := PersonalLoan{
+		ProfileId: 1,
+		CurrencyId: 1,
+		LoanAmount: 1_000_000,
+		InterestRate: 300,
+	}
+
 	testCases := []struct {
 		desc        string
-		loan         PersonalLoan
+		mutate func(p *PersonalLoan)
 		expectedErr error
 	}{
 		{
 			desc: "Personal Loan With Valid Details Passes Validation",
-			loan: PersonalLoan{
-				ProfileId: 1,
-				CurrencyId: 1,
-				LoanAmount: 1_000_000,
-				InterestRate: 300,
-			},
+			mutate: func (p *PersonalLoan) {}, 
 			expectedErr: nil,
 		},
 		{
 			desc: "Personal Loan With Invalid Profile Id Fails Validation",
-			loan: PersonalLoan{
-				ProfileId: 0,
-				CurrencyId: 1,
-				LoanAmount: 1_000_000,
-				InterestRate: 300,
+			mutate: func(p *PersonalLoan) {
+				p.ProfileId = 0
 			},
 			expectedErr: ErrInvalidPersonalLoan,
 		},
 		{
 			desc: "Personal Loan With Invalid Currency Id Fails Validation",
-			loan: PersonalLoan{
-				ProfileId:    1,
-				CurrencyId:   -1, 
-				LoanAmount:   1_000_000,
-				InterestRate: 300,
+			mutate: func (p *PersonalLoan) {
+				p.CurrencyId = -1
 			},
 			expectedErr: ErrInvalidCurrency,
 		},
 		{
 			desc: "Personal Loan With Invalid Loan Amount Fails Validation",
-			loan: PersonalLoan {
-				ProfileId: 1,
-				CurrencyId: 1,
-				LoanAmount: -1_000_000,
-				InterestRate: 300,
+			mutate: func(p *PersonalLoan) {
+				p.LoanAmount = -1_000_000
 			},
 			expectedErr: ErrInvalidLoanAmount,
 		},
 		{
 			desc: "Personal Loan With Invalid Interest Rate Fails Validation",
-			loan: PersonalLoan{
-				ProfileId: 1,
-				CurrencyId: 1,
-				LoanAmount: 1_000_000,
-				InterestRate: -300,
+			mutate: func (p *PersonalLoan) {
+				p.InterestRate = -300
 			},
 			expectedErr: ErrInvalidInterestRate,
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			err := tC.loan.Validate()
+			loan := base
+			tC.mutate(&loan)
+			err := loan.Validate()
+
 			if !errors.Is(err, tC.expectedErr) {
 				t.Errorf(
 					"Validate Error: Expected = %v, Actual = %v",
@@ -371,12 +357,53 @@ func Test_Applicant_Validate(t *testing.T) {
 }
 
 func Test_Application_Validate(t *testing.T) {
-	// This ensures the function is called, covering the function signature and 'return nil'
-	app := Application{}
-	if err := app.Validate(); err != nil {
-		t.Errorf("Expected nil error for empty application validate (stub), got %v", err)
+	testCases := []struct {
+		desc        string
+		app         Application
+		expectedErr error
+	}{
+		{
+			desc: "Application Created Today Passes Validation",
+			app: Application{
+				CreatedAt:         time.Now(),
+				UpdatedAt:         time.Now(),
+				OtherApplicants: []Applicant{},
+				MemberReferenceNo: "ABCDE12345",
+				Applicant: Applicant {
+					Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC), 
+					ContactNumbers: []ContactNumber {
+						{ Value: "9171234567", Type: TypeMobile },
+					},
+					LastName: "Smith",
+					FirstName: "John",
+					MiddleName: "Doe",
+					IsPrincipal: true,
+				},
+				CreditCard: CreditCard {
+					ProfileId: 1,
+					CurrencyId: 1,
+					CreditLimit: 1_000_000,
+					InterestRate: 300,
+				},
+				Status:            StatusCreated,
+				RequestedAmount:   100_000_000,
+			},
+			expectedErr: nil,
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			err := tC.app.Validate()
+			if !errors.Is(err, tC.expectedErr) {
+				t.Errorf(
+					"Validate Error: Expected = %v, Actual = %v",
+					tC.expectedErr, err,
+					)
+			}
+		})
 	}
 }
+
 
 // func TestApplication_Validate_CardProfile(t *testing.T) {
 // 	testCases := []struct {
@@ -565,75 +592,6 @@ func Test_Application_Validate(t *testing.T) {
 // 		})
 // 	}
 // }
-//
-// func TestApplication_Validate_CreatedAt(t *testing.T) {
-// 	testCases := []struct {
-// 		desc        string
-// 		app         Application
-// 		expectedErr error
-// 	}{
-// 		{
-// 			desc: "Application Created Today Passes Validation",
-// 			app: Application{
-// 				CreatedAt:         time.Now(),
-// 				UpdatedAt:         time.Now(),
-// 				MemberReferenceNo: "ABCDE12345",
-// 				Status:            StatusCreated,
-// 				RequestedAmount:   100_000_000,
-// 				CreditCard: CreditCard{
-// 					CardProfile:  1,
-// 					CreditLimit:  1_000_000,
-// 					InterestRate: 1_000,
-// 				},
-// 			},
-// 			expectedErr: nil,
-// 		},
-// 		{
-// 			desc: "Application Created Yesterday Fails Validation",
-// 			app: Application{
-// 				CreatedAt:         time.Now().AddDate(0, 0, -1),
-// 				UpdatedAt:         time.Now(),
-// 				MemberReferenceNo: "ABCDE12345",
-// 				Status:            StatusCreated,
-// 				RequestedAmount:   100_000_000,
-// 				CreditCard: CreditCard{
-// 					CardProfile:  1,
-// 					CreditLimit:  1_000_000,
-// 					InterestRate: 1_000,
-// 				},
-// 			},
-// 			expectedErr: nil,
-// 		},
-// 		{
-// 			desc: "Application Created Tomorrow Fails Validation",
-// 			app: Application{
-// 				CreatedAt:         time.Now().AddDate(0, 0, 1),
-// 				UpdatedAt:         time.Now(),
-// 				MemberReferenceNo: "ABCDE12345",
-// 				Status:            StatusCreated,
-// 				RequestedAmount:   100_000_000,
-// 				CreditCard: CreditCard{
-// 					CardProfile:  1,
-// 					CreditLimit:  1_000_000,
-// 					InterestRate: 1_000,
-// 				},
-// 			},
-// 			expectedErr: ErrCreatedAtInFuture,
-// 		},
-// 	}
-// 	for _, tC := range testCases {
-// 		t.Run(tC.desc, func(t *testing.T) {
-// 			err := tC.app.Validate()
-// 			if err != tC.expectedErr {
-// 				t.Errorf(
-// 					"Validate Error: Expected = %v, Actual = %v",
-// 					tC.expectedErr, err,
-// 				)
-// 			}
-// 		})
-// 	}
-// }
-//
 // func TestApplication_Validate_UpdatedAt(t *testing.T) {
 // 	testCases := []struct {
 // 		desc        string
