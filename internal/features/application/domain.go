@@ -65,6 +65,8 @@ func (a *Application) Validate() error {
 		return ErrInvalidStatus
 	}
 
+	// TODO: Invoke Applicant.Validate()
+
 	return nil
 }
 
