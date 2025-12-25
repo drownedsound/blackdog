@@ -65,7 +65,11 @@ func (a *Application) Validate() error {
 		return ErrInvalidStatus
 	}
 
-	// TODO: Invoke Applicant.Validate()
+	// TODO: Invoke Applicant.Validate() on principal borrower
+	// TODO: Invoke Applicant.Validate() on each applicant in 
+	//		 []Applicant
+	// TODO: Invoke CreditCard.Validate()
+	// TODO: Invoke PersonalLoan.Validate()
 
 	return nil
 }
