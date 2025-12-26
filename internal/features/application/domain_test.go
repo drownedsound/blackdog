@@ -384,9 +384,9 @@ func Test_Application_Validate(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
-			desc: "Application Created Yesterday Passes Validation",
+			desc: "Application Created in the Past Passes Validation",
 			mutate: func(a *Application) {
-				a.CreatedAt = fixedNow.AddDate(0, 0, -1).UTC()
+				a.CreatedAt = fixedNow.AddDate(-5, 0, 0).UTC()
 			},
 			expectedErr: nil,
 		},
@@ -398,9 +398,9 @@ func Test_Application_Validate(t *testing.T) {
 			expectedErr: ErrCreatedAtInFuture,
 		},
 		{
-			desc: "Application Updated Yesterday Passes Validation",
+			desc: "Application Updated in the Past Passes Validation",
 			mutate: func(a *Application) {
-				a.UpdatedAt = fixedNow.AddDate(0, 0, -1).UTC()
+				a.UpdatedAt = fixedNow.AddDate(-5, 0, 0).UTC()
 			},
 			expectedErr: nil,
 		},
