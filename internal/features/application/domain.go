@@ -97,6 +97,14 @@ func (a *Application) Validate(v *Validator) error {
 		}
 	}
 
+	if a.CreditCard.ProfileId == 0 && a.PersonalLoan.ProfileId == 0 {
+		return ErrMissingProduct
+	}
+
+	if a.CreditCard.ProfileId > 0 && a.PersonalLoan.ProfileId > 0 {
+		return ErrTooManyProducts
+	}
+
 	if a.CreditCard.ProfileId > 0 {
 		if err := a.CreditCard.Validate(); err != nil {
 			return fmt.Errorf("credit card failed validation: %w", err)

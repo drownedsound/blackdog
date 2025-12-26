@@ -49,6 +49,10 @@ var (
 		"requested amount cannot be less than or equal to zero")
 	ErrInvalidStatus = errors.New(
 		"status is not a valid value")
+	ErrMissingProduct = errors.New(
+		"credit card or personal loan is required")
+	ErrTooManyProducts = errors.New(
+		"application limited to one product only")
 	ErrNotFound          = errors.New(
 		"database record not found")
 	ErrInsertFailed      = errors.New(

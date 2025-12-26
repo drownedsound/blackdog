@@ -452,6 +452,85 @@ func Test_Application_Validate(t *testing.T) {
 			},
 			expectedErr: ErrInvalidStatus,
 		},
+		{
+			desc: "Application With Principal Validation Error" +
+			"Fails Validation",
+			mutate: func(a *Application) {
+				a.Applicant.LastName = ""
+			},
+			expectedErr: ErrMissingLastName, 
+		},
+		{
+			desc: "Application With Valid OtherApplicants Passes Validation",
+			mutate: func(a *Application) {
+				other := a.Applicant 
+				a.OtherApplicants = []Applicant{other}
+			},
+			expectedErr: nil,
+		},
+		{
+			desc: "Application With Invalid OtherApplicants Fails Validation",
+			mutate: func(a *Application) {
+				invalidOther := a.Applicant
+				invalidOther.LastName = ""
+				a.OtherApplicants = []Applicant{invalidOther}
+			},
+			expectedErr: ErrMissingLastName,
+		},
+		{
+			desc: "Application With No Products Fails Validation",
+			mutate: func(a *Application) {
+				a.CreditCard = CreditCard{}
+				a.PersonalLoan = PersonalLoan{}
+			},
+			expectedErr: ErrMissingProduct,
+		},
+		{
+			desc: "Application With Both Products Fails Validation",
+			mutate: func(a *Application) {
+				// CreditCard is set in base; add PersonalLoan
+				a.PersonalLoan = PersonalLoan{
+					ProfileId: 1, 
+					CurrencyId: 1, 
+					LoanAmount: 10000, 
+					InterestRate: 100,
+				}
+			},
+			expectedErr: ErrTooManyProducts,
+		},
+		{
+			desc: "Application With Valid Personal Loan Passes Validation",
+			mutate: func(a *Application) {
+				a.CreditCard = CreditCard{}
+				a.PersonalLoan = PersonalLoan{
+					ProfileId: 1, 
+					CurrencyId: 1, 
+					LoanAmount: 10000, 
+					InterestRate: 100,
+				}
+			},
+			expectedErr: nil,
+		},
+		{
+			desc: "Application With Invalid Personal Loan Fails Validation",
+			mutate: func(a *Application) {
+				a.CreditCard = CreditCard{}
+				a.PersonalLoan = PersonalLoan{
+					ProfileId: 1, 
+					CurrencyId: 1, 
+					LoanAmount: -100, 
+					InterestRate: 100,
+				}
+			},
+			expectedErr: ErrInvalidLoanAmount,
+		},
+		{
+			desc: "Application With Invalid Credit Card Fails Validation",
+			mutate: func(a *Application) {
+				a.CreditCard.CreditLimit = -100
+			},
+			expectedErr: ErrInvalidCreditLimit,
+		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
