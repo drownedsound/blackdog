@@ -6,12 +6,6 @@ import (
 	"unicode/utf8"
 )
 
-var validator *Validator
-
-func init()  {
-	validator = NewValidator(time.Now().UTC())
-}
-
 type Validator struct {
 	Now time.Time
 	EighteenYearsAgo time.Time
