@@ -8,6 +8,19 @@ import (
 
 const maxNameLength int = 30
 
+type Validator struct {
+	Now time.Time
+	MinContactNumberLength int
+}
+
+func NewValidtor() *Validator {
+	now := time.Now()
+	return &Validator {
+		Now: now,
+		MinContactNumberLength: 9,
+	}
+}
+
 type ApplicationStatus byte
 
 const (
@@ -211,9 +224,9 @@ type ContactNumber struct {
 	Type ContactNumberType
 }
 
-func (c *ContactNumber) Validate() error {
+func (c *ContactNumber) Validate(v *Validator) error {
 	// TODO: Ensure that service trims the string
-	if c.Value == "" || len(c.Value) < 9 {
+	if c.Value == "" || len(c.Value) < v.MinContactNumberLength {
 		return ErrInvalidContactNumber
 	}
 

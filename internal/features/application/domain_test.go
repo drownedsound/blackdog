@@ -213,7 +213,7 @@ func Test_ContactNumber_Validate(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			contact := base
 			tC.mutate(&contact)
-			err := contact.Validate()
+			err := contact.Validate(v)
 
 			if !errors.Is(err, tC.expectedErr) {
 				t.Errorf(
