@@ -8,11 +8,13 @@ import (
 )
 
 var (
+	testValidator *Validator
 	fixedNow time.Time
 )
 
 func TestMain(m *testing.M) {
 	fixedNow = time.Date(2025, 1, 1, 12, 0, 0, 0, time.UTC)
+	testValidator = NewValidator(fixedNow)
 
 	os.Exit(m.Run())
 }
@@ -213,7 +215,7 @@ func Test_ContactNumber_Validate(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			contact := base
 			tC.mutate(&contact)
-			err := contact.Validate(v)
+			err := contact.Validate(testValidator)
 
 			if !errors.Is(err, tC.expectedErr) {
 				t.Errorf(
@@ -335,7 +337,7 @@ func Test_Applicant_Validate(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			app := base
 			tC.mutate(&app)
-			err := app.Validate()
+			err := app.Validate(testValidator)
 
 			if !errors.Is(err, tC.expectedErr) {
 				t.Errorf(
@@ -453,7 +455,7 @@ func Test_Application_Validate(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			app := base
 			tC.mutate(&app)
-			err := app.Validate()
+			err := app.Validate(testValidator)
 
 			if !errors.Is(err, tC.expectedErr) {
 				t.Errorf(

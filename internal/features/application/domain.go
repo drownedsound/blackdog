@@ -6,17 +6,24 @@ import (
 	"unicode/utf8"
 )
 
-const maxNameLength int = 30
-
 type Validator struct {
 	Now time.Time
+	EighteenYearsAgo time.Time
+	MaxNameLength int
 	MinContactNumberLength int
 }
 
-func NewValidtor() *Validator {
-	now := time.Now()
+// FIXME: Initialize Validator in init() of the package
+func NewValidator(now time.Time) *Validator {
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+
+	// TODO: Move magic numbers to a configuration file
 	return &Validator {
 		Now: now,
+		EighteenYearsAgo: now.AddDate(-18,0 ,0),
+		MaxNameLength: 30,
 		MinContactNumberLength: 9,
 	}
 }
@@ -54,14 +61,12 @@ type Application struct {
 	Status            ApplicationStatus
 }
 
-func (a *Application) Validate() error {
-	now := time.Now().UTC()
-
-	if a.CreatedAt.After(now) {
+func (a *Application) Validate(v *Validator) error {
+	if a.CreatedAt.After(v.Now) {
 		return ErrCreatedAtInFuture
 	}
 
-	if a.UpdatedAt.After(now) {
+	if a.UpdatedAt.After(v.Now) {
 		return ErrUpdatedAtInFuture
 	}
 
@@ -78,11 +83,30 @@ func (a *Application) Validate() error {
 		return ErrInvalidStatus
 	}
 
-	// TODO: Invoke Applicant.Validate() on principal borrower
-	// TODO: Invoke Applicant.Validate() on each applicant in 
-	//		 []Applicant
-	// TODO: Invoke CreditCard.Validate()
-	// TODO: Invoke PersonalLoan.Validate()
+	a.Applicant.Validate(v)	
+	if err := a.Applicant.Validate(v); err != nil {
+		return fmt.Errorf("principal applicant failed validation: %w", err)
+	}
+
+	if len(a.OtherApplicants) > 0 {
+		for i := range a.OtherApplicants {
+			if err := a.OtherApplicants[i].Validate(v); err != nil {
+				return fmt.Errorf("aplicant %d failed validation: %w", i, err)
+			}
+		}
+	}
+
+	if a.CreditCard.ProfileId > 0 {
+		if err := a.CreditCard.Validate(); err != nil {
+			return fmt.Errorf("credit card failed validation: %w", err)
+		}
+	}
+
+	if a.PersonalLoan.ProfileId > 0 {
+		if err := a.PersonalLoan.Validate(); err != nil {
+			return fmt.Errorf("personal loan failed validation: %w", err)
+		}
+	}
 
 	return nil
 }
@@ -154,18 +178,19 @@ type Applicant struct {
 	IsPrincipal bool
 }
 
-func (a *Applicant) Validate() error {
+func (a *Applicant) Validate(v *Validator) error {
 	// Checks for zero time.Time (0001-01-01 00:00:00 UTC)
 	if a.Birthday.IsZero() {
 		return ErrMissingBirthday
 	}	
 
-	now := time.Now().UTC()
-	if a.Birthday.After(now) {
+	// Use v.Now to ensure that time.Now() is only done once
+	if a.Birthday.After(v.Now) {
 		return ErrBirthdayInFuture	
 	}
 
-	if a.Birthday.AddDate(18, 0, 0).After(now) {
+	// Use v.EighteenYearsAgo to prevent recalculation of date
+	if a.Birthday.After(v.EighteenYearsAgo) {
 		return ErrMinimumAgeNotMet	
 	}
 
@@ -176,32 +201,32 @@ func (a *Applicant) Validate() error {
 
 	// Fast Path - len(a.LastName) reads the length from the 
 	// slice header (stack). This is an O(1) operation costing ~1 nanosecond.
-    // If the byte count is within the limit, the rune count is guaranteed 
+	// If the byte count is within the limit, the rune count is guaranteed 
 	// to be safe.
-    if len(a.LastName) > maxNameLength {
+	if len(a.LastName) > v.MaxNameLength {
 		// Slow Path - Handles non-ASCII. Incur the O(N) CPU cost of decoding 
 		// UTF-8 if the byte count exceeds the limit. 
-        if utf8.RuneCountInString(a.LastName) > maxNameLength {
-            return ErrLastNameTooLong
-        }
-    }
-	
+		if utf8.RuneCountInString(a.LastName) > v.MaxNameLength {
+			return ErrLastNameTooLong
+		}
+	}
+
 	// TODO: Ensure that service trims the string
 	if a.FirstName == "" {
 		return ErrMissingFirstName
 	}
-	
+
 	// Same approach as LastName above
-    if len(a.FirstName) > maxNameLength {
-        if utf8.RuneCountInString(a.FirstName) > maxNameLength {
-		return ErrFirstNameTooLong
-        }
-    }
+	if len(a.FirstName) > v.MaxNameLength {
+		if utf8.RuneCountInString(a.FirstName) > v.MaxNameLength {
+			return ErrFirstNameTooLong
+		}
+	}
 
 	// TODO: Ensure that service trims the string
 	// Same approach as LastName above
-	if len(a.MiddleName) > maxNameLength {
-		if utf8.RuneCountInString(a.MiddleName) > maxNameLength {
+	if len(a.MiddleName) > v.MaxNameLength {
+		if utf8.RuneCountInString(a.MiddleName) > v.MaxNameLength {
 			return ErrMiddleNameTooLong
 		}
 	}
@@ -211,7 +236,7 @@ func (a *Applicant) Validate() error {
 	}
 
 	for i := range a.ContactNumbers {
-		if err := a.ContactNumbers[i].Validate(); err != nil {
+		if err := a.ContactNumbers[i].Validate(v); err != nil {
 			return fmt.Errorf("contact number %d failed validation: %w", i, err)
 		}
 	}
