@@ -6,6 +6,12 @@ import (
 	"unicode/utf8"
 )
 
+var validator *Validator
+
+func init()  {
+	validator = NewValidator(time.Now().UTC())
+}
+
 type Validator struct {
 	Now time.Time
 	EighteenYearsAgo time.Time
@@ -13,12 +19,7 @@ type Validator struct {
 	MinContactNumberLength int
 }
 
-// FIXME: Initialize Validator in init() of the package
 func NewValidator(now time.Time) *Validator {
-	if now.IsZero() {
-		now = time.Now().UTC()
-	}
-
 	// TODO: Move magic numbers to a configuration file
 	return &Validator {
 		Now: now,
