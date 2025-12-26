@@ -1,10 +1,21 @@
 package app
 
 import (
+	"os"
 	"testing"
 	"time"
 	"errors"
 )
+
+var (
+	fixedNow time.Time
+)
+
+func TestMain(m *testing.M) {
+	fixedNow = time.Date(2025, 1, 1, 12, 0, 0, 0, time.UTC)
+
+	os.Exit(m.Run())
+}
 
 func Test_CreditCard_Validate(t *testing.T) {
 	base := CreditCard{
@@ -246,14 +257,14 @@ func Test_Applicant_Validate(t *testing.T) {
 		{
 			desc: "Applicant With Birthday in Future Fails Validation",
 			mutate: func(a *Applicant) {
-				a.Birthday = time.Now().AddDate(0, 0, 1).UTC()
+				a.Birthday = fixedNow.AddDate(5, 0, 0).UTC()
 			},
 			expectedErr: ErrBirthdayInFuture,
 		},
 		{
 			desc: "Applicant Not Meeting Age Requirements Fails Validation",
 			mutate: func(a *Applicant) {
-				a.Birthday = time.Now().AddDate(-16, 0, 1).UTC()
+				a.Birthday = fixedNow.AddDate(-16, 0, 1).UTC()
 			},
 			expectedErr: ErrMinimumAgeNotMet,
 		},
@@ -338,8 +349,8 @@ func Test_Applicant_Validate(t *testing.T) {
 
 func Test_Application_Validate(t *testing.T) {
 	base := Application{
-		CreatedAt:         time.Now(),
-		UpdatedAt:         time.Now(),
+		CreatedAt:         fixedNow,
+		UpdatedAt:         fixedNow,
 		OtherApplicants: []Applicant{},
 		MemberReferenceNo: "ABCDE12345",
 		Applicant: Applicant {
@@ -375,28 +386,28 @@ func Test_Application_Validate(t *testing.T) {
 		{
 			desc: "Application Created Yesterday Passes Validation",
 			mutate: func(a *Application) {
-				a.CreatedAt = time.Now().AddDate(0, 0, -1).UTC()
+				a.CreatedAt = fixedNow.AddDate(0, 0, -1).UTC()
 			},
 			expectedErr: nil,
 		},
 		{
-			desc: "Application Created Tomorrow Fails Validation",
+			desc: "Application Created in the Future Fails Validation",
 			mutate: func(a *Application) {
-				a.CreatedAt = time.Now().AddDate(0, 0, 1).UTC()
+				a.CreatedAt = fixedNow.AddDate(5, 0, 0).UTC()
 			},
 			expectedErr: ErrCreatedAtInFuture,
 		},
 		{
 			desc: "Application Updated Yesterday Passes Validation",
 			mutate: func(a *Application) {
-				a.UpdatedAt = time.Now().AddDate(0, 0, -1).UTC()
+				a.UpdatedAt = fixedNow.AddDate(0, 0, -1).UTC()
 			},
 			expectedErr: nil,
 		},
 		{
-			desc: "Application Updated Tomorrow Fails Validation",
+			desc: "Application Updated Future Fails Validation",
 			mutate: func(a *Application) {
-				a.UpdatedAt = time.Now().AddDate(0, 0, 1).UTC()
+				a.UpdatedAt = fixedNow.AddDate(5, 0, 0).UTC()
 			},
 			expectedErr: ErrUpdatedAtInFuture,
 		},
