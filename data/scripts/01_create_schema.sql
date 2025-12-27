@@ -54,7 +54,7 @@ CREATE TABLE REF_CREDIT_CARD (
     interest_rate integer NOT NULL,
     FOREIGN KEY (currency_id) REFERENCES REF_CURRENCY (id),
     CONSTRAINT ck_ref_cc_ceiling CHECK (product_ceiling > 0),
-    CONSTRAINT ck_ref_cc_rate CHECK (interest_rate > 0))
+    CONSTRAINT ck_ref_cc_interest CHECK (interest_rate > 0))
 STRICT;
 
 CREATE TRIGGER trg_block_del_ref_cc BEFORE DELETE ON REF_CREDIT_CARD
@@ -71,7 +71,7 @@ CREATE TABLE REF_PERSONAL_LOAN (
     interest_rate integer NOT NULL,
     FOREIGN KEY (currency_id) REFERENCES REF_CURRENCY (id),
     CONSTRAINT ck_ref_pl_ceiling CHECK (product_ceiling > 0),
-    CONSTRAINT ck_ref_pl_rate CHECK (interest_rate > 0))
+    CONSTRAINT ck_ref_pl_interest CHECK (interest_rate > 0))
 STRICT;
 
 CREATE TRIGGER trg_block_del_ref_pl BEFORE DELETE ON REF_PERSONAL_LOAN
@@ -99,7 +99,7 @@ CREATE TABLE CREDIT_CARD (
     profile_id integer NOT NULL,
     credit_limit integer NOT NULL DEFAULT 0,
     FOREIGN KEY (profile_id) REFERENCES REF_CREDIT_CARD (id),
-    CONSTRAINT ck_cc_limit CHECK (credit_limit > 0))
+    CONSTRAINT ck_cc_limit CHECK (credit_limit > 0)),
 STRICT;
 
 CREATE TRIGGER trg_audit_ins_cc AFTER INSERT ON CREDIT_CARD
@@ -192,7 +192,7 @@ BEGIN
     INSERT INTO AUDIT_LOG (table_name, record_id, action, changes)
     VALUES ('APPLICATION', new.id, 'INSERT', 
         json_object(
-            'ref_no', new.member_reference_no, 
+            'member_ref_no', new.member_reference_no, 
             'status', new.status_id,
             'cc_id', new.credit_card_id,
             'pl_id', new.personal_loan_id,
@@ -206,7 +206,7 @@ BEGIN
     INSERT INTO AUDIT_LOG (table_name, record_id, action, changes)
     VALUES ('APPLICATION', new.id, 'UPDATE', 
         json_object(
-            'ref_no', new.member_reference_no, 
+            'member_ref_no', new.member_reference_no, 
             'status', new.status_id,
             'cc_id', new.credit_card_id,
             'pl_id', new.personal_loan_id,
@@ -251,8 +251,8 @@ BEGIN
         json_object(
             'app_id', new.application_id, 
             'is_principal', new.is_principal,
-            'last', new.last_name,
-            'first', new.first_name
+            'last_name', new.last_name,
+            'first_name', new.first_name
         )
     );
 END;
@@ -264,8 +264,8 @@ BEGIN
         json_object(
             'app_id', new.application_id, 
             'is_principal', new.is_principal,
-            'last', new.last_name,
-            'first', new.first_name
+            'last_name', new.last_name,
+            'first_name', new.first_name
         )
     );
 END;

@@ -11,9 +11,18 @@ BEGIN TRANSACTION;
 -- 2. SINGLE APPLICANT CREDIT CARD APPLICATION
 -- ============================================================================
 
-INSERT INTO CREDIT_CARD (profile_id, credit_limit) VALUES (1, 5000000);
+INSERT INTO CREDIT_CARD (
+    id, 
+    profile_id, 
+    credit_limit
+) VALUES (
+    7410754270103867392, 
+    1, 
+    5000000
+);
 
 INSERT INTO APPLICATION (
+    id,
     member_reference_no,
     status_id,
     credit_card_id,
@@ -21,15 +30,17 @@ INSERT INTO APPLICATION (
     created_at,
     updated_at
 ) VALUES (
+    7410754167536357376,
     'APP-CC-001',
     1,                   
-    last_insert_rowid(),
+    7410754270103867392,
     6000000,
     unixepoch(),
     unixepoch()
 );
 
 INSERT INTO APPLICANT (
+    id,
     application_id,
     is_principal,
     last_name,
@@ -37,7 +48,8 @@ INSERT INTO APPLICANT (
     middle_name,
     birthday
 ) VALUES (
-    last_insert_rowid(),
+    7410754725357817856,
+    7410754167536357376,
     1,
     'SMITH',
     'JOHN',
@@ -46,11 +58,13 @@ INSERT INTO APPLICANT (
 );
 
 INSERT INTO CONTACT_NUMBER (
+    id,
     applicant_id, 
     type_id, 
     value
 ) VALUES (
-    last_insert_rowid(),
+    7410758405897326592,
+    7410754725357817856,
     1,
     '1234567'
 );
@@ -59,9 +73,18 @@ INSERT INTO CONTACT_NUMBER (
 -- 3. SINGLE APPLICANT PERSONAL LOAN APPLICATION
 -- ============================================================================
 
-INSERT INTO PERSONAL_LOAN (profile_id, loan_amount) VALUES (1,200000000);
+INSERT INTO PERSONAL_LOAN (
+    id,
+    profile_id, 
+    loan_amount
+) VALUES (
+    7410755240611287040,
+    1,
+    200000000
+);
 
 INSERT INTO APPLICATION (
+    id,
     member_reference_no,
     status_id,
     personal_loan_id,
@@ -69,15 +92,17 @@ INSERT INTO APPLICATION (
     created_at,
     updated_at
 ) VALUES (
+    7410755338086912000,
     'APP-PL-001',
     1,                   
-    last_insert_rowid(),
+    7410755240611287040,
     200000000,
     unixepoch(),
     unixepoch()
 );
 
 INSERT INTO APPLICANT (
+    id,
     application_id,
     is_principal,
     last_name,
@@ -85,7 +110,8 @@ INSERT INTO APPLICANT (
     middle_name,
     birthday
 ) VALUES (
-    last_insert_rowid(), 
+    7410755498057666560,
+    7410755338086912000,
     1,                  
     'SMITH',
     'DOE',
@@ -94,11 +120,13 @@ INSERT INTO APPLICANT (
 );
 
 INSERT INTO CONTACT_NUMBER (
+    id,
     applicant_id, 
     type_id, 
     value
 ) VALUES (
-    last_insert_rowid(), 
+    7410755610020417536,
+    7410755498057666560,
     1,                  
     '09171112222'
 );
@@ -108,9 +136,18 @@ INSERT INTO CONTACT_NUMBER (
 -- 4. MULTI APPLICANT CREDIT CARD APPLICATION
 -- ============================================================================
 
-INSERT INTO CREDIT_CARD (profile_id, credit_limit) VALUES (2, 30000000);
+INSERT INTO CREDIT_CARD (
+    id,
+    profile_id, 
+    credit_limit
+) VALUES (
+    7410755959405940736,
+    2, 
+    30000000
+);
 
 INSERT INTO APPLICATION (
+    id,
     member_reference_no,
     status_id,
     credit_card_id,
@@ -118,22 +155,25 @@ INSERT INTO APPLICATION (
     created_at,
     updated_at
 ) VALUES (
+    7410756033057918976,
     'APP-CC-002',
     1,
-    last_insert_rowid(),
+    7410755959405940736,
     30000000,
     unixepoch(),
     unixepoch()
 );
 
 INSERT INTO APPLICANT (
+    id,
     application_id, 
     is_principal, 
     last_name, 
     first_name, 
     birthday
 ) VALUES (
-    last_insert_rowid(), -- Links to APPLICATION
+    7410756138540470272,
+    7410756033057918976,
     1,
     'SANTOS',
     'MARIA',
@@ -142,11 +182,13 @@ INSERT INTO APPLICANT (
 
 -- Principal Contact 1: Mobile
 INSERT INTO CONTACT_NUMBER (
+    id,
     applicant_id, 
     type_id, 
     value
 ) VALUES (
-    last_insert_rowid(), -- Links to PRINCIPAL
+    7410756396527915008,
+    7410756138540470272,
     1,
     '09181234567'
 );
@@ -154,25 +196,27 @@ INSERT INTO CONTACT_NUMBER (
 -- Principal Contact 2: Landline
 -- Note: We must lookup the ID again because last_insert_rowid changed above
 INSERT INTO CONTACT_NUMBER (
+    id,
     applicant_id, 
     type_id, 
     value
 ) VALUES (
-    (SELECT id FROM APPLICANT WHERE last_name = 'SANTOS' AND is_principal = 1),
+    7410756463674527744,
+    7410756138540470272,
     2,
     '0288881234'
 );
 
 INSERT INTO APPLICANT (
+    id,
     application_id, 
     is_principal, 
     last_name, 
     first_name, 
     birthday
 ) VALUES (
-    -- We cannot use last_insert_rowid() here; it points to a contact number.
-    -- We lookup the Application ID by its unique reference number.
-    (SELECT id FROM APPLICATION WHERE member_reference_no = 'APP-CC-002'),
+    7410756670961225728,
+    7410756033057918976,
     0, -- Supplementary
     'SANTOS',
     'JUAN',
@@ -181,11 +225,13 @@ INSERT INTO APPLICANT (
 
 -- Supplementary Contact: Mobile
 INSERT INTO CONTACT_NUMBER (
+    id,
     applicant_id, 
     type_id, 
     value
 ) VALUES (
-    last_insert_rowid(), -- Links to SUPPLEMENTARY
+    7410756919549235200,
+    7410756670961225728,
     1,
     '09199876543'
 );
