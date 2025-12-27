@@ -17,7 +17,7 @@ var (
 		"interest rate cannot be less than or equal to zero")
 	ErrMissingBirthday = errors.New(
 		"birthday is required")
-	ErrBirthdayInFuture  = errors.New(
+	ErrBirthdayInFuture = errors.New(
 		"birthday cannot be in the future")
 	ErrMinimumAgeNotMet = errors.New(
 		"minimum age not met")
@@ -37,9 +37,9 @@ var (
 		"contact number is not a valid value")
 	ErrInvalidContactNumberType = errors.New(
 		"contact number type is not a valid value")
-	ErrCreatedAtInFuture  = errors.New(
+	ErrCreatedAtInFuture = errors.New(
 		"created at cannot be in the future")
-	ErrUpdatedAtInFuture  = errors.New(
+	ErrUpdatedAtInFuture = errors.New(
 		"updated at cannot be in the future")
 	ErrMissingMemberRefNo = errors.New(
 		"member reference number is required")
@@ -51,9 +51,9 @@ var (
 		"credit card or personal loan is required")
 	ErrTooManyProducts = errors.New(
 		"application limited to one product only")
-	ErrNotFound          = errors.New(
+	ErrNotFound = errors.New(
 		"database record not found")
-	ErrInsertFailed      = errors.New(
+	ErrInsertFailed = errors.New(
 		"database record insertion failed")
 	ErrConnectionRefused = errors.New(
 		"database connection refused")

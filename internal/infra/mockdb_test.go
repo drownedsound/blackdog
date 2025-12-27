@@ -2,17 +2,15 @@ package infra
 
 import (
 	"context"
-	"sync"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
 	app "github.com/drownedsound/blackdog/internal/features/application"
 )
 
-var (
-	fixedNow time.Time
-)
+var fixedNow time.Time
 
 func TestMain(m *testing.M) {
 	// Freeze time at Jan 1, 2025, 12:00 UTC
@@ -36,10 +34,10 @@ func TestMockDb_SaveValidation(t *testing.T) {
 		// This hits the 'if a.Id <= 0' branch in mockdb.go
 		if err := repo.Save(ctx, invalidApp); err != app.ErrInvalidUUID {
 			t.Errorf(
-				"Save Error: Expected = %v, Actual = %v", 
-				app.ErrInvalidUUID, 
+				"Save Error: Expected = %v, Actual = %v",
+				app.ErrInvalidUUID,
 				err,
-				)
+			)
 		}
 	})
 
@@ -61,9 +59,9 @@ func TestMockDb_SaveValidation(t *testing.T) {
 			t.Error("Expected CreatedAt to be populated, got Zero")
 			t.Errorf(
 				"Save Error on Refetched App: "+
-				"CreatedAt Expected = 0, Actual = %v",
+					"CreatedAt Expected = 0, Actual = %v",
 				freshApp.CreatedAt,
-				)
+			)
 		}
 	})
 }
@@ -75,27 +73,27 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 	newApp := app.Application{
 		CreatedAt:         fixedNow,
 		UpdatedAt:         fixedNow,
-		OtherApplicants: []app.Applicant{},
+		OtherApplicants:   []app.Applicant{},
 		MemberReferenceNo: "ABCDE12345",
-		Applicant: app.Applicant {
-			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC), 
-			ContactNumbers: []app.ContactNumber {
-				{ Value: "9171234567", Type: app.TypeMobile },
+		Applicant: app.Applicant{
+			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC),
+			ContactNumbers: []app.ContactNumber{
+				{Value: "9171234567", Type: app.TypeMobile},
 			},
-			LastName: "Smith",
-			FirstName: "John",
-			MiddleName: "Doe",
+			LastName:    "Smith",
+			FirstName:   "John",
+			MiddleName:  "Doe",
 			IsPrincipal: true,
 		},
-		CreditCard: app.CreditCard {
-			ProfileId: 1,
-			CurrencyId: 1,
-			CreditLimit: 1_000_000,
+		CreditCard: app.CreditCard{
+			ProfileId:    1,
+			CurrencyId:   1,
+			CreditLimit:  1_000_000,
 			InterestRate: 300,
 		},
-		Id: 7410680147088510976,
-		RequestedAmount:   100_000_000,
-		Status:            app.StatusCreated,
+		Id:              7410680147088510976,
+		RequestedAmount: 100_000_000,
+		Status:          app.StatusCreated,
 	}
 
 	t.Run("Save Creates Valid Application", func(t *testing.T) {
@@ -116,10 +114,10 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 		if fetchedApp.RequestedAmount != 100_000_000 {
 			t.Errorf(
 				"GetById Error on Fetched App: "+
-				"RequestedAmount Expected = %v, Actual = %v",
+					"RequestedAmount Expected = %v, Actual = %v",
 				100_000_000,
 				fetchedApp.RequestedAmount,
-				)
+			)
 		}
 	})
 
@@ -144,8 +142,8 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 		if refetch.RequestedAmount == 99999 {
 			t.Error(
 				"Violation of Isolation: Modifying Local Struct Affected" +
-				" The Repository Store",
-				)
+					" The Repository Store",
+			)
 		}
 	})
 
@@ -169,10 +167,10 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 		if refetchAfterUpdate.RequestedAmount != 99_999 {
 			t.Errorf(
 				"GetById Error on Refetched App: "+
-				"RequestedAmount Expected = %v, Actual = %v",
+					"RequestedAmount Expected = %v, Actual = %v",
 				99_999,
 				refetchAfterUpdate.RequestedAmount,
-				)
+			)
 		}
 	})
 }
@@ -200,27 +198,27 @@ func TestMockDb_ConcurrentSaveAndGetApplication(t *testing.T) {
 	app := app.Application{
 		CreatedAt:         fixedNow,
 		UpdatedAt:         fixedNow,
-		OtherApplicants: []app.Applicant{},
+		OtherApplicants:   []app.Applicant{},
 		MemberReferenceNo: "ABCDE12345",
-		Applicant: app.Applicant {
-			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC), 
-			ContactNumbers: []app.ContactNumber {
-				{ Value: "9171234567", Type: app.TypeMobile },
+		Applicant: app.Applicant{
+			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC),
+			ContactNumbers: []app.ContactNumber{
+				{Value: "9171234567", Type: app.TypeMobile},
 			},
-			LastName: "Smith",
-			FirstName: "John",
-			MiddleName: "Doe",
+			LastName:    "Smith",
+			FirstName:   "John",
+			MiddleName:  "Doe",
 			IsPrincipal: true,
 		},
-		CreditCard: app.CreditCard {
-			ProfileId: 1,
-			CurrencyId: 1,
-			CreditLimit: 1_000_000,
+		CreditCard: app.CreditCard{
+			ProfileId:    1,
+			CurrencyId:   1,
+			CreditLimit:  1_000_000,
 			InterestRate: 300,
 		},
-		Id: 7410680147088510976,
-		RequestedAmount:   100_000_000,
-		Status:            app.StatusCreated,
+		Id:              7410680147088510976,
+		RequestedAmount: 100_000_000,
+		Status:          app.StatusCreated,
 	}
 
 	repo.Save(ctx, &app)
@@ -276,7 +274,7 @@ func TestMockDb_SerializationErrors(t *testing.T) {
 		if err := repo.Save(ctx, invalidApp); err == nil {
 			t.Error(
 				"Expected Json.Marshal Error Due to Invalid Year, Got Nil",
-				)
+			)
 		}
 	})
 
@@ -292,8 +290,8 @@ func TestMockDb_SerializationErrors(t *testing.T) {
 			if err == nil {
 				t.Error(
 					"Expected Json.Unmarshal Error" +
-					"Due to Corrupt Data, Got Nil",
-					)
+						"Due to Corrupt Data, Got Nil",
+				)
 			}
 		})
 }
@@ -316,6 +314,6 @@ func TestMockDb_SimulatedConnectionError(t *testing.T) {
 		t.Errorf(
 			"Expected ErrConnectionRefused for ERR-100, Got %v",
 			err,
-			)
+		)
 	}
 }

@@ -10,14 +10,14 @@ import (
 )
 
 type MockDb struct {
-	mu     sync.RWMutex
-	store  map[int64][]byte // Store as []bytes to force deep-copy
+	mu    sync.RWMutex
+	store map[int64][]byte // Store as []bytes to force deep-copy
 }
 
 // NewMockDb creates a thread-safe in-memory store.
 func NewMockDb() *MockDb {
 	return &MockDb{
-		store:  make(map[int64][]byte),
+		store: make(map[int64][]byte),
 	}
 }
 

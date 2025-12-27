@@ -25,7 +25,6 @@ func (s *Service) CreateApplication(
 	ctx context.Context,
 	req CreateApplicationRequest,
 ) (CreateApplicationResponse, error) {
-
 	now := time.Now().UTC()
 	// app := &Application{
 	// 	CreditCard: CreditCard{
@@ -42,26 +41,26 @@ func (s *Service) CreateApplication(
 	app := Application{
 		CreatedAt:         now,
 		UpdatedAt:         now,
-		OtherApplicants: []Applicant{},
+		OtherApplicants:   []Applicant{},
 		MemberReferenceNo: "ABCDE12345",
-		Applicant: Applicant {
-			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC), 
-			ContactNumbers: []ContactNumber {
-				{ Value: "9171234567", Type: TypeMobile },
+		Applicant: Applicant{
+			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC),
+			ContactNumbers: []ContactNumber{
+				{Value: "9171234567", Type: TypeMobile},
 			},
-			LastName: "Smith",
-			FirstName: "John",
-			MiddleName: "Doe",
+			LastName:    "Smith",
+			FirstName:   "John",
+			MiddleName:  "Doe",
 			IsPrincipal: true,
 		},
-		CreditCard: CreditCard {
-			ProfileId: 1,
-			CurrencyId: 1,
-			CreditLimit: 1_000_000,
+		CreditCard: CreditCard{
+			ProfileId:    1,
+			CurrencyId:   1,
+			CreditLimit:  1_000_000,
 			InterestRate: 300,
 		},
-		Status:            StatusCreated,
-		RequestedAmount:   100_000_000,
+		Status:          StatusCreated,
+		RequestedAmount: 100_000_000,
 	}
 
 	if err := app.Validate(validator); err != nil {
@@ -81,9 +80,9 @@ func (s *Service) CreateApplication(
 		UpdatedAt:         app.UpdatedAt,
 		MemberReferenceNo: app.MemberReferenceNo,
 		// CardProfile:       app.CardProfile,
-		Status:            app.Status,
-		Id:                app.Id,
-		RequestedAmount:   app.RequestedAmount,
+		Status:          app.Status,
+		Id:              app.Id,
+		RequestedAmount: app.RequestedAmount,
 		// InterestRate:      app.InterestRate,
 	}, nil
 }
@@ -104,9 +103,9 @@ func (s *Service) GetApplicationById(
 		UpdatedAt:         app.UpdatedAt,
 		MemberReferenceNo: app.MemberReferenceNo,
 		// CardProfile:       app.CardProfile,
-		Status:            app.Status,
-		Id:                app.Id,
-		RequestedAmount:   app.RequestedAmount,
+		Status:          app.Status,
+		Id:              app.Id,
+		RequestedAmount: app.RequestedAmount,
 		// InterestRate:      app.InterestRate,
 	}, nil
 }

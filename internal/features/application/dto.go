@@ -14,8 +14,8 @@ type CreateApplicationResponse struct {
 	MemberReferenceNo string            `json:"member_reference_no"`
 	Status            ApplicationStatus `json:"status"`
 	// CardProfile       int64             `json:"card_profile"`
-	Id                int64             `json:"id"`
-	RequestedAmount   int               `json:"requested_amount"`
+	Id              int64 `json:"id"`
+	RequestedAmount int   `json:"requested_amount"`
 	// InterestRate      int               `json:"interest_rate"`
 }
 
@@ -29,7 +29,7 @@ type GetApplicationResponse struct {
 	MemberReferenceNo string            `json:"member_reference_no"`
 	Status            ApplicationStatus `json:"status"`
 	// CardProfile       int64             `json:"card_profile"`
-	Id                int64             `json:"id"`
-	RequestedAmount   int               `json:"requested_amount"`
+	Id              int64 `json:"id"`
+	RequestedAmount int   `json:"requested_amount"`
 	// InterestRate      int               `json:"interest_rate"`
 }

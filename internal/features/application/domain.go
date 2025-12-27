@@ -7,18 +7,18 @@ import (
 )
 
 type Validator struct {
-	Now time.Time
-	EighteenYearsAgo time.Time
-	MaxNameLength int
+	Now                    time.Time
+	EighteenYearsAgo       time.Time
+	MaxNameLength          int
 	MinContactNumberLength int
 }
 
 func NewValidator(now time.Time) *Validator {
 	// TODO: Move magic numbers to a configuration file
-	return &Validator {
-		Now: now,
-		EighteenYearsAgo: now.AddDate(-18,0 ,0),
-		MaxNameLength: 30,
+	return &Validator{
+		Now:                    now,
+		EighteenYearsAgo:       now.AddDate(-18, 0, 0),
+		MaxNameLength:          30,
 		MinContactNumberLength: 9,
 	}
 }
@@ -46,14 +46,14 @@ const (
 type Application struct {
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
-	OtherApplicants []Applicant
+	OtherApplicants   []Applicant
 	MemberReferenceNo string // Used as external identifier
 	Applicant
-	CreditCard CreditCard
-	PersonalLoan PersonalLoan
-	Id                int64  // Used as internal identifier
-	RequestedAmount   int    // Shown in centavos
-	Status            ApplicationStatus
+	CreditCard      CreditCard
+	PersonalLoan    PersonalLoan
+	Id              int64 // Used as internal identifier
+	RequestedAmount int   // Shown in centavos
+	Status          ApplicationStatus
 }
 
 func (a *Application) Validate(v *Validator) error {
@@ -78,7 +78,7 @@ func (a *Application) Validate(v *Validator) error {
 		return ErrInvalidStatus
 	}
 
-	a.Applicant.Validate(v)	
+	a.Applicant.Validate(v)
 	if err := a.Applicant.Validate(v); err != nil {
 		return fmt.Errorf("principal applicant failed validation: %w", err)
 	}
@@ -115,8 +115,8 @@ func (a *Application) Validate(v *Validator) error {
 }
 
 type CreditCard struct {
-	ProfileId int64
-	CurrencyId int64
+	ProfileId   int64
+	CurrencyId  int64
 	CreditLimit int
 	// InterestRate represents the rate in basis points
 	// Example: 1 bps == 0.01% or 1250 bps == 12.50%
@@ -129,7 +129,7 @@ func (c *CreditCard) Validate() error {
 	}
 
 	if c.CurrencyId < 0 {
-		return ErrInvalidCurrency	
+		return ErrInvalidCurrency
 	}
 
 	if c.CreditLimit < 0 {
@@ -144,7 +144,7 @@ func (c *CreditCard) Validate() error {
 }
 
 type PersonalLoan struct {
-	ProfileId int64
+	ProfileId  int64
 	CurrencyId int64
 	LoanAmount int
 	// InterestRate represents the rate in basis points
@@ -155,10 +155,10 @@ type PersonalLoan struct {
 func (p *PersonalLoan) Validate() error {
 	if p.ProfileId <= 0 {
 		return ErrInvalidPersonalLoan
-	}	
+	}
 
 	if p.CurrencyId < 0 {
-		return ErrInvalidCurrency	
+		return ErrInvalidCurrency
 	}
 
 	if p.LoanAmount < 0 {
@@ -173,28 +173,28 @@ func (p *PersonalLoan) Validate() error {
 }
 
 type Applicant struct {
-	Birthday time.Time
+	Birthday       time.Time
 	ContactNumbers []ContactNumber
-	LastName string
-	FirstName string
-	MiddleName string
-	IsPrincipal bool
+	LastName       string
+	FirstName      string
+	MiddleName     string
+	IsPrincipal    bool
 }
 
 func (a *Applicant) Validate(v *Validator) error {
 	// Checks for zero time.Time (0001-01-01 00:00:00 UTC)
 	if a.Birthday.IsZero() {
 		return ErrMissingBirthday
-	}	
+	}
 
 	// Use v.Now to ensure that time.Now() is only done once
 	if a.Birthday.After(v.Now) {
-		return ErrBirthdayInFuture	
+		return ErrBirthdayInFuture
 	}
 
 	// Use v.EighteenYearsAgo to prevent recalculation of date
 	if a.Birthday.After(v.EighteenYearsAgo) {
-		return ErrMinimumAgeNotMet	
+		return ErrMinimumAgeNotMet
 	}
 
 	// TODO: Ensure that service trims the string
@@ -202,13 +202,13 @@ func (a *Applicant) Validate(v *Validator) error {
 		return ErrMissingLastName
 	}
 
-	// Fast Path - len(a.LastName) reads the length from the 
+	// Fast Path - len(a.LastName) reads the length from the
 	// slice header (stack). This is an O(1) operation costing ~1 nanosecond.
-	// If the byte count is within the limit, the rune count is guaranteed 
+	// If the byte count is within the limit, the rune count is guaranteed
 	// to be safe.
 	if len(a.LastName) > v.MaxNameLength {
-		// Slow Path - Handles non-ASCII. Incur the O(N) CPU cost of decoding 
-		// UTF-8 if the byte count exceeds the limit. 
+		// Slow Path - Handles non-ASCII. Incur the O(N) CPU cost of decoding
+		// UTF-8 if the byte count exceeds the limit.
 		if utf8.RuneCountInString(a.LastName) > v.MaxNameLength {
 			return ErrLastNameTooLong
 		}
@@ -249,7 +249,7 @@ func (a *Applicant) Validate(v *Validator) error {
 
 type ContactNumber struct {
 	Value string
-	Type ContactNumberType
+	Type  ContactNumberType
 }
 
 func (c *ContactNumber) Validate(v *Validator) error {

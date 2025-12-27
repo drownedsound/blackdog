@@ -4,7 +4,6 @@ import "time"
 
 var validator *Validator
 
-func init()  {
+func init() {
 	validator = NewValidator(time.Now().UTC())
 }
-
