@@ -43,8 +43,6 @@ var (
 		"updated at cannot be in the future")
 	ErrMissingMemberRefNo = errors.New(
 		"member reference number is required")
-	ErrInvalidId = errors.New(
-		"id cannot be less than or equal to zero")
 	ErrInvalidRequestedAmount = errors.New(
 		"requested amount cannot be less than or equal to zero")
 	ErrInvalidStatus = errors.New(
@@ -59,4 +57,6 @@ var (
 		"database record insertion failed")
 	ErrConnectionRefused = errors.New(
 		"database connection refused")
+	ErrInvalidUUID = errors.New(
+		"uuid cannot be less than or equal to zero")
 )

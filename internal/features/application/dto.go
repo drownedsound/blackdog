@@ -13,10 +13,10 @@ type CreateApplicationResponse struct {
 	UpdatedAt         time.Time         `json:"updated_at"`
 	MemberReferenceNo string            `json:"member_reference_no"`
 	Status            ApplicationStatus `json:"status"`
-	CardProfile       int64             `json:"card_profile"`
+	// CardProfile       int64             `json:"card_profile"`
 	Id                int64             `json:"id"`
 	RequestedAmount   int               `json:"requested_amount"`
-	InterestRate      int               `json:"interest_rate"`
+	// InterestRate      int               `json:"interest_rate"`
 }
 
 type GetApplicationRequest struct {
@@ -28,8 +28,8 @@ type GetApplicationResponse struct {
 	UpdatedAt         time.Time         `json:"updated_at"`
 	MemberReferenceNo string            `json:"member_reference_no"`
 	Status            ApplicationStatus `json:"status"`
-	CardProfile       int64             `json:"card_profile"`
+	// CardProfile       int64             `json:"card_profile"`
 	Id                int64             `json:"id"`
 	RequestedAmount   int               `json:"requested_amount"`
-	InterestRate      int               `json:"interest_rate"`
+	// InterestRate      int               `json:"interest_rate"`
 }

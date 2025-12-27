@@ -1,9 +1,6 @@
 package app
 
-import (
-	"context"
-	"errors"
-)
+import "context"
 
 type Repository interface {
 	Save(ctx context.Context, a *Application) error
