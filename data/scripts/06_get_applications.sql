@@ -58,8 +58,10 @@ LEFT JOIN CONTACT_NUMBER c      ON a.id = c.applicant_id
 LEFT JOIN REF_CONTACT_TYPE rct  ON c.type_id = rct.id
 
 -- HOW TO FILTER:
--- * CC Only: WHERE app.credit_card_id IS NOT NULL
--- * PL Only: WHERE app.personal_loan_id IS NOT NULL
+-- * CC Only: 
+WHERE app.credit_card_id IS NOT NULL
+-- * PL Only: 
+-- WHERE app.personal_loan_id IS NOT NULL
 
 -- Sorting: Critical for Row Folding. Must group by App -> Applicant.
 ORDER BY 
