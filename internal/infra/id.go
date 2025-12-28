@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/snowflake"
-	// app "github.com/drownedsound/blackdog/internal/features/application"
 )
 
 type IdGenerator interface {
@@ -24,10 +23,6 @@ func NewSnowflakeIdGenerator(nodeId int64) (
 	err error,
 ) {
 	// FIXME: Get nodeId from configuration file
-	// if nodeId < 0 || nodeId >= 1023 {
-	// 	return nil, app.ErrInvalidNodeId
-	// }
-
 	node, err := snowflake.NewNode(nodeId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize snowflake node: %w", err)
