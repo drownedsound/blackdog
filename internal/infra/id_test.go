@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_SnowflakeIdGenerator_New(t *testing.T) {
+func TestSnowflakeIdGenerator_New(t *testing.T) {
 	testCases := []struct {
 		desc        string
 		nodeId      int64
@@ -56,7 +56,7 @@ func Test_SnowflakeIdGenerator_New(t *testing.T) {
 	}
 }
 
-func Test_SnowflakeIdGenerator_Generate(t *testing.T) {
+func TestSnowflakeIdGenerator_Generate(t *testing.T) {
 	gen, err := NewSnowflakeIdGenerator(1)
 	if err != nil {
 		t.Fatalf("Failed to Create Generator: %v", err)

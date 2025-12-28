@@ -9,20 +9,23 @@ import (
 	app "github.com/drownedsound/blackdog/internal/features/application"
 )
 
-type MockDb struct {
+type MockApplicationRepository struct {
 	mu    sync.RWMutex
 	store map[int64][]byte // Store as []bytes to force deep-copy
 }
 
-// NewMockDb creates a thread-safe in-memory store.
-func NewMockDb() *MockDb {
-	return &MockDb{
+// NewMockApplicationRepository creates a thread-safe in-memory store.
+func NewMockApplicationRepository() *MockApplicationRepository {
+	return &MockApplicationRepository{
 		store: make(map[int64][]byte),
 	}
 }
 
 // Save persists the application.
-func (r *MockDb) Insert(ctx context.Context, a *app.Application) error {
+func (r *MockApplicationRepository) Insert(
+	ctx context.Context, 
+	a *app.Application,
+) error {
 	// Create error scenario to force an HTTP 500 on the handler
 	if a.MemberReferenceNo == "ERR-100" {
 		return app.ErrConnectionRefused
@@ -52,9 +55,10 @@ func (r *MockDb) Insert(ctx context.Context, a *app.Application) error {
 }
 
 // GetByInternalId retrieves an application by id.
-func (r *MockDb) GetByInternalId(ctx context.Context, id int64) (
-	app.Application, error,
-) {
+func (r *MockApplicationRepository) GetByInternalId(
+	ctx context.Context,
+	id int64,
+) (app.Application, error) {
 	if id <= 0 {
 		return app.Application{}, app.ErrInvalidUUID
 	}

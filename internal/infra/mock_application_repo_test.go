@@ -19,8 +19,8 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestMockDb_InsertValidation(t *testing.T) {
-	repo := NewMockDb()
+func TestMockApplicationRepository_InsertValidation(t *testing.T) {
+	repo := NewMockApplicationRepository()
 	ctx := context.Background()
 
 	t.Run("Insert Returns Error When Id Is Invalid", func(t *testing.T) {
@@ -66,8 +66,8 @@ func TestMockDb_InsertValidation(t *testing.T) {
 	})
 }
 
-func TestMockDb_InsertAndGetApplication(t *testing.T) {
-	repo := NewMockDb()
+func TestMockApplicationRepository_InsertAndGetApplication(t *testing.T) {
+	repo := NewMockApplicationRepository()
 	ctx := context.Background()
 
 	newApp := app.Application{
@@ -123,7 +123,7 @@ func TestMockDb_InsertAndGetApplication(t *testing.T) {
 
 	// Verify Memory Isolation (Deep Copy)
 	// This ensures that modifying the struct returned by GetByInternalId does not
-	// corrupt the data inside the MockDb (common bug in in-memory mocks).
+	// corrupt the data inside the MockApplicationRepository (common bug in in-memory mocks).
 	t.Run("Verify_Memory_Isolation", func(t *testing.T) {
 		if fetchedApp.Id == 0 {
 			t.Skip("Skipping Isolation Test Because Previous Fetch Failed")
@@ -175,24 +175,24 @@ func TestMockDb_InsertAndGetApplication(t *testing.T) {
 	})
 }
 
-func TestMockDb_GetUsingInvalidId(t *testing.T) {
-	repo := NewMockDb()
+func TestMockApplicationRepository_GetUsingInvalidId(t *testing.T) {
+	repo := NewMockApplicationRepository()
 	_, err := repo.GetByInternalId(context.Background(), -100)
 	if err != app.ErrInvalidUUID {
 		t.Errorf("GetByInternalId Error: %v", err)
 	}
 }
 
-func TestMockDb_ApplicationNotFound(t *testing.T) {
-	repo := NewMockDb()
+func TestMockApplicationRepository_ApplicationNotFound(t *testing.T) {
+	repo := NewMockApplicationRepository()
 	_, err := repo.GetByInternalId(context.Background(), 999)
 	if err != app.ErrNotFound {
 		t.Errorf("GetByInternalId Error: %v", err)
 	}
 }
 
-func TestMockDb_ConcurrentInsertAndGetApplication(t *testing.T) {
-	repo := NewMockDb()
+func TestMockApplicationRepository_ConcurrentInsertAndGetApplication(t *testing.T) {
+	repo := NewMockApplicationRepository()
 	ctx := context.Background()
 
 	app := app.Application{
@@ -254,8 +254,8 @@ func TestMockDb_ConcurrentInsertAndGetApplication(t *testing.T) {
 	wg.Wait()
 }
 
-func TestMockDb_SerializationErrors(t *testing.T) {
-	repo := NewMockDb()
+func TestMockApplicationRepository_SerializationErrors(t *testing.T) {
+	repo := NewMockApplicationRepository()
 	ctx := context.Background()
 
 	t.Run("Insert Returns Error on Json.Marshal Failure", func(t *testing.T) {
@@ -296,8 +296,8 @@ func TestMockDb_SerializationErrors(t *testing.T) {
 		})
 }
 
-func TestMockDb_SimulatedConnectionError(t *testing.T) {
-	repo := NewMockDb()
+func TestMockApplicationRepository_SimulatedConnectionError(t *testing.T) {
+	repo := NewMockApplicationRepository()
 	ctx := context.Background()
 
 	// Trigger the specific "ERR-100" condition

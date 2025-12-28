@@ -21,7 +21,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func Test_CreditCard_Validate(t *testing.T) {
+func TestCreditCard_Validate(t *testing.T) {
 	base := CreditCard{
 		ProfileId:    1,
 		CurrencyId:   1,
@@ -98,7 +98,7 @@ func Test_CreditCard_Validate(t *testing.T) {
 	}
 }
 
-func Test_PersonaLoan_Validate(t *testing.T) {
+func TestPersonaLoan_Validate(t *testing.T) {
 	base := PersonalLoan{
 		ProfileId:    1,
 		CurrencyId:   1,
@@ -175,7 +175,7 @@ func Test_PersonaLoan_Validate(t *testing.T) {
 	}
 }
 
-func Test_ContactNumber_Validate(t *testing.T) {
+func TestContactNumber_Validate(t *testing.T) {
 	base := ContactNumber{
 		Value: "9171234567",
 		Type:  TypeMobile,
@@ -229,7 +229,7 @@ func Test_ContactNumber_Validate(t *testing.T) {
 	}
 }
 
-func Test_Applicant_Validate(t *testing.T) {
+func TestApplicant_Validate(t *testing.T) {
 	base := Applicant{
 		LastName:    "Doe",
 		FirstName:   "John",
@@ -351,7 +351,7 @@ func Test_Applicant_Validate(t *testing.T) {
 	}
 }
 
-func Test_Application_Validate(t *testing.T) {
+func TestApplication_Validate(t *testing.T) {
 	base := Application{
 		CreatedAt:         fixedNow,
 		UpdatedAt:         fixedNow,
