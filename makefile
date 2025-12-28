@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := build
+# .DEFAULT_GOAL := build
 
 # TODO: Combine formatting and linting steps
 # TODO: Create switch to run unit tests
@@ -17,9 +17,9 @@ staticcheck: gofumpt
 test: staticcheck
 	go test ./internal/features/application ./internal/infra -cover
 
-build: test
-	go build -C cmd/web -o ../../bin/blackdog-web
+# build: test
+# 	go build -C cmd/web -o ../../bin/blackdog-web
 
-clean: build
-	go clean
+# clean: build
+# 	go clean
 

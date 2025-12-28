@@ -1,283 +1,230 @@
 package infra
 
-// import (
-// 	"context"
-// 	"errors"
-// 	"os"
-// 	"path/filepath"
-// 	"testing"
-// 	"time"
-//
-// 	app "github.com/drownedsound/blackdog/internal/features/application"
-// 	_ "github.com/mattn/go-sqlite3"
-// )
-//
-// // minimalSchema mirrors the production schema required for these tests.
-// // Keeping this local ensures tests are atomic and don't break
-// // if external SQL files move.
-// const minimalSchema = `
-// 	PRAGMA foreign_keys = ON;
-// 	PRAGMA journal_mode = WAL;
-//
-// 	CREATE TABLE REF_PRODUCT_CATEGORY (
-// 	id INTEGER PRIMARY KEY,
-// 	name TEXT NOT NULL UNIQUE,
-// 	description TEXT NOT NULL
-// 	) STRICT;
-//
-// 	CREATE TABLE REF_APP_STATUS (
-// 	id INTEGER PRIMARY KEY,
-// 	name TEXT NOT NULL UNIQUE,
-// 	description TEXT NOT NULL,
-// 	is_terminal INTEGER NOT NULL DEFAULT 0 CHECK (is_terminal IN (0, 1))
-// 	) STRICT;
-//
-// 	CREATE TABLE APPLICATION (
-// 	id INTEGER PRIMARY KEY,
-// 	member_reference_no TEXT NOT NULL UNIQUE,
-// 	category_id INTEGER NOT NULL,
-// 	status_id INTEGER NOT NULL,
-// 	requested_amount INTEGER NOT NULL,
-// 	created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-// 	updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
-//
-// 	FOREIGN KEY (category_id) REFERENCES REF_PRODUCT_CATEGORY(id),
-// 	FOREIGN KEY (status_id) REFERENCES REF_APP_STATUS(id)
-// 	CHECK (requested_amount > 0)
-// 	) STRICT;
-//
-// 	-- Seed Reference Data
-// 	INSERT INTO REF_PRODUCT_CATEGORY (id, name, description)
-// 	VALUES (1, 'Credit Card', 'CC');
-//
-// 	INSERT INTO REF_APP_STATUS (id, name, description)
-// 	VALUES (1, 'CREATED', 'New');
-// 	`
-//
-// // setupTestDb initializes a fresh SQLite DB in a temp directory
-// // for valid isolation.
-// func setupTestDb(t *testing.T) (*SqliteDb, func()) {
-// 	t.Helper()
-//
-// 	// Use t.TempDir for isolation. On Linux, this is often tmpfs (RAM),
-// 	// providing high performance while still testing file I/O mechanics.
-// 	tmpDir := t.TempDir()
-// 	dbPath := filepath.Join(tmpDir, "test_blackdog.db")
-//
-// 	db, err := NewSQLiteConnection(dbPath)
-// 	if err != nil {
-// 		t.Fatalf("Failed to open connection: %v", err)
-// 	}
-//
-// 	// Initialize Schema
-// 	if _, err := db.Exec(minimalSchema); err != nil {
-// 		t.Fatalf("Failed to initialize schema: %v", err)
-// 	}
-//
-// 	repo := NewSqliteDb(db)
-//
-// 	cleanup := func() {
-// 		db.Close()
-// 	}
-//
-// 	return repo, cleanup
-// }
-//
-// func TestSqliteDb_Save(t *testing.T) {
-// 	// Parallel execution to detect any WAL-mode locking issues
-// 	t.Parallel()
-//
-// 	repo, cleanup := setupTestDb(t)
-// 	defer cleanup()
-//
-// 	ctx := context.Background()
-//
-// 	t.Run("Successfully Persists Application", func(t *testing.T) {
-// 		newApp := &app.Application{
-// 			MemberReferenceNo: "REF-001",
-// 			CategoryCode:      app.CategoryCard,
-// 			StatusCode:        app.StatusCreated,
-// 			RequestedAmount:   500_000,
-// 			CreatedAt:         time.Now().UTC(),
-// 			UpdatedAt:         time.Now().UTC(),
-// 		}
-//
-// 		err := repo.Save(ctx, newApp)
-// 		if err != nil {
-// 			t.Fatalf("Save() failed: %v", err)
-// 		}
-//
-// 		if newApp.Id == 0 {
-// 			t.Error("Expected ID to be set after Save(), got 0")
-// 		}
-// 	})
-//
-// 	t.Run("Fails On Duplicate MemberReferenceNo", func(t *testing.T) {
-// 		// Attempt to insert the same Reference No again
-// 		dupApp := &app.Application{
-// 			MemberReferenceNo: "REF-001", // Already exists from previous test
-// 			CategoryCode:      app.CategoryCard,
-// 			StatusCode:        app.StatusCreated,
-// 			RequestedAmount:   1000,
-// 			CreatedAt:         time.Now().UTC(),
-// 			UpdatedAt:         time.Now().UTC(),
-// 		}
-//
-// 		err := repo.Save(ctx, dupApp)
-// 		if err == nil {
-// 			t.Error("Expected error on duplicate insert, got nil")
-// 		}
-//
-// 		// Verify we are wrapping the error correctly
-// 		expectedMsg := "duplicate application"
-// 		if err != nil && len(err.Error()) < len(expectedMsg) {
-// 			t.Errorf(
-// 				"Expected error containing %q, got %q",
-// 				expectedMsg,
-// 				err.Error(),
-// 			)
-// 		}
-// 	})
-//
-// 	t.Run("Fails When Context Canceled", func(t *testing.T) {
-// 		canceledCtx, cancel := context.WithCancel(ctx)
-// 		cancel() // Cancel immediately
-//
-// 		a := &app.Application{
-// 			MemberReferenceNo: "REF-CANCEL",
-// 			CategoryCode:      app.CategoryCard,
-// 			StatusCode:        app.StatusCreated,
-// 			RequestedAmount:   100,
-// 			CreatedAt:         time.Now(),
-// 			UpdatedAt:         time.Now(),
-// 		}
-//
-// 		err := repo.Save(canceledCtx, a)
-// 		if err == nil {
-// 			t.Error("Expected error on canceled context, got nil")
-// 		}
-// 	})
-// }
-//
-// func TestSqliteDb_GetById(t *testing.T) {
-// 	t.Parallel()
-// 	repo, cleanup := setupTestDb(t)
-// 	defer cleanup()
-//
-// 	ctx := context.Background()
-//
-// 	// Seed a record
-// 	savedApp := &app.Application{
-// 		MemberReferenceNo: "GET-001",
-// 		CategoryCode:      app.CategoryCard,
-// 		StatusCode:        app.StatusCreated,
-// 		RequestedAmount:   75_000,
-// 		CreatedAt:         time.Now().UTC().Truncate(time.Second),
-// 		UpdatedAt:         time.Now().UTC().Truncate(time.Second),
-// 	}
-// 	if err := repo.Save(ctx, savedApp); err != nil {
-// 		t.Fatalf("Setup failed, could not save app: %v", err)
-// 	}
-//
-// 	t.Run("Successfully Retrieves Application", func(t *testing.T) {
-// 		fetched, err := repo.GetById(ctx, savedApp.Id)
-// 		if err != nil {
-// 			t.Fatalf("GetById() failed: %v", err)
-// 		}
-//
-// 		if fetched.Id != savedApp.Id {
-// 			t.Errorf("Expected ID %d, got %d", savedApp.Id, fetched.Id)
-// 		}
-// 		if fetched.MemberReferenceNo != savedApp.MemberReferenceNo {
-// 			t.Errorf(
-// 				"Expected Ref %s, got %s",
-// 				savedApp.MemberReferenceNo,
-// 				fetched.MemberReferenceNo)
-// 		}
-// 		// Verify Enum Mapping
-// 		if fetched.CategoryCode != app.CategoryCard {
-// 			t.Errorf("Expected CategoryCard, got %v", fetched.CategoryCode)
-// 		}
-// 		// Verify Timestamp Rehydration
-// 		if !fetched.CreatedAt.Equal(savedApp.CreatedAt) {
-// 			t.Errorf(
-// 				"Expected CreatedAt %v, got %v",
-// 				savedApp.CreatedAt,
-// 				fetched.CreatedAt)
-// 		}
-// 	})
-//
-// 	t.Run("Returns ErrNotFound For NonExistent ID", func(t *testing.T) {
-// 		_, err := repo.GetById(ctx, 999999)
-// 		if err != app.ErrNotFound {
-// 			t.Errorf("Expected ErrNotFound, got %v", err)
-// 		}
-// 	})
-// }
-//
-// func TestNewSQLiteConnection_Errors(t *testing.T) {
-// 	tmpDir := t.TempDir()
-// 	conflictPath := filepath.Join(tmpDir, "bad_db")
-//
-// 	// Create a directory at the path where we want the DB file to be
-// 	if err := os.Mkdir(conflictPath, 0o755); err != nil {
-// 		t.Fatal(err)
-// 	}
-//
-// 	// This should fail because 'bad_db' is a directory, not a file
-// 	_, err := NewSQLiteConnection(conflictPath)
-// 	if err == nil {
-// 		t.Error("Expected error opening DB on top of directory, got nil")
-// 	}
-// }
-//
-// func TestSqliteDb_Save_EdgeCases(t *testing.T) {
-// 	t.Parallel()
-// 	repo, cleanup := setupTestDb(t)
-// 	defer cleanup()
-// 	ctx := context.Background()
-//
-// 	t.Run("Fails On Check Constraint Violation", func(t *testing.T) {
-// 		// The schema has CHECK (requested_amount > 0)
-// 		invalidApp := &app.Application{
-// 			MemberReferenceNo: "NEG-AMOUNT",
-// 			CategoryCode:      app.CategoryCard,
-// 			StatusCode:        app.StatusCreated,
-// 			RequestedAmount:   -500, // Invalid
-// 			CreatedAt:         time.Now().UTC(),
-// 			UpdatedAt:         time.Now().UTC(),
-// 		}
-//
-// 		err := repo.Save(ctx, invalidApp)
-// 		if err == nil {
-// 			t.Error("Expected error due to CHECK constraint, got nil")
-// 		}
-//
-// 		if !errors.Is(err, app.ErrInsertFailed) {
-// 			t.Errorf("Expected ErrInsertFailed, got %v", err)
-// 		}
-// 	})
-// }
-//
-// func TestSqliteDb_GetById_EdgeCases(t *testing.T) {
-// 	t.Parallel()
-// 	repo, cleanup := setupTestDb(t)
-// 	defer cleanup()
-// 	ctx := context.Background()
-//
-// 	t.Run("Fails When Context Canceled", func(t *testing.T) {
-// 		// Cancel the context immediately
-// 		canceledCtx, cancel := context.WithCancel(ctx)
-// 		cancel()
-//
-// 		_, err := repo.GetById(canceledCtx, 1)
-// 		if err == nil {
-// 			t.Error("Expected error due to canceled context, got nil")
-// 		}
-//
-// 		// Verify it hits the generic error path, not ErrNotFound
-// 		if err == app.ErrNotFound {
-// 			t.Error("Expected generic query error, got ErrNotFound")
-// 		}
-// 	})
-// }
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+
+	app "github.com/drownedsound/blackdog/internal/features/application"
+
+	_ "github.com/mattn/go-sqlite3"
+)
+
+// setupTestDb creates an in-memory SQLite database, applies the schema,
+// and populates reference data.
+func setupTestDb(t *testing.T) (*sql.DB, func()) {
+	t.Helper()
+
+	// 1. Open In-Memory Database
+	db, err := sql.Open("sqlite3", ":memory:")
+	if err != nil {
+		t.Fatalf("failed to open in-memory db: %v", err)
+	}
+
+	// 2. Enable Foreign Keys (Critical for this schema)
+	if _, err := db.Exec("PRAGMA foreign_keys = ON;"); err != nil {
+		t.Fatalf("failed to enable foreign keys: %v", err)
+	}
+
+	// 3. Load Schema and Reference Data
+	// Assuming the test runs from 'internal/infra', step back to 'data/scripts'
+	basePath := "../../data/scripts"
+	scripts := []string{
+		"01_create_schema.sql",
+		"02_populate_ref_data.sql",
+	}
+
+	for _, script := range scripts {
+		path := filepath.Join(basePath, script)
+		content, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("failed to read script %s: %v", path, err)
+		}
+
+		_, err = db.Exec(string(content))
+		if err != nil {
+			t.Fatalf("failed to execute script %s: %v", script, err)
+		}
+	}
+
+	cleanup := func() {
+		db.Close()
+	}
+
+	return db, cleanup
+}
+
+func TestSQLiteDb_Insert(t *testing.T) {
+	t.Parallel()
+
+	db, cleanup := setupTestDb(t)
+	defer cleanup()
+
+	// 1. Initialize Dependencies
+	// Use Node 1 for tests.
+	idGen, err := NewSnowflakeIDGenerator(1)
+	if err != nil {
+		t.Fatalf("failed to create id generator: %v", err)
+	}
+
+	repo, err := NewSQLiteRepository(db, idGen)
+	if err != nil {
+		t.Fatalf("failed to create repository: %v", err)
+	}
+
+	ctx := context.Background()
+
+	t.Run("Successfully Insert Credit Card Application", func(t *testing.T) {
+		now := time.Now().UTC()
+		application := &app.Application{
+			MemberReferenceNo: "TEST-MRN-001",
+			Status:            app.StatusCreated,
+			RequestedAmount:   5000000, // 50,000.00
+			CreatedAt:         now,
+			UpdatedAt:         now,
+			CreditCard: app.CreditCard{
+				ProfileId:   1, // Pasada King
+				CreditLimit: 5000000,
+			},
+			Applicant: app.Applicant{
+				IsPrincipal: true,
+				FirstName:   "Juan",
+				LastName:    "Dela Cruz",
+				MiddleName:  "Santos",
+				Birthday:    time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
+				ContactNumbers: []app.ContactNumber{
+					{Type: app.TypeMobile, Value: "09171234567"},
+					{Type: app.TypeHome, Value: "0281234567"},
+				},
+			},
+		}
+
+		err := repo.Insert(ctx, application)
+
+		if err != nil {
+			t.Fatalf("Insert failed: %v", err)
+		}
+
+		if application.Id == 0 {
+			t.Error("expected application ID to be generated, got 0")
+		}
+
+		var dbStatus int
+		var dbReqAmount int
+		var dbCCId int64
+		err = db.QueryRowContext(ctx, `
+			SELECT status_id, requested_amount, credit_card_id 
+			FROM APPLICATION WHERE id = ?`, 
+			application.Id,
+			).Scan(&dbStatus, &dbReqAmount, &dbCCId)
+
+		if err != nil {
+			t.Fatalf("failed to query inserted application: %v", err)
+		}
+
+		if dbStatus != int(app.StatusCreated) {
+			t.Errorf("expected status %d, got %d", app.StatusCreated, dbStatus)
+		}
+		if dbCCId == 0 {
+			t.Error("expected credit_card_id to be set, got 0/NULL")
+		}
+
+		var applicantName string
+		err = db.QueryRowContext(ctx, `
+			SELECT last_name FROM APPLICANT WHERE application_id = ?`, 
+			application.Id,
+			).Scan(&applicantName)
+		if err != nil {
+			t.Fatalf("failed to query applicant: %v", err)
+		}
+		if applicantName != "Dela Cruz" {
+			t.Errorf("expected applicant last name 'Dela Cruz', got '%s'", applicantName)
+		}
+	})
+
+	t.Run("Successfully Insert Personal Loan Application", func(t *testing.T) {
+		now := time.Now().UTC()
+		application := &app.Application{
+			MemberReferenceNo: "TEST-MRN-PL-001",
+			Status:            app.StatusCreated,
+			RequestedAmount:   10000000,
+			CreatedAt:         now,
+			UpdatedAt:         now,
+			PersonalLoan: app.PersonalLoan{
+				ProfileId:  1, 
+				LoanAmount: 10000000,
+			},
+			Applicant: app.Applicant{
+				IsPrincipal: true,
+				FirstName:   "Maria",
+				LastName:    "Clara",
+				Birthday:    time.Date(1995, 5, 5, 0, 0, 0, 0, time.UTC),
+				ContactNumbers: []app.ContactNumber{
+					{Type: app.TypeMobile, Value: "09181234567"},
+				},
+			},
+		}
+
+		err := repo.Insert(ctx, application)
+
+		if err != nil {
+			t.Fatalf("Insert failed: %v", err)
+		}
+		if application.Id == 0 {
+			t.Error("expected application ID to be generated")
+		}
+
+		var dbPLId sql.NullInt64
+		var dbCCId sql.NullInt64
+		err = db.QueryRowContext(ctx, `
+			SELECT personal_loan_id, credit_card_id 
+			FROM APPLICATION WHERE id = ?`, 
+			application.Id,
+			).Scan(&dbPLId, &dbCCId)
+
+		if err != nil {
+			t.Fatalf("failed to query inserted application: %v", err)
+		}
+
+		if !dbPLId.Valid {
+			t.Error("expected personal_loan_id to be valid")
+		}
+		if dbCCId.Valid {
+			t.Error("expected credit_card_id to be NULL for PL application")
+		}
+	})
+
+	t.Run("Fail on Missing Constraint Data", func(t *testing.T) {
+		application := &app.Application{
+			MemberReferenceNo: "TEST-FAIL-001",
+			Status:            app.StatusCreated,
+			RequestedAmount:   5000,
+			CreatedAt:         time.Now(),
+			UpdatedAt:         time.Now(),
+			Applicant: app.Applicant{
+				IsPrincipal: true,
+				LastName:    "Doe",
+				FirstName:   "John",
+				Birthday:    time.Now(),
+				ContactNumbers: []app.ContactNumber{
+					{Type: app.TypeMobile, Value: "0000000"},
+				},
+			},
+		}
+
+		err := repo.Insert(ctx, application)
+
+		if err == nil {
+			t.Error("expected error due to missing product, got nil")
+		}
+
+		if err != nil && !strings.Contains(err.Error(), "constraint") {
+			t.Logf("Got error as expected, but check message: %v", err)
+		}
+	})
+}
