@@ -19,11 +19,11 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestMockDb_SaveValidation(t *testing.T) {
+func TestMockDb_InsertValidation(t *testing.T) {
 	repo := NewMockDb()
 	ctx := context.Background()
 
-	t.Run("Save Returns Error When Id Is Invalid", func(t *testing.T) {
+	t.Run("Insert Returns Error When Id Is Invalid", func(t *testing.T) {
 		// 1. Create app with Id = 0 (default)
 		invalidApp := &app.Application{
 			MemberReferenceNo: "REF-001",
@@ -32,16 +32,16 @@ func TestMockDb_SaveValidation(t *testing.T) {
 
 		// 2. Expect ErrInvalidUUID
 		// This hits the 'if a.Id <= 0' branch in mockdb.go
-		if err := repo.Save(ctx, invalidApp); err != app.ErrInvalidUUID {
+		if err := repo.Insert(ctx, invalidApp); err != app.ErrInvalidUUID {
 			t.Errorf(
-				"Save Error: Expected = %v, Actual = %v",
+				"Insert Error: Expected = %v, Actual = %v",
 				app.ErrInvalidUUID,
 				err,
 			)
 		}
 	})
 
-	t.Run("Save Auto-Populates CreatedAt", func(t *testing.T) {
+	t.Run("Insert Auto-Populates CreatedAt", func(t *testing.T) {
 		// 1. Create app with Zero CreatedAt
 		freshApp := &app.Application{
 			Id:                101,
@@ -49,8 +49,8 @@ func TestMockDb_SaveValidation(t *testing.T) {
 			// CreatedAt is left as time.Time{} (Zero)
 		}
 
-		if err := repo.Save(ctx, freshApp); err != nil {
-			t.Fatalf("Save Error: %v", err)
+		if err := repo.Insert(ctx, freshApp); err != nil {
+			t.Fatalf("Insert Error: %v", err)
 		}
 
 		// 2. Verify CreatedAt was set
@@ -58,7 +58,7 @@ func TestMockDb_SaveValidation(t *testing.T) {
 		if freshApp.CreatedAt.IsZero() {
 			t.Error("Expected CreatedAt to be populated, got Zero")
 			t.Errorf(
-				"Save Error on Refetched App: "+
+				"Insert Error on Refetched App: "+
 					"CreatedAt Expected = 0, Actual = %v",
 				freshApp.CreatedAt,
 			)
@@ -66,7 +66,7 @@ func TestMockDb_SaveValidation(t *testing.T) {
 	})
 }
 
-func TestMockDb_SaveAndGetApplication(t *testing.T) {
+func TestMockDb_InsertAndGetApplication(t *testing.T) {
 	repo := NewMockDb()
 	ctx := context.Background()
 
@@ -96,24 +96,24 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 		Status:          app.StatusCreated,
 	}
 
-	t.Run("Save Creates Valid Application", func(t *testing.T) {
-		if err := repo.Save(ctx, &newApp); err != nil {
-			t.Errorf("Save Error on New App: %v", err)
+	t.Run("Insert Creates Valid Application", func(t *testing.T) {
+		if err := repo.Insert(ctx, &newApp); err != nil {
+			t.Errorf("Insert Error on New App: %v", err)
 		}
 	})
 
 	var fetchedApp app.Application
 
-	t.Run("GetById Retrieves Saved Application", func(t *testing.T) {
+	t.Run("GetByInternalId Retrieves Inserted Application", func(t *testing.T) {
 		var err error
-		fetchedApp, err = repo.GetById(ctx, newApp.Id)
+		fetchedApp, err = repo.GetByInternalId(ctx, newApp.Id)
 		if err != nil {
-			t.Errorf("GetById Error on New App: %v", err)
+			t.Errorf("GetByInternalId Error on New App: %v", err)
 		}
 
 		if fetchedApp.RequestedAmount != 100_000_000 {
 			t.Errorf(
-				"GetById Error on Fetched App: "+
+				"GetByInternalId Error on Fetched App: "+
 					"RequestedAmount Expected = %v, Actual = %v",
 				100_000_000,
 				fetchedApp.RequestedAmount,
@@ -122,7 +122,7 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 	})
 
 	// Verify Memory Isolation (Deep Copy)
-	// This ensures that modifying the struct returned by GetById does not
+	// This ensures that modifying the struct returned by GetByInternalId does not
 	// corrupt the data inside the MockDb (common bug in in-memory mocks).
 	t.Run("Verify_Memory_Isolation", func(t *testing.T) {
 		if fetchedApp.Id == 0 {
@@ -133,9 +133,9 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 		fetchedApp.RequestedAmount = 99999
 
 		// Fetch a fresh copy from the repo
-		refetch, err := repo.GetById(ctx, newApp.Id)
+		refetch, err := repo.GetByInternalId(ctx, newApp.Id)
 		if err != nil {
-			t.Errorf("GetById Error on Refetched App: %v", err)
+			t.Errorf("GetByInternalId Error on Refetched App: %v", err)
 		}
 
 		// The repo should still have the OLD value
@@ -153,20 +153,20 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 			t.Skip("Skipping Update Test Because Struct is Missing")
 		}
 
-		// Save the mutated 'fetchedApp' (which has Amount = 99999)
-		if err := repo.Save(ctx, &fetchedApp); err != nil {
-			t.Errorf("Save Error on Fetched App: %v", err)
+		// Insert the mutated 'fetchedApp' (which has Amount = 99999)
+		if err := repo.Insert(ctx, &fetchedApp); err != nil {
+			t.Errorf("Insert Error on Fetched App: %v", err)
 		}
 
 		// Fetch again to verify persistence
-		refetchAfterUpdate, err := repo.GetById(ctx, newApp.Id)
+		refetchAfterUpdate, err := repo.GetByInternalId(ctx, newApp.Id)
 		if err != nil {
-			t.Errorf("GetById Error Refetched App: %v", err)
+			t.Errorf("GetByInternalId Error Refetched App: %v", err)
 		}
 
 		if refetchAfterUpdate.RequestedAmount != 99_999 {
 			t.Errorf(
-				"GetById Error on Refetched App: "+
+				"GetByInternalId Error on Refetched App: "+
 					"RequestedAmount Expected = %v, Actual = %v",
 				99_999,
 				refetchAfterUpdate.RequestedAmount,
@@ -177,21 +177,21 @@ func TestMockDb_SaveAndGetApplication(t *testing.T) {
 
 func TestMockDb_GetUsingInvalidId(t *testing.T) {
 	repo := NewMockDb()
-	_, err := repo.GetById(context.Background(), -100)
+	_, err := repo.GetByInternalId(context.Background(), -100)
 	if err != app.ErrInvalidUUID {
-		t.Errorf("GetById Error: %v", err)
+		t.Errorf("GetByInternalId Error: %v", err)
 	}
 }
 
 func TestMockDb_ApplicationNotFound(t *testing.T) {
 	repo := NewMockDb()
-	_, err := repo.GetById(context.Background(), 999)
+	_, err := repo.GetByInternalId(context.Background(), 999)
 	if err != app.ErrNotFound {
-		t.Errorf("GetById Error: %v", err)
+		t.Errorf("GetByInternalId Error: %v", err)
 	}
 }
 
-func TestMockDb_ConcurrentSaveAndGetApplication(t *testing.T) {
+func TestMockDb_ConcurrentInsertAndGetApplication(t *testing.T) {
 	repo := NewMockDb()
 	ctx := context.Background()
 
@@ -221,7 +221,7 @@ func TestMockDb_ConcurrentSaveAndGetApplication(t *testing.T) {
 		Status:          app.StatusCreated,
 	}
 
-	repo.Save(ctx, &app)
+	repo.Insert(ctx, &app)
 	targetId := app.Id
 
 	// Run parallel readers and writers
@@ -234,9 +234,9 @@ func TestMockDb_ConcurrentSaveAndGetApplication(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			<-start
-			a, _ := repo.GetById(ctx, targetId)
+			a, _ := repo.GetByInternalId(ctx, targetId)
 			a.UpdatedAt = time.Now()
-			repo.Save(ctx, &a)
+			repo.Insert(ctx, &a)
 		}()
 	}
 
@@ -246,7 +246,7 @@ func TestMockDb_ConcurrentSaveAndGetApplication(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			<-start
-			repo.GetById(ctx, targetId)
+			repo.GetByInternalId(ctx, targetId)
 		}()
 	}
 
@@ -258,12 +258,12 @@ func TestMockDb_SerializationErrors(t *testing.T) {
 	repo := NewMockDb()
 	ctx := context.Background()
 
-	t.Run("Save Returns Error on Json.Marshal Failure", func(t *testing.T) {
+	t.Run("Insert Returns Error on Json.Marshal Failure", func(t *testing.T) {
 		// 1. Construct an app with a Year outside [0, 9999]
 		//    to trigger MarshalJSON error.
 		//
 		// 2. Set Id > 0 to simulate an UPDATE.
-		//    If Id is 0, Save() overwrites CreatedAt with time.Now(),
+		//    If Id is 0, Insert() overwrites CreatedAt with time.Now(),
 		//    masking the error.
 		invalidApp := &app.Application{
 			Id:                1,
@@ -271,7 +271,7 @@ func TestMockDb_SerializationErrors(t *testing.T) {
 			MemberReferenceNo: "INVALID",
 		}
 
-		if err := repo.Save(ctx, invalidApp); err == nil {
+		if err := repo.Insert(ctx, invalidApp); err == nil {
 			t.Error(
 				"Expected Json.Marshal Error Due to Invalid Year, Got Nil",
 			)
@@ -279,14 +279,14 @@ func TestMockDb_SerializationErrors(t *testing.T) {
 	})
 
 	t.Run(
-		"GetById Returns Error on Json.Unmarshal Failure",
+		"GetByInternalId Returns Error on Json.Unmarshal Failure",
 		func(t *testing.T) {
 			// 1. Manually inject corrupted JSON into the private store.
 			badID := int64(999)
 			repo.store[badID] = []byte(`{"truncated_json":`)
 
 			// 2. Attempt to retrieve it.
-			_, err := repo.GetById(ctx, badID)
+			_, err := repo.GetByInternalId(ctx, badID)
 			if err == nil {
 				t.Error(
 					"Expected Json.Unmarshal Error" +
@@ -309,7 +309,7 @@ func TestMockDb_SimulatedConnectionError(t *testing.T) {
 		RequestedAmount:   10_0000_000,
 	}
 
-	err := repo.Save(ctx, a)
+	err := repo.Insert(ctx, a)
 	if err != app.ErrConnectionRefused {
 		t.Errorf(
 			"Expected ErrConnectionRefused for ERR-100, Got %v",

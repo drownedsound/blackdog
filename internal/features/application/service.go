@@ -69,7 +69,7 @@ func (s *Service) CreateApplication(
 		)
 	}
 
-	if err := s.repo.Save(ctx, &app); err != nil {
+	if err := s.repo.Insert(ctx, &app); err != nil {
 		return CreateApplicationResponse{}, fmt.Errorf(
 			"application.service failed to save entity: %w", err,
 		)
@@ -91,7 +91,7 @@ func (s *Service) GetApplicationById(
 	ctx context.Context,
 	req GetApplicationRequest,
 ) (GetApplicationResponse, error) {
-	app, err := s.repo.GetById(ctx, req.Id)
+	app, err := s.repo.GetByInternalId(ctx, req.Id)
 	if err != nil {
 		return GetApplicationResponse{}, fmt.Errorf(
 			"application.service failed to get application: %w", err,

@@ -22,7 +22,7 @@ func NewMockDb() *MockDb {
 }
 
 // Save persists the application.
-func (r *MockDb) Save(ctx context.Context, a *app.Application) error {
+func (r *MockDb) Insert(ctx context.Context, a *app.Application) error {
 	// Create error scenario to force an HTTP 500 on the handler
 	if a.MemberReferenceNo == "ERR-100" {
 		return app.ErrConnectionRefused
@@ -51,8 +51,8 @@ func (r *MockDb) Save(ctx context.Context, a *app.Application) error {
 	return nil
 }
 
-// GetById retrieves an application by id.
-func (r *MockDb) GetById(ctx context.Context, id int64) (
+// GetByInternalId retrieves an application by id.
+func (r *MockDb) GetByInternalId(ctx context.Context, id int64) (
 	app.Application, error,
 ) {
 	if id <= 0 {

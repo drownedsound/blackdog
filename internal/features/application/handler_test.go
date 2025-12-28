@@ -182,7 +182,7 @@ func TestHandler_GetApplication(t *testing.T) {
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			mock := &mockRepo{getByIdFunc: tC.mockGet}
+			mock := &mockRepo{getByInternalIdFunc: tC.mockGet}
 			logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 			svc := NewService(mock, logger)
 			h := NewHandler(svc)
@@ -232,7 +232,7 @@ func TestHandler_JsonEncodingFailure(t *testing.T) {
 			a.Id = 101
 			return nil
 		},
-		getByIdFunc: func(ctx context.Context, id int64) (Application, error) {
+		getByInternalIdFunc: func(ctx context.Context, id int64) (Application, error) {
 			return Application{Id: 101}, nil
 		},
 	}

@@ -12,19 +12,19 @@ import (
 
 type mockRepo struct {
 	saveFunc    func(ctx context.Context, a *Application) error
-	getByIdFunc func(ctx context.Context, id int64) (Application, error)
+	getByInternalIdFunc func(ctx context.Context, id int64) (Application, error)
 }
 
-func (m *mockRepo) Save(ctx context.Context, a *Application) error {
+func (m *mockRepo) Insert(ctx context.Context, a *Application) error {
 	if m.saveFunc != nil {
 		return m.saveFunc(ctx, a)
 	}
 	return nil
 }
 
-func (m *mockRepo) GetById(ctx context.Context, id int64) (Application, error) {
-	if m.getByIdFunc != nil {
-		return m.getByIdFunc(ctx, id)
+func (m *mockRepo) GetByInternalId(ctx context.Context, id int64) (Application, error) {
+	if m.getByInternalIdFunc != nil {
+		return m.getByInternalIdFunc(ctx, id)
 	}
 	return Application{}, ErrNotFound
 }
@@ -145,14 +145,14 @@ func TestService_GetApplicationById(t *testing.T) {
 	testCases := []struct {
 		desc          string
 		req           GetApplicationRequest
-		mockGetById   func(ctx context.Context, id int64) (Application, error)
+		mockGetByInternalId   func(ctx context.Context, id int64) (Application, error)
 		expectedErr   error
 		expectedState ApplicationStatus
 	}{
 		{
 			desc: "Get Existing Application Succeeds",
 			req:  GetApplicationRequest{Id: 99},
-			mockGetById: func(ctx context.Context, id int64) (
+			mockGetByInternalId: func(ctx context.Context, id int64) (
 				Application, error,
 			) {
 				if id == 99 {
@@ -176,7 +176,7 @@ func TestService_GetApplicationById(t *testing.T) {
 		{
 			desc: "Get Non-Existent Application Fails",
 			req:  GetApplicationRequest{Id: 999},
-			mockGetById: func(ctx context.Context, id int64) (
+			mockGetByInternalId: func(ctx context.Context, id int64) (
 				Application, error,
 			) {
 				return Application{}, ErrNotFound
@@ -189,7 +189,7 @@ func TestService_GetApplicationById(t *testing.T) {
 		{
 			desc: "Repository Failure Returns Error",
 			req:  GetApplicationRequest{Id: 50},
-			mockGetById: func(ctx context.Context, id int64) (
+			mockGetByInternalId: func(ctx context.Context, id int64) (
 				Application, error,
 			) {
 				return Application{}, errors.New("connection refused")
@@ -203,7 +203,7 @@ func TestService_GetApplicationById(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			mock := &mockRepo{
-				getByIdFunc: tC.mockGetById,
+				getByInternalIdFunc: tC.mockGetByInternalId,
 			}
 
 			logger := slog.New(slog.NewTextHandler(io.Discard, nil))
