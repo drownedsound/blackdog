@@ -59,4 +59,6 @@ var (
 		"database connection refused")
 	ErrInvalidUUID = errors.New(
 		"uuid cannot be less than or equal to zero")
+	ErrInvalidNodeId = errors.New(
+		"node id out of range")
 )
