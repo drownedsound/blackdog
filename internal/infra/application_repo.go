@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	app "github.com/drownedsound/blackdog/internal/features/application"
 )
@@ -12,10 +13,11 @@ type ApplicationRepository struct {
 	db    *sql.DB
 	idGen IdGenerator
 
-	stmtInsertApplication  *sql.Stmt
-	stmtInsertCreditCard   *sql.Stmt
-	stmtInsertPersonalLoan *sql.Stmt
-	stmtInsertApplicant    *sql.Stmt
+	stmtInsertApplication   *sql.Stmt
+	stmtInsertCreditCard    *sql.Stmt
+	stmtInsertPersonalLoan  *sql.Stmt
+	stmtInsertApplicant     *sql.Stmt
+	stmtInsertContactNumber *sql.Stmt
 }
 
 func NewApplicationRepository(db *sql.DB, idGen IdGenerator) (
@@ -64,6 +66,15 @@ func NewApplicationRepository(db *sql.DB, idGen IdGenerator) (
 		) VALUES (?, ?, ?, ?, ?, ?, ?)`
 	if repo.stmtInsertApplicant, err = db.Prepare(queryAppl); err != nil {
 		return nil, fmt.Errorf("preparing insert applicant stmt failed: %w", err)
+	}
+
+	queryContact := `
+		INSERT INTO CONTACT_NUMBER (
+			id, applicant_id, type_id, value
+		) VALUES (?, ?, ?, ?)`
+
+	if repo.stmtInsertContactNumber, err = db.Prepare(queryContact); err != nil {
+		return nil, fmt.Errorf("preparing insert contact stmt failed: %w", err)
 	}
 
 	return repo, nil
@@ -129,19 +140,40 @@ func (r *ApplicationRepository) Insert(
 	stmtAppl := tx.StmtContext(ctx, r.stmtInsertApplicant)
 	defer stmtAppl.Close()
 
+	applicantId := r.idGen.Generate()
+
 	_, err = stmtAppl.ExecContext(
 		ctx,
-		r.idGen.Generate(),
+		applicantId,
 		a.Id,
 		1,
 		a.LastName,
 		a.FirstName,
 		a.MiddleName,
-		// FIXME: Map to DTO
-		a.Birthday.Format("2006-01-02"),
+		a.Birthday.Format(time.DateOnly),
 	)
 	if err != nil {
 		return fmt.Errorf("insert applicant failed: %w", err)
+	}
+
+	if len(a.ContactNumbers) > 0 {
+		stmtContact := tx.StmtContext(ctx, r.stmtInsertContactNumber)
+		defer stmtContact.Close()
+
+		for i, contact := range a.ContactNumbers {
+			contactId := r.idGen.Generate()
+
+			_, err = stmtContact.ExecContext(
+				ctx,
+				contactId,
+				applicantId,
+				contact.Type,
+				contact.Value,
+			)
+			if err != nil {
+				return fmt.Errorf("insert contact number %d failed: %w", i, err)
+			}
+		}
 	}
 
 	if err := tx.Commit(); err != nil {

@@ -35,6 +35,14 @@ func (s *Service) CreateApplication(
 		)
 	}
 
+	contactNumbers := make([]ContactNumber, len(req.ContactNumbers))
+	for i, c := range req.ContactNumbers {
+		contactNumbers[i] = ContactNumber{
+			Value: c.Value,
+			Type:  ContactNumberType(c.Type),
+		}
+	}
+
 	app := Application{
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -43,14 +51,12 @@ func (s *Service) CreateApplication(
 		MemberReferenceNo: req.MemberReferenceNo,
 		// TODO: Map from request
 		Applicant: Applicant{
-			Birthday: birthday,
-			ContactNumbers: []ContactNumber{
-				{Value: "9171234567", Type: TypeMobile},
-			},
-			LastName:    req.LastName,
-			FirstName:   req.FirstName,
-			MiddleName:  req.MiddleName,
-			IsPrincipal: true,
+			Birthday:       birthday,
+			ContactNumbers: contactNumbers,
+			LastName:       req.LastName,
+			FirstName:      req.FirstName,
+			MiddleName:     req.MiddleName,
+			IsPrincipal:    true,
 		},
 		CreditCard: CreditCard{
 			ProfileId: req.CardProfile,
@@ -84,7 +90,17 @@ func (s *Service) CreateApplication(
 		)
 	}
 
+	contactNumbersRes := make([]ContactNumberResponse, len(app.ContactNumbers))
+	for i, c := range app.ContactNumbers {
+		contactNumbersRes[i] = ContactNumberResponse{
+			Value: c.Value,
+			// Cast the domain type (byte/enum) to the DTO type (int)
+			Type: int(c.Type),
+		}
+	}
+
 	res := CreateApplicationResponse{
+		Birthday:          app.Birthday.Format(time.DateOnly),
 		CreatedAt:         app.CreatedAt,
 		UpdatedAt:         app.UpdatedAt,
 		MemberReferenceNo: app.MemberReferenceNo,
@@ -96,6 +112,7 @@ func (s *Service) CreateApplication(
 		Status:            app.Status,
 		Id:                app.Id,
 		RequestedAmount:   app.RequestedAmount,
+		ContactNumbers:    contactNumbersRes,
 	}
 
 	if app.CreditCard.ProfileId > 0 {
