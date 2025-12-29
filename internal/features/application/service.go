@@ -28,6 +28,13 @@ func (s *Service) CreateApplication(
 	now := time.Now().UTC()
 	validator := NewValidator(time.Now().UTC())
 
+	birthday, err := time.Parse(time.DateOnly, req.Birthday)
+	if err != nil {
+		return CreateApplicationResponse{}, fmt.Errorf(
+			"invalid birthday format (expected YYYY-MM-DD): %w", err,
+		)
+	}
+
 	app := Application{
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -36,7 +43,7 @@ func (s *Service) CreateApplication(
 		MemberReferenceNo: req.MemberReferenceNo,
 		// TODO: Map from request
 		Applicant: Applicant{
-			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC),
+			Birthday: birthday,
 			ContactNumbers: []ContactNumber{
 				{Value: "9171234567", Type: TypeMobile},
 			},
@@ -67,7 +74,7 @@ func (s *Service) CreateApplication(
 
 	if err := app.Validate(validator); err != nil {
 		return CreateApplicationResponse{}, fmt.Errorf(
-			"application.service stopped saving entity: %w", err,
+			"application.service stopped validating entity: %w", err,
 		)
 	}
 

@@ -3,6 +3,7 @@ package app
 import "time"
 
 type CreateApplicationRequest struct {
+	Birthday          string `json:"birthday"`
 	MemberReferenceNo string `json:"member_reference_no"`
 	CardProfile       int64  `json:"card_profile,omitempty"`
 	LastName          string `json:"last_name"`
@@ -13,6 +14,7 @@ type CreateApplicationRequest struct {
 }
 
 type CreateApplicationResponse struct {
+	Birthday          string            `json:"birthday"`
 	CreatedAt         time.Time         `json:"created_at"`
 	UpdatedAt         time.Time         `json:"updated_at"`
 	MemberReferenceNo string            `json:"member_reference_no"`
