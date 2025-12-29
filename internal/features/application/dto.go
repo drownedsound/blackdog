@@ -33,7 +33,7 @@ type ApplicantResponse struct {
 type CreateApplicationRequest struct {
 	Birthday string `json:"birthday"`
 	// FIXME: Use Number instead of No
-	MemberReferenceNo string                 `json:"member_reference_no"`
+	MemberReferenceNumber string                 `json:"member_reference_no"`
 	CardProfile       int64                  `json:"card_profile,omitempty"`
 	LastName          string                 `json:"last_name"`
 	FirstName         string                 `json:"first_name"`
@@ -49,7 +49,7 @@ type CreateApplicationResponse struct {
 	Birthday          string                  `json:"birthday"`
 	CreatedAt         time.Time               `json:"created_at"`
 	UpdatedAt         time.Time               `json:"updated_at"`
-	MemberReferenceNo string                  `json:"member_reference_no"`
+	MemberReferenceNumber string                  `json:"member_reference_no"`
 	LastName          string                  `json:"last_name"`
 	FirstName         string                  `json:"first_name"`
 	MiddleName        string                  `json:"middle_name,omitempty"`
@@ -70,7 +70,7 @@ type CreateApplicationResponse struct {
 // type GetApplicationResponse struct {
 // 	CreatedAt         time.Time         `json:"created_at"`
 // 	UpdatedAt         time.Time         `json:"updated_at"`
-// 	MemberReferenceNo string            `json:"member_reference_no"`
+// 	MemberReferenceNumber string            `json:"member_reference_no"`
 // 	Status            ApplicationStatus `json:"status"`
 // 	// CardProfile       int64             `json:"card_profile"`
 // 	Id              int64 `json:"id"`

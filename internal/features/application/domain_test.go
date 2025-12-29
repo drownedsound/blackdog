@@ -356,7 +356,7 @@ func TestApplication_Validate(t *testing.T) {
 		CreatedAt:         fixedNow,
 		UpdatedAt:         fixedNow,
 		OtherApplicants:   []Applicant{},
-		MemberReferenceNo: "ABCDE12345",
+		MemberReferenceNumber: "ABCDE12345",
 		Applicant: Applicant{
 			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC),
 			ContactNumbers: []ContactNumber{
@@ -419,9 +419,9 @@ func TestApplication_Validate(t *testing.T) {
 			desc: "Application With Missing MemberReferenceNumber" +
 				"Fails Validation",
 			mutate: func(a *Application) {
-				a.MemberReferenceNo = ""
+				a.MemberReferenceNumber = ""
 			},
-			expectedErr: ErrMissingMemberRefNo,
+			expectedErr: ErrMissingMemberReferenceNumber,
 		},
 		{
 			desc: "Application With Unset RequestedAmount Fails Validation",

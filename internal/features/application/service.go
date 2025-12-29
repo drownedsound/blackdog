@@ -69,7 +69,7 @@ func (s *Service) CreateApplication(
 		CreatedAt:         now,
 		UpdatedAt:         now,
 		OtherApplicants:   otherApplicants,
-		MemberReferenceNo: req.MemberReferenceNo,
+		MemberReferenceNumber: req.MemberReferenceNumber,
 		// Applicant: Applicant{
 		// 	Birthday:       birthday,
 		// 	ContactNumbers: contactNumbers,
@@ -142,7 +142,7 @@ func (s *Service) CreateApplication(
 		Birthday:          app.Birthday.Format(time.DateOnly),
 		CreatedAt:         app.CreatedAt,
 		UpdatedAt:         app.UpdatedAt,
-		MemberReferenceNo: app.MemberReferenceNo,
+		MemberReferenceNumber: app.MemberReferenceNumber,
 		LastName:          app.LastName,
 		FirstName:         app.FirstName,
 		MiddleName:        app.MiddleName,
@@ -180,7 +180,7 @@ func (s *Service) CreateApplication(
 // 	return GetApplicationResponse{
 // 		CreatedAt:         app.CreatedAt,
 // 		UpdatedAt:         app.UpdatedAt,
-// 		MemberReferenceNo: app.MemberReferenceNo,
+// 		MemberReferenceNumber: app.MemberReferenceNumber,
 // 		// CardProfile:       app.CardProfile,
 // 		Status:          app.Status,
 // 		Id:              app.Id,

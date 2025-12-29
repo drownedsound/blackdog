@@ -27,7 +27,7 @@ func (r *MockApplicationRepository) Insert(
 	a *app.Application,
 ) error {
 	// Create error scenario to force an HTTP 500 on the handler
-	if a.MemberReferenceNo == "ERR-100" {
+	if a.MemberReferenceNumber == "ERR-100" {
 		return app.ErrConnectionRefused
 	}
 

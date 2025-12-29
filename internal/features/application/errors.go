@@ -41,7 +41,7 @@ var (
 		"created at cannot be in the future")
 	ErrUpdatedAtInFuture = errors.New(
 		"updated at cannot be in the future")
-	ErrMissingMemberRefNo = errors.New(
+	ErrMissingMemberReferenceNumber = errors.New(
 		"member reference number is required")
 	ErrInvalidRequestedAmount = errors.New(
 		"requested amount cannot be less than or equal to zero")

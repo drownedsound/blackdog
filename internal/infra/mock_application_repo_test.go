@@ -26,7 +26,7 @@ func TestMockApplicationRepository_InsertValidation(t *testing.T) {
 	t.Run("Insert Returns Error When Id Is Invalid", func(t *testing.T) {
 		// 1. Create app with Id = 0 (default)
 		invalidApp := &app.Application{
-			MemberReferenceNo: "REF-001",
+			MemberReferenceNumber: "REF-001",
 			// Id is explicitly 0
 		}
 
@@ -45,7 +45,7 @@ func TestMockApplicationRepository_InsertValidation(t *testing.T) {
 		// 1. Create app with Zero CreatedAt
 		freshApp := &app.Application{
 			Id:                101,
-			MemberReferenceNo: "REF-002",
+			MemberReferenceNumber: "REF-002",
 			// CreatedAt is left as time.Time{} (Zero)
 		}
 
@@ -74,7 +74,7 @@ func TestMockApplicationRepository_InsertAndGetApplication(t *testing.T) {
 		CreatedAt:         fixedNow,
 		UpdatedAt:         fixedNow,
 		OtherApplicants:   []app.Applicant{},
-		MemberReferenceNo: "ABCDE12345",
+		MemberReferenceNumber: "ABCDE12345",
 		Applicant: app.Applicant{
 			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC),
 			ContactNumbers: []app.ContactNumber{
@@ -199,7 +199,7 @@ func TestMockApplicationRepository_ConcurrentInsertAndGetApplication(t *testing.
 		CreatedAt:         fixedNow,
 		UpdatedAt:         fixedNow,
 		OtherApplicants:   []app.Applicant{},
-		MemberReferenceNo: "ABCDE12345",
+		MemberReferenceNumber: "ABCDE12345",
 		Applicant: app.Applicant{
 			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC),
 			ContactNumbers: []app.ContactNumber{
@@ -268,7 +268,7 @@ func TestMockApplicationRepository_SerializationErrors(t *testing.T) {
 		invalidApp := &app.Application{
 			Id:                1,
 			CreatedAt:         time.Date(10_001, 1, 1, 0, 0, 0, 0, time.UTC),
-			MemberReferenceNo: "INVALID",
+			MemberReferenceNumber: "INVALID",
 		}
 
 		if err := repo.Insert(ctx, invalidApp); err == nil {
@@ -304,7 +304,7 @@ func TestMockApplicationRepository_SimulatedConnectionError(t *testing.T) {
 	a := &app.Application{
 		CreatedAt:         time.Now(),
 		UpdatedAt:         time.Now(),
-		MemberReferenceNo: "ERR-100",
+		MemberReferenceNumber: "ERR-100",
 		Status:            app.StatusCreated,
 		RequestedAmount:   10_0000_000,
 	}

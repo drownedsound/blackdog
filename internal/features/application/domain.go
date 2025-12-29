@@ -6,16 +6,16 @@ import (
 	"unicode/utf8"
 )
 
-type Validator struct {
+type validator struct {
 	Now                    time.Time
 	EighteenYearsAgo       time.Time
 	MaxNameLength          int
 	MinContactNumberLength int
 }
 
-func NewValidator(now time.Time) *Validator {
+func newValidator(now time.Time) *validator {
 	// TODO: Move magic numbers to a configuration file
-	return &Validator{
+	return &validator{
 		Now:                    now,
 		EighteenYearsAgo:       now.AddDate(-18, 0, 0),
 		MaxNameLength:          30,
@@ -47,16 +47,19 @@ type Application struct {
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	OtherApplicants   []Applicant
-	MemberReferenceNo string // Used as external identifier
+	// Used as the external identifier
+	MemberReferenceNumber string 
 	Applicant
 	CreditCard      CreditCard
 	PersonalLoan    PersonalLoan
-	Id              int64 // Used as internal identifier
-	RequestedAmount int   // Shown in centavos
+	// Used as the internal identifier
+	Id              int64 
+	// Shown in centavos
+	RequestedAmount int   
 	Status          ApplicationStatus
 }
 
-func (a *Application) Validate(v *Validator) error {
+func (a *Application) Validate(v *validator) error {
 	if a.CreatedAt.After(v.Now) {
 		return ErrCreatedAtInFuture
 	}
@@ -66,8 +69,8 @@ func (a *Application) Validate(v *Validator) error {
 	}
 
 	// TODO: Ensure that service trims the string
-	if a.MemberReferenceNo == "" {
-		return ErrMissingMemberRefNo
+	if a.MemberReferenceNumber == "" {
+		return ErrMissingMemberReferenceNumber
 	}
 
 	if a.RequestedAmount <= 0 {
@@ -86,15 +89,17 @@ func (a *Application) Validate(v *Validator) error {
 	if len(a.OtherApplicants) > 0 {
 		for i := range a.OtherApplicants {
 			if err := a.OtherApplicants[i].Validate(v); err != nil {
-				return fmt.Errorf("aplicant %d failed validation: %w", i, err)
+				return fmt.Errorf("applicant %d failed validation: %w", i, err)
 			}
 		}
 	}
 
+	// Application should have either a credit card or personal loan
 	if a.CreditCard.ProfileId == 0 && a.PersonalLoan.ProfileId == 0 {
 		return ErrMissingProduct
 	}
 
+	// Application cannot be for both credit card and personal loan
 	if a.CreditCard.ProfileId > 0 && a.PersonalLoan.ProfileId > 0 {
 		return ErrTooManyProducts
 	}
@@ -117,10 +122,13 @@ func (a *Application) Validate(v *Validator) error {
 type CreditCard struct {
 	ProfileId   int64
 	CurrencyId  int64
-	CreditLimit int
+	// Caps at PHP 20,000,000 when using int32 (4 bytes)
+	CreditLimit int32
 	// InterestRate represents the rate in basis points
 	// Example: 1 bps == 0.01% or 1250 bps == 12.50%
-	InterestRate int
+	// 1 bps is 0.01%. Even if InterestRate is 100% that is only 10,000 bps. 
+	// This fits easily into int16 (2 bytes, max 32,767)
+	InterestRate int16
 }
 
 func (c *CreditCard) Validate() error {
@@ -146,10 +154,13 @@ func (c *CreditCard) Validate() error {
 type PersonalLoan struct {
 	ProfileId  int64
 	CurrencyId int64
-	LoanAmount int
+	// Caps at PHP 20,000,000 when using int32 (4 bytes)
+	LoanAmount int32
 	// InterestRate represents the rate in basis points
 	// Example: 1 bps == 0.01% or 1250 bps == 12.50%
-	InterestRate int
+	// 1 bps is 0.01%. Even if InterestRate is 100% that is only 10,000 bps. 
+	// This fits easily into int16 (2 bytes, max 32,767)
+	InterestRate int16
 }
 
 func (p *PersonalLoan) Validate() error {
@@ -181,7 +192,7 @@ type Applicant struct {
 	IsPrincipal    bool
 }
 
-func (a *Applicant) Validate(v *Validator) error {
+func (a *Applicant) Validate(v *validator) error {
 	// Checks for zero time.Time (0001-01-01 00:00:00 UTC)
 	if a.Birthday.IsZero() {
 		return ErrMissingBirthday
@@ -203,7 +214,7 @@ func (a *Applicant) Validate(v *Validator) error {
 	}
 
 	// Fast Path - len(a.LastName) reads the length from the
-	// slice header (stack). This is an O(1) operation costing ~1 nanosecond.
+	// slice header (stack). This is an O(1) operation with minimal cost.
 	// If the byte count is within the limit, the rune count is guaranteed
 	// to be safe.
 	if len(a.LastName) > v.MaxNameLength {
@@ -234,6 +245,7 @@ func (a *Applicant) Validate(v *Validator) error {
 		}
 	}
 
+	// Applicant should have at least one contact number
 	if len(a.ContactNumbers) == 0 {
 		return ErrMissingContactNumber
 	}
@@ -252,7 +264,7 @@ type ContactNumber struct {
 	Type  ContactNumberType
 }
 
-func (c *ContactNumber) Validate(v *Validator) error {
+func (c *ContactNumber) Validate(v *validator) error {
 	// TODO: Ensure that service trims the string
 	if c.Value == "" || len(c.Value) < v.MinContactNumberLength {
 		return ErrInvalidContactNumber

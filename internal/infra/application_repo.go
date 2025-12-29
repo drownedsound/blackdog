@@ -125,7 +125,7 @@ func (r *ApplicationRepository) Insert(
 	_, err = stmtApp.ExecContext(
 		ctx,
 		a.Id,
-		a.MemberReferenceNo,
+		a.MemberReferenceNumber,
 		a.Status,
 		a.RequestedAmount,
 		ccId,
