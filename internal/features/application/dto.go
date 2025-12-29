@@ -34,33 +34,35 @@ type CreateApplicationRequest struct {
 	Birthday string `json:"birthday"`
 	// FIXME: Use Number instead of No
 	MemberReferenceNumber string                 `json:"member_reference_no"`
-	CardProfile       int64                  `json:"card_profile,omitempty"`
-	LastName          string                 `json:"last_name"`
-	FirstName         string                 `json:"first_name"`
-	MiddleName        string                 `json:"middle_name,omitempty"`
-	LoanProfile       int64                  `json:"loan_profile,omitempty"`
-	RequestedAmount   int                    `json:"requested_amount"`
-	ContactNumbers    []ContactNumberRequest `json:"contact_numbers"`
-	OtherApplicants   []ApplicantRequest     `json:"other_applicants,omitempty"`
+	CardProfile           int64                  `json:"card_profile,omitempty"`
+	LastName              string                 `json:"last_name"`
+	FirstName             string                 `json:"first_name"`
+	MiddleName            string                 `json:"middle_name,omitempty"`
+	LoanProfile           int64                  `json:"loan_profile,omitempty"`
+	RequestedAmount       int32                  `json:"requested_amount"`
+	ContactNumbers        []ContactNumberRequest `json:"contact_numbers"`
+	OtherApplicants       []ApplicantRequest     `json:"other_applicants,omitempty"`
 }
 
 // TODO: Rename to ApplicationResponse
 type CreateApplicationResponse struct {
-	Birthday          string                  `json:"birthday"`
-	CreatedAt         time.Time               `json:"created_at"`
-	UpdatedAt         time.Time               `json:"updated_at"`
+	CreatedAt             time.Time               `json:"created_at"`
+	UpdatedAt             time.Time               `json:"updated_at"`
 	MemberReferenceNumber string                  `json:"member_reference_no"`
-	LastName          string                  `json:"last_name"`
-	FirstName         string                  `json:"first_name"`
-	MiddleName        string                  `json:"middle_name,omitempty"`
-	Status            ApplicationStatus       `json:"status"`
-	CardProfile       int64                   `json:"card_profile,omitempty"`
-	LoanProfile       int64                   `json:"loan_profile,omitempty"`
-	Id                int64                   `json:"id"`
-	RequestedAmount   int                     `json:"requested_amount"`
-	InterestRate      int                     `json:"interest_rate"`
-	ContactNumbers    []ContactNumberResponse `json:"contact_numbers"`
-	OtherApplicants   []ApplicantResponse     `json:"other_applicants,omitempty"`
+	LastName              string                  `json:"last_name"`
+	FirstName             string                  `json:"first_name"`
+	MiddleName            string                  `json:"middle_name,omitempty"`
+	Birthday              string                  `json:"birthday"`
+	ContactNumbers        []ContactNumberResponse `json:"contact_numbers"`
+	OtherApplicants       []ApplicantResponse     `json:"other_applicants,omitempty"`
+	CardProfile           int64                   `json:"card_profile,omitempty"`
+	LoanProfile           int64                   `json:"loan_profile,omitempty"`
+	Id                    int64                   `json:"id"`
+	CreditLimit           int32                   `json:"credit_limit,omitempty"`
+	LoanAmount            int32                   `json:"loan_amount,omitempty"`
+	RequestedAmount       int32                   `json:"requested_amount"`
+	InterestRate          int16                   `json:"interest_rate"`
+	Status                ApplicationStatus       `json:"status"`
 }
 
 // type GetApplicationRequest struct {

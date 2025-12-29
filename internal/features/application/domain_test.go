@@ -353,9 +353,9 @@ func TestApplicant_Validate(t *testing.T) {
 
 func TestApplication_Validate(t *testing.T) {
 	base := Application{
-		CreatedAt:         fixedNow,
-		UpdatedAt:         fixedNow,
-		OtherApplicants:   []Applicant{},
+		CreatedAt:             fixedNow,
+		UpdatedAt:             fixedNow,
+		OtherApplicants:       []Applicant{},
 		MemberReferenceNumber: "ABCDE12345",
 		Applicant: Applicant{
 			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC),

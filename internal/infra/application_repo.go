@@ -32,10 +32,10 @@ func NewApplicationRepository(db *sql.DB, idGen IdGenerator) (
 	var err error
 
 	queryApp := `
-		INSERT INTO APPLICATION (
-			id, member_reference_no, status_id, requested_amount, 
-			credit_card_id, personal_loan_id, created_at, updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+	INSERT INTO APPLICATION (
+	id, member_reference_no, status_id, requested_amount, 
+	credit_card_id, personal_loan_id, created_at, updated_at
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 
 	if repo.stmtInsertApplication, err = db.Prepare(queryApp); err != nil {
 		return nil, fmt.Errorf(
@@ -45,33 +45,33 @@ func NewApplicationRepository(db *sql.DB, idGen IdGenerator) (
 	}
 
 	queryCC := `
-		INSERT INTO CREDIT_CARD (
-			id, profile_id, credit_limit
-		) VALUES (?, ?, ?)`
+	INSERT INTO CREDIT_CARD (
+	id, profile_id, credit_limit
+	) VALUES (?, ?, ?)`
 	if repo.stmtInsertCreditCard, err = db.Prepare(queryCC); err != nil {
 		return nil, fmt.Errorf("preparing insert cc stmt failed: %w", err)
 	}
 
 	queryPL := `
-		INSERT INTO PERSONAL_LOAN (
-			id, profile_id, loan_amount
-		) VALUES (?, ?, ?)`
+	INSERT INTO PERSONAL_LOAN (
+	id, profile_id, loan_amount
+	) VALUES (?, ?, ?)`
 	if repo.stmtInsertPersonalLoan, err = db.Prepare(queryPL); err != nil {
 		return nil, fmt.Errorf("preparing insert pl stmt failed: %w", err)
 	}
 
 	queryAppl := `
-		INSERT INTO APPLICANT (
-			id, application_id, is_principal, last_name, first_name, middle_name, birthday
-		) VALUES (?, ?, ?, ?, ?, ?, ?)`
+	INSERT INTO APPLICANT (
+	id, application_id, is_principal, last_name, first_name, middle_name, birthday
+	) VALUES (?, ?, ?, ?, ?, ?, ?)`
 	if repo.stmtInsertApplicant, err = db.Prepare(queryAppl); err != nil {
 		return nil, fmt.Errorf("preparing insert applicant stmt failed: %w", err)
 	}
 
 	queryContact := `
-		INSERT INTO CONTACT_NUMBER (
-			id, applicant_id, type_id, value
-		) VALUES (?, ?, ?, ?)`
+	INSERT INTO CONTACT_NUMBER (
+	id, applicant_id, type_id, value
+	) VALUES (?, ?, ?, ?)`
 
 	if repo.stmtInsertContactNumber, err = db.Prepare(queryContact); err != nil {
 		return nil, fmt.Errorf("preparing insert contact stmt failed: %w", err)
@@ -137,54 +137,9 @@ func (r *ApplicationRepository) Insert(
 		return fmt.Errorf("insert application failed: %w", err)
 	}
 
-	// stmtAppl := tx.StmtContext(ctx, r.stmtInsertApplicant)
-	// defer stmtAppl.Close()
-	//
-	// applicantId := r.idGen.Generate()
-	//
-	// _, err = stmtAppl.ExecContext(
-	// 	ctx,
-	// 	applicantId,
-	// 	a.Id,
-	// 	1,
-	// 	a.LastName,
-	// 	a.FirstName,
-	// 	a.MiddleName,
-	// 	a.Birthday.Format(time.DateOnly),
-	// )
-	// if err != nil {
-	// 	return fmt.Errorf("insert applicant failed: %w", err)
-	// }
-	//
-	// if len(a.ContactNumbers) > 0 {
-	// 	stmtContact := tx.StmtContext(ctx, r.stmtInsertContactNumber)
-	// 	defer stmtContact.Close()
-	//
-	// 	for i, contact := range a.ContactNumbers {
-	// 		contactId := r.idGen.Generate()
-	//
-	// 		_, err = stmtContact.ExecContext(
-	// 			ctx,
-	// 			contactId,
-	// 			applicantId,
-	// 			contact.Type,
-	// 			contact.Value,
-	// 		)
-	// 		if err != nil {
-	// 			return fmt.Errorf("insert contact number %d failed: %w", i, err)
-	// 		}
-	// 	}
-	// }
-	//
-	// if err := tx.Commit(); err != nil {
-	// 	return fmt.Errorf("commit tx failed: %w", err)
-	// }
-	//
-	// return nil
-
 	// Define closure to insert an applicant and their contacts.
 	// This reduces code duplication and leverages the existing transaction context.
-	insertApplicant := func(appl app.Applicant) error {
+	insertApplicant := func(appl *app.Applicant) error {
 		applicantId := r.idGen.Generate()
 
 		// Map boolean to integer for SQLite storage
@@ -232,14 +187,15 @@ func (r *ApplicationRepository) Insert(
 	}
 
 	// 1. Insert Principal
-	if err := insertApplicant(a.Applicant); err != nil {
+	if err := insertApplicant(&a.Applicant); err != nil {
 		return fmt.Errorf("insert principal failed: %w", err)
 	}
 
 	// 2. Insert Other Applicants
-	// Iterating over the contiguous slice is cache-friendly.
-	for i, oa := range a.OtherApplicants {
-		if err := insertApplicant(oa); err != nil {
+	for i := range a.OtherApplicants {
+		// Pass the address of the element in the slice directly.
+		// This avoids copying the struct from the slice to a local variable.
+		if err := insertApplicant(&a.OtherApplicants[i]); err != nil {
 			return fmt.Errorf("insert other applicant %d failed: %w", i, err)
 		}
 	}
@@ -250,29 +206,3 @@ func (r *ApplicationRepository) Insert(
 
 	return nil
 }
-
-// func (r *ApplicationRepository) Close() error {
-// 	var errs []error
-//
-// 	if r.stmtInsertApplication != nil {
-// 		if err := r.stmtInsertApplication.Close(); err != nil {
-// 			errs = append(errs, err)
-// 		}
-// 	}
-// 	if r.stmtInsertCreditCard != nil {
-// 		if err := r.stmtInsertCreditCard.Close(); err != nil {
-// 			errs = append(errs, err)
-// 		}
-// 	}
-// 	if r.stmtInsertPersonalLoan != nil {
-// 		if err := r.stmtInsertPersonalLoan.Close(); err != nil {
-// 			errs = append(errs, err)
-// 		}
-// 	}
-//
-// 	if len(errs) > 0 {
-// 		return fmt.Errorf("failed to close one or more statements: %v", errs)
-// 	}
-//
-// 	return nil
-// }

@@ -44,7 +44,7 @@ func TestMockApplicationRepository_InsertValidation(t *testing.T) {
 	t.Run("Insert Auto-Populates CreatedAt", func(t *testing.T) {
 		// 1. Create app with Zero CreatedAt
 		freshApp := &app.Application{
-			Id:                101,
+			Id:                    101,
 			MemberReferenceNumber: "REF-002",
 			// CreatedAt is left as time.Time{} (Zero)
 		}
@@ -71,9 +71,9 @@ func TestMockApplicationRepository_InsertAndGetApplication(t *testing.T) {
 	ctx := context.Background()
 
 	newApp := app.Application{
-		CreatedAt:         fixedNow,
-		UpdatedAt:         fixedNow,
-		OtherApplicants:   []app.Applicant{},
+		CreatedAt:             fixedNow,
+		UpdatedAt:             fixedNow,
+		OtherApplicants:       []app.Applicant{},
 		MemberReferenceNumber: "ABCDE12345",
 		Applicant: app.Applicant{
 			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC),
@@ -196,9 +196,9 @@ func TestMockApplicationRepository_ConcurrentInsertAndGetApplication(t *testing.
 	ctx := context.Background()
 
 	app := app.Application{
-		CreatedAt:         fixedNow,
-		UpdatedAt:         fixedNow,
-		OtherApplicants:   []app.Applicant{},
+		CreatedAt:             fixedNow,
+		UpdatedAt:             fixedNow,
+		OtherApplicants:       []app.Applicant{},
 		MemberReferenceNumber: "ABCDE12345",
 		Applicant: app.Applicant{
 			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC),
@@ -266,8 +266,8 @@ func TestMockApplicationRepository_SerializationErrors(t *testing.T) {
 		//    If Id is 0, Insert() overwrites CreatedAt with time.Now(),
 		//    masking the error.
 		invalidApp := &app.Application{
-			Id:                1,
-			CreatedAt:         time.Date(10_001, 1, 1, 0, 0, 0, 0, time.UTC),
+			Id:                    1,
+			CreatedAt:             time.Date(10_001, 1, 1, 0, 0, 0, 0, time.UTC),
 			MemberReferenceNumber: "INVALID",
 		}
 
@@ -302,11 +302,11 @@ func TestMockApplicationRepository_SimulatedConnectionError(t *testing.T) {
 
 	// Trigger the specific "ERR-100" condition
 	a := &app.Application{
-		CreatedAt:         time.Now(),
-		UpdatedAt:         time.Now(),
+		CreatedAt:             time.Now(),
+		UpdatedAt:             time.Now(),
 		MemberReferenceNumber: "ERR-100",
-		Status:            app.StatusCreated,
-		RequestedAmount:   10_0000_000,
+		Status:                app.StatusCreated,
+		RequestedAmount:       10_0000_000,
 	}
 
 	err := repo.Insert(ctx, a)

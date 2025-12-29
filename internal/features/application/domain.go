@@ -7,19 +7,19 @@ import (
 )
 
 type validator struct {
-	Now                    time.Time
-	EighteenYearsAgo       time.Time
-	MaxNameLength          int
-	MinContactNumberLength int
+	now                    time.Time
+	eighteenYearsAgo       time.Time
+	maxNameLength          int
+	minContactNumberLength int
 }
 
 func newValidator(now time.Time) *validator {
 	// TODO: Move magic numbers to a configuration file
 	return &validator{
-		Now:                    now,
-		EighteenYearsAgo:       now.AddDate(-18, 0, 0),
-		MaxNameLength:          30,
-		MinContactNumberLength: 9,
+		now:                    now,
+		eighteenYearsAgo:       now.AddDate(-18, 0, 0),
+		maxNameLength:          30,
+		minContactNumberLength: 9,
 	}
 }
 
@@ -44,27 +44,27 @@ const (
 )
 
 type Application struct {
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
-	OtherApplicants   []Applicant
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	OtherApplicants []Applicant
 	// Used as the external identifier
-	MemberReferenceNumber string 
+	MemberReferenceNumber string
 	Applicant
-	CreditCard      CreditCard
-	PersonalLoan    PersonalLoan
+	CreditCard   CreditCard
+	PersonalLoan PersonalLoan
 	// Used as the internal identifier
-	Id              int64 
+	Id int64
 	// Shown in centavos
-	RequestedAmount int   
+	RequestedAmount int32
 	Status          ApplicationStatus
 }
 
 func (a *Application) Validate(v *validator) error {
-	if a.CreatedAt.After(v.Now) {
+	if a.CreatedAt.After(v.now) {
 		return ErrCreatedAtInFuture
 	}
 
-	if a.UpdatedAt.After(v.Now) {
+	if a.UpdatedAt.After(v.now) {
 		return ErrUpdatedAtInFuture
 	}
 
@@ -120,13 +120,13 @@ func (a *Application) Validate(v *validator) error {
 }
 
 type CreditCard struct {
-	ProfileId   int64
-	CurrencyId  int64
+	ProfileId  int64
+	CurrencyId int64
 	// Caps at PHP 20,000,000 when using int32 (4 bytes)
 	CreditLimit int32
 	// InterestRate represents the rate in basis points
 	// Example: 1 bps == 0.01% or 1250 bps == 12.50%
-	// 1 bps is 0.01%. Even if InterestRate is 100% that is only 10,000 bps. 
+	// 1 bps is 0.01%. Even if InterestRate is 100% that is only 10,000 bps.
 	// This fits easily into int16 (2 bytes, max 32,767)
 	InterestRate int16
 }
@@ -158,7 +158,7 @@ type PersonalLoan struct {
 	LoanAmount int32
 	// InterestRate represents the rate in basis points
 	// Example: 1 bps == 0.01% or 1250 bps == 12.50%
-	// 1 bps is 0.01%. Even if InterestRate is 100% that is only 10,000 bps. 
+	// 1 bps is 0.01%. Even if InterestRate is 100% that is only 10,000 bps.
 	// This fits easily into int16 (2 bytes, max 32,767)
 	InterestRate int16
 }
@@ -198,13 +198,13 @@ func (a *Applicant) Validate(v *validator) error {
 		return ErrMissingBirthday
 	}
 
-	// Use v.Now to ensure that time.Now() is only done once
-	if a.Birthday.After(v.Now) {
+	// Use v.now to ensure that time.Now() is only done once
+	if a.Birthday.After(v.now) {
 		return ErrBirthdayInFuture
 	}
 
-	// Use v.EighteenYearsAgo to prevent recalculation of date
-	if a.Birthday.After(v.EighteenYearsAgo) {
+	// Use v.eighteenYearsAgo to prevent recalculation of date
+	if a.Birthday.After(v.eighteenYearsAgo) {
 		return ErrMinimumAgeNotMet
 	}
 
@@ -217,10 +217,10 @@ func (a *Applicant) Validate(v *validator) error {
 	// slice header (stack). This is an O(1) operation with minimal cost.
 	// If the byte count is within the limit, the rune count is guaranteed
 	// to be safe.
-	if len(a.LastName) > v.MaxNameLength {
+	if len(a.LastName) > v.maxNameLength {
 		// Slow Path - Handles non-ASCII. Incur the O(N) CPU cost of decoding
 		// UTF-8 if the byte count exceeds the limit.
-		if utf8.RuneCountInString(a.LastName) > v.MaxNameLength {
+		if utf8.RuneCountInString(a.LastName) > v.maxNameLength {
 			return ErrLastNameTooLong
 		}
 	}
@@ -231,16 +231,16 @@ func (a *Applicant) Validate(v *validator) error {
 	}
 
 	// Same approach as LastName above
-	if len(a.FirstName) > v.MaxNameLength {
-		if utf8.RuneCountInString(a.FirstName) > v.MaxNameLength {
+	if len(a.FirstName) > v.maxNameLength {
+		if utf8.RuneCountInString(a.FirstName) > v.maxNameLength {
 			return ErrFirstNameTooLong
 		}
 	}
 
 	// TODO: Ensure that service trims the string
 	// Same approach as LastName above
-	if len(a.MiddleName) > v.MaxNameLength {
-		if utf8.RuneCountInString(a.MiddleName) > v.MaxNameLength {
+	if len(a.MiddleName) > v.maxNameLength {
+		if utf8.RuneCountInString(a.MiddleName) > v.maxNameLength {
 			return ErrMiddleNameTooLong
 		}
 	}
@@ -266,7 +266,7 @@ type ContactNumber struct {
 
 func (c *ContactNumber) Validate(v *validator) error {
 	// TODO: Ensure that service trims the string
-	if c.Value == "" || len(c.Value) < v.MinContactNumberLength {
+	if c.Value == "" || len(c.Value) < v.minContactNumberLength {
 		return ErrInvalidContactNumber
 	}
 

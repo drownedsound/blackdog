@@ -26,7 +26,7 @@ func (s *Service) CreateApplication(
 	req CreateApplicationRequest,
 ) (CreateApplicationResponse, error) {
 	now := time.Now().UTC()
-	validator := NewValidator(time.Now().UTC())
+	validator := newValidator(time.Now().UTC())
 
 	principalReq := ApplicantRequest{
 		Birthday:       req.Birthday,
@@ -50,35 +50,12 @@ func (s *Service) CreateApplication(
 		otherApplicants = append(otherApplicants, oa)
 	}
 
-	// birthday, err := time.Parse(time.DateOnly, req.Birthday)
-	// if err != nil {
-	// 	return CreateApplicationResponse{}, fmt.Errorf(
-	// 		"invalid birthday format (expected YYYY-MM-DD): %w", err,
-	// 	)
-	// }
-	//
-	// contactNumbers := make([]ContactNumber, len(req.ContactNumbers))
-	// for i, c := range req.ContactNumbers {
-	// 	contactNumbers[i] = ContactNumber{
-	// 		Value: c.Value,
-	// 		Type:  ContactNumberType(c.Type),
-	// 	}
-	// }
-
 	app := Application{
-		CreatedAt:         now,
-		UpdatedAt:         now,
-		OtherApplicants:   otherApplicants,
+		CreatedAt:             now,
+		UpdatedAt:             now,
+		OtherApplicants:       otherApplicants,
 		MemberReferenceNumber: req.MemberReferenceNumber,
-		// Applicant: Applicant{
-		// 	Birthday:       birthday,
-		// 	ContactNumbers: contactNumbers,
-		// 	LastName:       req.LastName,
-		// 	FirstName:      req.FirstName,
-		// 	MiddleName:     req.MiddleName,
-		// 	IsPrincipal:    true,
-		// },
-		Applicant: principal,
+		Applicant:             principal,
 		CreditCard: CreditCard{
 			ProfileId: req.CardProfile,
 			// TODO: Get CurrencyId from cache
@@ -111,17 +88,6 @@ func (s *Service) CreateApplication(
 		)
 	}
 
-	// contactNumbersRes := make([]ContactNumberResponse, len(app.ContactNumbers))
-	// for i, c := range app.ContactNumbers {
-	// 	contactNumbersRes[i] = ContactNumberResponse{
-	// 		Value: c.Value,
-	// 		Type: int(c.Type),
-	// 	}
-	// }
-
-	// 1. Map Principal's contacts
-	// (We could reuse the helper here too if we refactored CreateApplicationResponse
-	// to nest the principal, but we follow the existing flat structure).
 	contactNumbersRes := make([]ContactNumberResponse, len(app.ContactNumbers))
 	for i, c := range app.ContactNumbers {
 		contactNumbersRes[i] = ContactNumberResponse{
@@ -130,29 +96,30 @@ func (s *Service) CreateApplication(
 		}
 	}
 
-	// 2. Map Other Applicants
-	// We allocate the exact size needed.
 	otherApplicantsRes := make([]ApplicantResponse, len(app.OtherApplicants))
 	for i, oa := range app.OtherApplicants {
-		// No error check needed here as this is a pure transformation of valid data
+		// No error check needed here as this is a pure transformation
+		// of valid data
 		otherApplicantsRes[i] = s.mapApplicantToResponse(oa)
 	}
 
 	res := CreateApplicationResponse{
-		Birthday:          app.Birthday.Format(time.DateOnly),
-		CreatedAt:         app.CreatedAt,
-		UpdatedAt:         app.UpdatedAt,
+		Birthday:              app.Birthday.Format(time.DateOnly),
+		CreatedAt:             app.CreatedAt,
+		UpdatedAt:             app.UpdatedAt,
 		MemberReferenceNumber: app.MemberReferenceNumber,
-		LastName:          app.LastName,
-		FirstName:         app.FirstName,
-		MiddleName:        app.MiddleName,
-		CardProfile:       app.CreditCard.ProfileId,
-		LoanProfile:       app.PersonalLoan.ProfileId,
-		Status:            app.Status,
-		Id:                app.Id,
-		RequestedAmount:   app.RequestedAmount,
-		ContactNumbers:    contactNumbersRes,
-		OtherApplicants:   otherApplicantsRes,
+		LastName:              app.LastName,
+		FirstName:             app.FirstName,
+		MiddleName:            app.MiddleName,
+		CardProfile:           app.CreditCard.ProfileId,
+		CreditLimit:           app.CreditCard.CreditLimit,
+		LoanProfile:           app.PersonalLoan.ProfileId,
+		LoanAmount:            app.PersonalLoan.LoanAmount,
+		Status:                app.Status,
+		Id:                    app.Id,
+		RequestedAmount:       app.RequestedAmount,
+		ContactNumbers:        contactNumbersRes,
+		OtherApplicants:       otherApplicantsRes,
 	}
 
 	if app.CreditCard.ProfileId > 0 {
@@ -165,29 +132,6 @@ func (s *Service) CreateApplication(
 
 	return res, nil
 }
-
-// func (s *Service) GetApplicationById(
-// 	ctx context.Context,
-// 	req GetApplicationRequest,
-// ) (GetApplicationResponse, error) {
-// 	app, err := s.repo.GetByInternalId(ctx, req.Id)
-// 	if err != nil {
-// 		return GetApplicationResponse{}, fmt.Errorf(
-// 			"application.service failed to get application: %w", err,
-// 		)
-// 	}
-//
-// 	return GetApplicationResponse{
-// 		CreatedAt:         app.CreatedAt,
-// 		UpdatedAt:         app.UpdatedAt,
-// 		MemberReferenceNumber: app.MemberReferenceNumber,
-// 		// CardProfile:       app.CardProfile,
-// 		Status:          app.Status,
-// 		Id:              app.Id,
-// 		RequestedAmount: app.RequestedAmount,
-// 		// InterestRate:      app.InterestRate,
-// 	}, nil
-// }
 
 // mapApplicant transforms the DTO into a Domain Entity.
 // It accepts the struct by value to avoid pointer chasing in the stack.
