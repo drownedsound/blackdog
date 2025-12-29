@@ -8,15 +8,15 @@ import (
 )
 
 var (
-	testValidator *Validator
+	testValidator *validator
 	fixedNow      time.Time
 )
 
 func TestMain(m *testing.M) {
 	// Freeze time at Jan 1, 2025, 12:00 UTC
 	fixedNow = time.Date(2025, 1, 1, 12, 0, 0, 0, time.UTC)
-	// Initialize Validator manually to inject constraints
-	testValidator = NewValidator(fixedNow)
+	// Initialize validator manually to inject constraints
+	testValidator = newValidator(fixedNow)
 
 	os.Exit(m.Run())
 }
