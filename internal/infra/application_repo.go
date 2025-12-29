@@ -15,6 +15,7 @@ type ApplicationRepository struct {
 	stmtInsertApplication  *sql.Stmt
 	stmtInsertCreditCard   *sql.Stmt
 	stmtInsertPersonalLoan *sql.Stmt
+	stmtInsertApplicant    *sql.Stmt
 }
 
 func NewApplicationRepository(db *sql.DB, idGen IdGenerator) (
@@ -57,6 +58,14 @@ func NewApplicationRepository(db *sql.DB, idGen IdGenerator) (
 		return nil, fmt.Errorf("preparing insert pl stmt failed: %w", err)
 	}
 
+	queryAppl := `
+		INSERT INTO APPLICANT (
+			id, application_id, is_principal, last_name, first_name, middle_name, birthday
+		) VALUES (?, ?, ?, ?, ?, ?, ?)`
+	if repo.stmtInsertApplicant, err = db.Prepare(queryAppl); err != nil {
+		return nil, fmt.Errorf("preparing insert applicant stmt failed: %w", err)
+	}
+
 	return repo, nil
 }
 
@@ -65,6 +74,7 @@ func (r *ApplicationRepository) Insert(
 	a *app.Application,
 ) error {
 	a.Id = r.idGen.Generate()
+	// FIXME: Map to DTO
 
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -75,8 +85,7 @@ func (r *ApplicationRepository) Insert(
 	var ccId, plId sql.NullInt64
 
 	if a.CreditCard.ProfileId > 0 {
-		id := r.idGen.Generate()
-		ccId = sql.NullInt64{Int64: id, Valid: true}
+		ccId = sql.NullInt64{Int64: r.idGen.Generate(), Valid: true}
 
 		stmt := tx.StmtContext(ctx, r.stmtInsertCreditCard)
 		defer stmt.Close()
@@ -88,8 +97,7 @@ func (r *ApplicationRepository) Insert(
 	}
 
 	if a.PersonalLoan.ProfileId > 0 {
-		id := r.idGen.Generate()
-		plId = sql.NullInt64{Int64: id, Valid: true}
+		plId = sql.NullInt64{Int64: r.idGen.Generate(), Valid: true}
 
 		stmt := tx.StmtContext(ctx, r.stmtInsertPersonalLoan)
 		defer stmt.Close()
@@ -118,6 +126,24 @@ func (r *ApplicationRepository) Insert(
 		return fmt.Errorf("insert application failed: %w", err)
 	}
 
+	stmtAppl := tx.StmtContext(ctx, r.stmtInsertApplicant)
+	defer stmtAppl.Close()
+
+	_, err = stmtAppl.ExecContext(
+		ctx,
+		r.idGen.Generate(),
+		a.Id,
+		1,
+		a.LastName,
+		a.FirstName,
+		a.MiddleName,
+		// FIXME: Map to DTO
+		a.Birthday.Format("2006-01-02"),
+	)
+	if err != nil {
+		return fmt.Errorf("insert applicant failed: %w", err)
+	}
+
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("commit tx failed: %w", err)
 	}
@@ -125,28 +151,28 @@ func (r *ApplicationRepository) Insert(
 	return nil
 }
 
-func (r *ApplicationRepository) Close() error {
-	var errs []error
-
-	if r.stmtInsertApplication != nil {
-		if err := r.stmtInsertApplication.Close(); err != nil {
-			errs = append(errs, err)
-		}
-	}
-	if r.stmtInsertCreditCard != nil {
-		if err := r.stmtInsertCreditCard.Close(); err != nil {
-			errs = append(errs, err)
-		}
-	}
-	if r.stmtInsertPersonalLoan != nil {
-		if err := r.stmtInsertPersonalLoan.Close(); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	if len(errs) > 0 {
-		return fmt.Errorf("failed to close one or more statements: %v", errs)
-	}
-
-	return nil
-}
+// func (r *ApplicationRepository) Close() error {
+// 	var errs []error
+//
+// 	if r.stmtInsertApplication != nil {
+// 		if err := r.stmtInsertApplication.Close(); err != nil {
+// 			errs = append(errs, err)
+// 		}
+// 	}
+// 	if r.stmtInsertCreditCard != nil {
+// 		if err := r.stmtInsertCreditCard.Close(); err != nil {
+// 			errs = append(errs, err)
+// 		}
+// 	}
+// 	if r.stmtInsertPersonalLoan != nil {
+// 		if err := r.stmtInsertPersonalLoan.Close(); err != nil {
+// 			errs = append(errs, err)
+// 		}
+// 	}
+//
+// 	if len(errs) > 0 {
+// 		return fmt.Errorf("failed to close one or more statements: %v", errs)
+// 	}
+//
+// 	return nil
+// }

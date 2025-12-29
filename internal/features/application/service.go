@@ -40,9 +40,9 @@ func (s *Service) CreateApplication(
 			ContactNumbers: []ContactNumber{
 				{Value: "9171234567", Type: TypeMobile},
 			},
-			LastName:    "Smith",
-			FirstName:   "John",
-			MiddleName:  "Doe",
+			LastName:    req.LastName,
+			FirstName:   req.FirstName,
+			MiddleName:  req.MiddleName,
 			IsPrincipal: true,
 		},
 		CreditCard: CreditCard{
@@ -77,16 +77,29 @@ func (s *Service) CreateApplication(
 		)
 	}
 
-	return CreateApplicationResponse{
+	res := CreateApplicationResponse{
 		CreatedAt:         app.CreatedAt,
 		UpdatedAt:         app.UpdatedAt,
 		MemberReferenceNo: app.MemberReferenceNo,
-		// CardProfile:       app.CardProfile,
-		Status:          app.Status,
-		Id:              app.Id,
-		RequestedAmount: app.RequestedAmount,
-		// InterestRate:      app.InterestRate,
-	}, nil
+		LastName:          app.LastName,
+		FirstName:         app.FirstName,
+		MiddleName:        app.MiddleName,
+		CardProfile:       app.CreditCard.ProfileId,
+		LoanProfile:       app.PersonalLoan.ProfileId,
+		Status:            app.Status,
+		Id:                app.Id,
+		RequestedAmount:   app.RequestedAmount,
+	}
+
+	if app.CreditCard.ProfileId > 0 {
+		res.InterestRate = app.CreditCard.InterestRate
+	}
+
+	if app.PersonalLoan.ProfileId > 0 {
+		res.InterestRate = app.PersonalLoan.InterestRate
+	}
+
+	return res, nil
 }
 
 // func (s *Service) GetApplicationById(
