@@ -18,10 +18,7 @@ type SnowflakeIdGenerator struct {
 
 // NewSnowflakeIdGenerator initializes a new node.
 // nodeId should be unique per running instance of the application (0-1023).
-func NewSnowflakeIdGenerator(nodeId int64) (
-	idGen *SnowflakeIdGenerator,
-	err error,
-) {
+func NewSnowflakeIdGenerator(nodeId int64) (*SnowflakeIdGenerator, error) {
 	// FIXME: Get nodeId from configuration file
 	node, err := snowflake.NewNode(nodeId)
 	if err != nil {

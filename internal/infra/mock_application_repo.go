@@ -23,7 +23,7 @@ func NewMockApplicationRepository() *MockApplicationRepository {
 
 // Save persists the application.
 func (r *MockApplicationRepository) Insert(
-	ctx context.Context, 
+	ctx context.Context,
 	a *app.Application,
 ) error {
 	// Create error scenario to force an HTTP 500 on the handler
