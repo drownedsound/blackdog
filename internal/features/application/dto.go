@@ -4,7 +4,8 @@ import "time"
 
 type CreateApplicationRequest struct {
 	MemberReferenceNo string `json:"member_reference_no"`
-	CardProfile       int64  `json:"card_profile"`
+	CardProfile       int64  `json:"card_profile,omitempty"`
+	LoanProfile       int64  `json:"loan_profile,omitempty"`
 	RequestedAmount   int    `json:"requested_amount"`
 }
 

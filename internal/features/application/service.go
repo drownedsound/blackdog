@@ -29,10 +29,12 @@ func (s *Service) CreateApplication(
 	validator := NewValidator(time.Now().UTC())
 
 	app := Application{
-		CreatedAt:         now,
-		UpdatedAt:         now,
+		CreatedAt: now,
+		UpdatedAt: now,
+		// TODO: Map from request
 		OtherApplicants:   []Applicant{},
-		MemberReferenceNo: "ABCDE12345",
+		MemberReferenceNo: req.MemberReferenceNo,
+		// TODO: Map from request
 		Applicant: Applicant{
 			Birthday: time.Date(1980, time.January, 1, 0, 0, 0, 0, time.UTC),
 			ContactNumbers: []ContactNumber{
@@ -44,13 +46,23 @@ func (s *Service) CreateApplication(
 			IsPrincipal: true,
 		},
 		CreditCard: CreditCard{
-			ProfileId:    1,
-			CurrencyId:   1,
-			CreditLimit:  1_000_000,
+			ProfileId: req.CardProfile,
+			// TODO: Get CurrencyId from cache
+			CurrencyId:  1,
+			CreditLimit: 0,
+			// TODO: Get InterestRate from cache
+			InterestRate: 300,
+		},
+		PersonalLoan: PersonalLoan{
+			ProfileId: req.LoanProfile,
+			// TODO: Get CurrencyId from cache
+			CurrencyId: 1,
+			LoanAmount: 0,
+			// TODO: Get InterestRate from cache
 			InterestRate: 300,
 		},
 		Status:          StatusCreated,
-		RequestedAmount: 100_000_000,
+		RequestedAmount: req.RequestedAmount,
 	}
 
 	if err := app.Validate(validator); err != nil {

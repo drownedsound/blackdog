@@ -99,7 +99,7 @@ CREATE TABLE CREDIT_CARD (
     profile_id integer NOT NULL,
     credit_limit integer NOT NULL DEFAULT 0,
     FOREIGN KEY (profile_id) REFERENCES REF_CREDIT_CARD (id),
-    CONSTRAINT ck_cc_limit CHECK (credit_limit > 0)),
+    CONSTRAINT ck_cc_limit CHECK (credit_limit >= 0)),
 STRICT;
 
 CREATE TRIGGER trg_audit_ins_cc AFTER INSERT ON CREDIT_CARD
@@ -134,7 +134,7 @@ CREATE TABLE PERSONAL_LOAN (
     profile_id integer NOT NULL,
     loan_amount integer NOT NULL DEFAULT 0,
     FOREIGN KEY (profile_id) REFERENCES REF_PERSONAL_LOAN (id),
-    CONSTRAINT ck_pl_amount CHECK (loan_amount > 0))
+    CONSTRAINT ck_pl_amount CHECK (loan_amount >= 0))
 STRICT;
 
 CREATE TRIGGER trg_audit_ins_pl AFTER INSERT ON PERSONAL_LOAN
