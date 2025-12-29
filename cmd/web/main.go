@@ -21,11 +21,10 @@ type config struct {
 
 func initSrvDependencies(cfg config) (*slog.Logger, app.Repository) {
 	// TODO: Replicate command-line flags in a TOML file
-	// TODO: Create command-line flag to direct log output to file or stdout
-	// TODO: Create command-line flag to set log format
-	// TODO: Use slog.NewTextHandler as default log format
-	// TODO: Use slog.NewTextHandler for stdout
-	// TODO: Use slog.NewJSONHandler for log files
+	// TODO: Create command-line flag to direct log output to a file or stdout
+	// TODO: Create command-line flag to set log format, e.g. JSON, text, etc.
+	// TODO: Use slog.NewTextHandler as default log format for stdout
+	// TODO: Use slog.NewJSONHandler as the default for log files
 	logger := slog.New(slog.NewTextHandler(
 		os.Stdout,
 		&slog.HandlerOptions{
@@ -36,7 +35,8 @@ func initSrvDependencies(cfg config) (*slog.Logger, app.Repository) {
 		},
 	))
 
-	// TODO: Dynamically determine which repository to use based on flag
+	// TODO: Dynamically determine which repository to use
+	// based on flag supplied
 	// repo = infra.NewMockDb()
 	// logger.Debug("Initialized in-memory database")
 
@@ -45,13 +45,12 @@ func initSrvDependencies(cfg config) (*slog.Logger, app.Repository) {
 		logger.Error("Failed to initialize database", slog.Any("error", err))
 		os.Exit(1)
 	}
-	logger.Debug(
-		"Initialized SQLite database",
-		slog.String("path", cfg.dbPath))
+	logger.Debug("Initialized SQLite database", slog.String("path", cfg.dbPath))
 
+	// FIXME: Set nodeId in using a configuration file
 	idGen, err := infra.NewSnowflakeIdGenerator(1)
 	if err != nil {
-		logger.Error("Failed to create id generator", slog.Any("error", err))
+		logger.Error("Failed to create Id Generator", slog.Any("error", err))
 	}
 
 	repo, err := infra.NewApplicationRepository(db, idGen)
@@ -81,7 +80,7 @@ func loadConfig() config {
 	)
 
 	// Default to local file
-	// Overridden by env vars or flags in production
+	// Overridden by env vars or flags in Production
 	flag.StringVar(
 		&cfg.dbPath,
 		"db-path",
