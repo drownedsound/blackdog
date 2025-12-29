@@ -137,42 +137,110 @@ func (r *ApplicationRepository) Insert(
 		return fmt.Errorf("insert application failed: %w", err)
 	}
 
-	stmtAppl := tx.StmtContext(ctx, r.stmtInsertApplicant)
-	defer stmtAppl.Close()
+	// stmtAppl := tx.StmtContext(ctx, r.stmtInsertApplicant)
+	// defer stmtAppl.Close()
+	//
+	// applicantId := r.idGen.Generate()
+	//
+	// _, err = stmtAppl.ExecContext(
+	// 	ctx,
+	// 	applicantId,
+	// 	a.Id,
+	// 	1,
+	// 	a.LastName,
+	// 	a.FirstName,
+	// 	a.MiddleName,
+	// 	a.Birthday.Format(time.DateOnly),
+	// )
+	// if err != nil {
+	// 	return fmt.Errorf("insert applicant failed: %w", err)
+	// }
+	//
+	// if len(a.ContactNumbers) > 0 {
+	// 	stmtContact := tx.StmtContext(ctx, r.stmtInsertContactNumber)
+	// 	defer stmtContact.Close()
+	//
+	// 	for i, contact := range a.ContactNumbers {
+	// 		contactId := r.idGen.Generate()
+	//
+	// 		_, err = stmtContact.ExecContext(
+	// 			ctx,
+	// 			contactId,
+	// 			applicantId,
+	// 			contact.Type,
+	// 			contact.Value,
+	// 		)
+	// 		if err != nil {
+	// 			return fmt.Errorf("insert contact number %d failed: %w", i, err)
+	// 		}
+	// 	}
+	// }
+	//
+	// if err := tx.Commit(); err != nil {
+	// 	return fmt.Errorf("commit tx failed: %w", err)
+	// }
+	//
+	// return nil
 
-	applicantId := r.idGen.Generate()
+	// Define closure to insert an applicant and their contacts.
+	// This reduces code duplication and leverages the existing transaction context.
+	insertApplicant := func(appl app.Applicant) error {
+		applicantId := r.idGen.Generate()
 
-	_, err = stmtAppl.ExecContext(
-		ctx,
-		applicantId,
-		a.Id,
-		1,
-		a.LastName,
-		a.FirstName,
-		a.MiddleName,
-		a.Birthday.Format(time.DateOnly),
-	)
-	if err != nil {
-		return fmt.Errorf("insert applicant failed: %w", err)
+		// Map boolean to integer for SQLite storage
+		isPrincipalInt := 0
+		if appl.IsPrincipal {
+			isPrincipalInt = 1
+		}
+
+		stmtAppl := tx.StmtContext(ctx, r.stmtInsertApplicant)
+		_, err = stmtAppl.ExecContext(
+			ctx,
+			applicantId,
+			a.Id,
+			isPrincipalInt,
+			appl.LastName,
+			appl.FirstName,
+			appl.MiddleName,
+			appl.Birthday.Format(time.DateOnly),
+		)
+		// Explicitly close the statement handle within the loop to keep resource usage tight
+		stmtAppl.Close()
+		if err != nil {
+			return err
+		}
+
+		if len(appl.ContactNumbers) > 0 {
+			stmtContact := tx.StmtContext(ctx, r.stmtInsertContactNumber)
+			for i, contact := range appl.ContactNumbers {
+				contactId := r.idGen.Generate()
+				_, err = stmtContact.ExecContext(
+					ctx,
+					contactId,
+					applicantId,
+					contact.Type,
+					contact.Value,
+				)
+				if err != nil {
+					stmtContact.Close()
+					return fmt.Errorf("contact %d: %w", i, err)
+				}
+			}
+			stmtContact.Close()
+		}
+		return nil
 	}
 
-	if len(a.ContactNumbers) > 0 {
-		stmtContact := tx.StmtContext(ctx, r.stmtInsertContactNumber)
-		defer stmtContact.Close()
+	// 1. Insert Principal
+	if err := insertApplicant(a.Applicant); err != nil {
+		return fmt.Errorf("insert principal failed: %w", err)
+	}
 
-		for i, contact := range a.ContactNumbers {
-			contactId := r.idGen.Generate()
-
-			_, err = stmtContact.ExecContext(
-				ctx,
-				contactId,
-				applicantId,
-				contact.Type,
-				contact.Value,
-			)
-			if err != nil {
-				return fmt.Errorf("insert contact number %d failed: %w", i, err)
-			}
+	// 2. Insert Other Applicants
+	// Iterating over the contiguous slice is cache-friendly.
+	for i, oa := range a.OtherApplicants {
+		if err := insertApplicant(oa); err != nil {
+			return fmt.Errorf("insert other applicant %d failed: %w", i, err)
 		}
 	}
 
