@@ -83,6 +83,101 @@ After a successful build, the binary is placed in `bin/blackdog-web`.
 ./bin/blackdog-web
 ```
 By default, the server listens on `:4000` and serves static assets from `./ui/static/`.
+
+To invoke the API, `POST localhost:4000/application`, any REST API client can be used.
+
+#### Using cURL
+```shell
+curl -v -X POST http://localhost:4000/application \
+  -H "Content-Type: application/json" \
+  -d '{
+    "member_reference_no": "APP-002",
+    "card_profile": 1,
+    "requested_amount": 1000000,
+    "last_name": "SMITH",
+    "first_name": "JOHN",
+    "middle_name": "DOE",
+    "birthday": "1979-08-30",
+    "contact_numbers": [
+      {
+        "value": "09171234567",
+        "type": 1
+      },
+      {
+        "value": "0281234567",
+        "type": 3
+      }
+    ],
+    "other_applicants": [
+      {
+        "first_name": "JANE",
+        "last_name": "SMITH",
+        "birthday": "1982-05-15",
+        "contact_numbers": [
+          {
+            "value": "09181234567",
+            "type": 1
+          },
+          {
+            "value": "0287654321",
+            "type": 3
+          }
+        ]
+      },
+      {
+        "first_name": "JOSEPH",
+        "last_name": "SMITH",
+        "birthday": "2000-11-20",
+        "contact_numbers": [
+          {
+            "value": "09191234567",
+            "type": 1
+          },
+          {
+            "value": "0289876543",
+            "type": 3
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+#### Using HTTPie
+```shell
+http -v POST localhost:4000/application \
+  member_reference_no=APP-001 \
+  card_profile:=1 \
+  requested_amount:=1000000 \
+  last_name="SMITH" \
+  first_name=JOHN \
+  middle_name=DOE \
+  birthday="1979-08-30" \
+  contact_numbers:='[
+    {"value": "09171234567", "type": 1}, 
+    {"value": "0281234567", "type": 3}
+  ]' \
+  other_applicants:='[
+    {
+      "first_name": "JANE", 
+      "last_name": "SMITH", 
+      "birthday": "1982-05-15", 
+      "contact_numbers": [
+        {"value": "09181234567", "type": 1}, 
+        {"value": "0287654321", "type": 3}
+      ]
+    },
+    {
+      "first_name": "JOSEPH", 
+      "last_name": "SMITH", 
+      "birthday": "2000-11-20", 
+      "contact_numbers": [
+        {"value": "09191234567", "type": 1}, 
+        {"value": "0289876543", "type": 3}
+      ]
+    }
+  ]'
+```
 ### Configuration
 The application accepts command-line flags to override default settings:
 | Flag | Default | Description |
@@ -102,13 +197,13 @@ To run unit tests specifically for the application domain and infrastructure:
 make test
 ```
 This targets `./internal/features/application` and `./internal/infra` with coverage enabled.
-### Code Quality
+### Enforcing Code Quality
 Enforce code standards and formatting:
 ```bash
 make staticcheck  # Runs static analysis
 make gofumpt      # Enforces stricter formatting
 ```
-### Domain Model
+### Understanding the Domain Model
 ```mermaid
 classDiagram
     namespace application {
@@ -232,7 +327,7 @@ The core domain entity is the **Application**, which acts as the Aggregate Root.
 Current **Status Codes** support the following lifecycle:
 `CREATED` -\> `IN_PROGRESS` -\> `APPROVED` | `DECLINED` | `CANCELLED`
 
-### Data Model
+### Understanding the Data Model
 Below is the current data model used for persistence. The same design will be used when the project is migrated to PostgreSQL from SQLite.
 ```mermaid
 erDiagram
