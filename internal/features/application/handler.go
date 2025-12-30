@@ -26,16 +26,19 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /application/{id}", h.HandleGet)
 
 	// TODO: Add HandleFunc for API
-	//       1. POST /application (new application)
-	//       2. GET /application/{id} (view existing application)
-	//       3. PATCH /application/{id} (update existing application)
+	//
+	// 1. ✅ POST /application (new application)
+	// 2. ✅ GET /application/{id} (view existing application)
+	// 3. ❌ GET /application (view existing applications with paging, sorting,
+	// 				and filtering
+	// 4. ❌ PATCH /application/{id} (update existing application)
 
 	// TODO: Add HandleFunc for web forms
-	//	     1. /application/new
-	//	     2. /application/100/save
-	//	     3. /application/100/view
-	//	     4. /application/100/edit
-	//	     4. /application/100/submit
+	// 1. ❌ /application/new
+	// 2. ❌ /application/100/save
+	// 3. ❌ /application/100/view
+	// 4. ❌ /application/100/edit
+	// 5. ❌ /application/100/submit
 }
 
 // HandleCreate processes the creation of a new application.
@@ -59,7 +62,7 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := h.svc.CreateApplication(r.Context(), req)
 	if err != nil {
-		// Handles infrastructure layer concerns
+		// Handles infrastructure failures
 		if errors.Is(err, ErrConnectionRefused) {
 			h.svc.logger.ErrorContext(
 				r.Context(), "database error", slog.Any("error", err),
@@ -72,7 +75,7 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Handles domain layer concerns
+		// Handles domain failures
 		h.svc.logger.WarnContext(
 			r.Context(), "domain validation failed", slog.Any("error", err),
 		)
