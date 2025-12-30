@@ -10,8 +10,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// -- Mocks --
-
 type mockIdGenerator struct {
 	nextId int64
 }
@@ -21,10 +19,8 @@ func (m *mockIdGenerator) Generate() int64 {
 	return m.nextId
 }
 
-// -- Helpers --
-
-func setupTestDB(t *testing.T) (*sql.DB, *ApplicationRepository) {
-	// shared cache allows multiple connections to the same in-memory DB
+func setupTestDb(t *testing.T) (*sql.DB, *ApplicationRepository) {
+	// Shared cache allows multiple connections to the same in-memory database
 	db, err := sql.Open("sqlite3", "file::memory:?cache=shared&_foreign_keys=on")
 	if err != nil {
 		t.Fatalf("Failed to open test db: %v", err)
@@ -78,16 +74,13 @@ func setupTestDB(t *testing.T) (*sql.DB, *ApplicationRepository) {
 	return db, repo
 }
 
-// -- Tests --
-
 func TestApplicationRepository_FullLifecycle(t *testing.T) {
-	db, repo := setupTestDB(t)
+	db, repo := setupTestDb(t)
 	defer db.Close()
 
 	ctx := context.Background()
-	now := time.Now().UTC().Truncate(time.Second) // Align with DB integer precision
+	now := time.Now().UTC().Truncate(time.Second)
 
-	// 1. Prepare Complex Entity (Credit Card + Multiple Applicants)
 	input := &app.Application{
 		MemberReferenceNumber: "REF-CC-001",
 		Status:                app.StatusCreated,
@@ -116,7 +109,6 @@ func TestApplicationRepository_FullLifecycle(t *testing.T) {
 		},
 	}
 
-	// 2. Insert
 	if err := repo.Insert(ctx, input); err != nil {
 		t.Fatalf("Insert failed: %v", err)
 	}
@@ -124,26 +116,34 @@ func TestApplicationRepository_FullLifecycle(t *testing.T) {
 		t.Error("Expected ID to be generated")
 	}
 
-	// 3. Get By ID
 	saved, err := repo.GetByInternalId(ctx, input.Id)
 	if err != nil {
 		t.Fatalf("GetByInternalId failed: %v", err)
 	}
 
-	// 4. Verification
 	if saved.MemberReferenceNumber != input.MemberReferenceNumber {
-		t.Errorf("Want MRN %s, got %s", input.MemberReferenceNumber, saved.MemberReferenceNumber)
+		t.Errorf(
+			"Want MRN %s, got %s",
+			input.MemberReferenceNumber,
+			saved.MemberReferenceNumber,
+		)
 	}
 	if len(saved.OtherApplicants) != 1 {
-		t.Errorf("Want 1 OtherApplicant, got %d", len(saved.OtherApplicants))
+		t.Errorf(
+			"Want 1 OtherApplicant, got %d",
+			len(saved.OtherApplicants),
+		)
 	}
 	if saved.Applicant.ContactNumbers[0].Value != "09170000001" {
-		t.Errorf("Want Principal Contact 09170000001, got %s", saved.Applicant.ContactNumbers[0].Value)
+		t.Errorf(
+			"Want Principal Contact 09170000001, got %s",
+			saved.Applicant.ContactNumbers[0].Value,
+		)
 	}
 }
 
 func TestApplicationRepository_PersonalLoan(t *testing.T) {
-	db, repo := setupTestDB(t)
+	db, repo := setupTestDb(t)
 	defer db.Close()
 
 	input := &app.Application{
@@ -158,8 +158,10 @@ func TestApplicationRepository_PersonalLoan(t *testing.T) {
 		},
 		Applicant: app.Applicant{
 			FirstName: "Solo", LastName: "User", IsPrincipal: true,
-			Birthday:       time.Date(1985, 1, 1, 0, 0, 0, 0, time.UTC),
-			ContactNumbers: []app.ContactNumber{{Type: app.TypeMobile, Value: "0999"}},
+			Birthday: time.Date(1985, 1, 1, 0, 0, 0, 0, time.UTC),
+			ContactNumbers: []app.ContactNumber{
+				{Type: app.TypeMobile, Value: "0999"},
+			},
 		},
 	}
 
@@ -181,10 +183,9 @@ func TestApplicationRepository_PersonalLoan(t *testing.T) {
 }
 
 func TestApplicationRepository_Errors(t *testing.T) {
-	db, repo := setupTestDB(t)
+	db, repo := setupTestDb(t)
 	defer db.Close()
 
-	// 1. Transaction Failure (Context Cancelled)
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
@@ -194,7 +195,6 @@ func TestApplicationRepository_Errors(t *testing.T) {
 		t.Error("Expected error on cancelled context, got nil")
 	}
 
-	// 2. Prepare Failure (Closed DB)
 	db2, _ := sql.Open("sqlite3", ":memory:")
 	db2.Close()
 	_, err = NewApplicationRepository(db2, &mockIdGenerator{})
@@ -202,7 +202,6 @@ func TestApplicationRepository_Errors(t *testing.T) {
 		t.Error("Expected error on NewApplicationRepository with closed DB")
 	}
 
-	// 3. Get Not Found
 	_, err = repo.GetByInternalId(context.Background(), 999999)
 	if err != app.ErrNotFound {
 		t.Errorf("Expected ErrNotFound, got %v", err)

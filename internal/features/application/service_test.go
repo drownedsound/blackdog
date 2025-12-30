@@ -19,7 +19,7 @@ func TestService_CreateApplication(t *testing.T) {
 		FirstName:             "John",
 		LastName:              "Doe",
 		ContactNumbers: []ContactNumberRequest{
-			{Value: "09171234567", Type: 1}, 
+			{Value: "09171234567", Type: 1},
 		},
 	}
 
@@ -76,7 +76,7 @@ func TestService_CreateApplication(t *testing.T) {
 			},
 			expectedErr: errors.New(
 				"principal mapping failed: invalid birthday format",
-				),
+			),
 		},
 		{
 			desc: "Create Credit Card Application With Other Applicants Succeeds",
@@ -102,13 +102,13 @@ func TestService_CreateApplication(t *testing.T) {
 		},
 		{
 			desc: "Create Credit Card Application" +
-			"With Invalid Other Applicants Fails",
+				"With Invalid Other Applicants Fails",
 			mutate: func(req *CreateApplicationRequest) {
 				req.OtherApplicants = []ApplicantRequest{
 					{
 						FirstName: "Jane",
 						LastName:  "Doe",
-						Birthday:  "invalid-date", 
+						Birthday:  "invalid-date",
 						ContactNumbers: []ContactNumberRequest{
 							{Value: "09181234567", Type: 1},
 						},
@@ -120,7 +120,7 @@ func TestService_CreateApplication(t *testing.T) {
 			},
 			expectedErr: errors.New(
 				"other applicant 0 mapping failed: invalid birthday format",
-				),
+			),
 		},
 		{
 			desc: "Create Personal Loan Application Succeeds",
@@ -205,8 +205,8 @@ func TestService_GetApplicationById(t *testing.T) {
 		mockGetByInternalId func(ctx context.Context, id int64) (
 			*Application, error,
 		)
-		expectedErr         error
-		expectedState       ApplicationStatus
+		expectedErr   error
+		expectedState ApplicationStatus
 	}{
 		{
 			desc: "Get Credit Card Application Succeeds",

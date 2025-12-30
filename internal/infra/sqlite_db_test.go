@@ -4,11 +4,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	_ "github.com/mattn/go-sqlite3" // Register SQLite driver
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestNewSQLiteConnection(t *testing.T) {
-	// 1. Happy Path: Valid File (WAL mode requires a file-backed DB to persist journaling)
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, "test.db")
 
@@ -22,7 +21,6 @@ func TestNewSQLiteConnection(t *testing.T) {
 		t.Errorf("Ping failed: %v", err)
 	}
 
-	// Verify PRAGMA settings (Mechanical Sympathy: WAL for concurrency)
 	var journalMode string
 	if err := db.QueryRow("PRAGMA journal_mode").Scan(&journalMode); err != nil {
 		t.Errorf("Query journal_mode failed: %v", err)
@@ -41,7 +39,6 @@ func TestNewSQLiteConnection(t *testing.T) {
 }
 
 func TestNewSQLiteConnection_Errors(t *testing.T) {
-	// 2. Error Path: Invalid Path (OS permission denied or invalid dir)
 	_, err := NewSQLiteConnection("/sys/invalid/path/db.sqlite")
 	if err == nil {
 		t.Error("Expected error for invalid path, got nil")
