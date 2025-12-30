@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"strconv"
 )
 
 // Handler manages the HTTP transport for the Application feature.
@@ -22,7 +23,7 @@ func NewHandler(svc *Service) *Handler {
 // RegisterRoutes registers the route patterns with the provided ServeMux.
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /application", h.HandleCreate)
-	// mux.HandleFunc("GET /application/{id}", h.HandleGet)
+	mux.HandleFunc("GET /application/{id}", h.HandleGet)
 
 	// TODO: Add HandleFunc for API
 	//       1. POST /application (new application)
@@ -47,7 +48,7 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	dec.DisallowUnknownFields()
 
 	if err := dec.Decode(&req); err != nil {
-		slog.ErrorContext(
+		h.svc.logger.ErrorContext(
 			r.Context(), "json decoding failed", slog.Any("error", err),
 		)
 
@@ -60,7 +61,7 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// Handles infrastructure layer concerns
 		if errors.Is(err, ErrConnectionRefused) {
-			slog.ErrorContext(
+			h.svc.logger.ErrorContext(
 				r.Context(), "database error", slog.Any("error", err),
 			)
 
@@ -72,7 +73,7 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Handles domain layer concerns
-		slog.WarnContext(
+		h.svc.logger.WarnContext(
 			r.Context(), "domain validation failed", slog.Any("error", err),
 		)
 
@@ -85,7 +86,7 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		slog.ErrorContext(
+		h.svc.logger.ErrorContext(
 			r.Context(), "json encoding failed", slog.Any("error", err),
 		)
 
@@ -97,51 +98,51 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// // HandleGet processes retrieving an application by Id.
-// func (h *Handler) HandleGet(w http.ResponseWriter, r *http.Request) {
-// 	s := r.PathValue("id")
-// 	id, err := strconv.ParseInt(s, 10, 64)
-//
-// 	if err != nil || id <= 0 {
-// 		slog.WarnContext(
-// 			r.Context(), "id validation failed", slog.Any("error", err),
-// 		)
-//
-// 		http.Error(w, "Invalid Id", http.StatusBadRequest)
-//
-// 		return
-// 	}
-//
-// 	req := GetApplicationRequest{Id: id}
-// 	resp, err := h.svc.GetApplicationById(r.Context(), req)
-// 	if err != nil {
-// 		if errors.Is(err, ErrNotFound) {
-// 			slog.WarnContext(
-// 				r.Context(), "unknown id", slog.Any("error", err),
-// 			)
-// 			http.Error(w, "Application Not Found", http.StatusNotFound)
-//
-// 			return
-// 		}
-//
-// 		slog.ErrorContext(
-// 			r.Context(), "database error", slog.Any("error", err),
-// 		)
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-//
-// 		return
-// 	}
-//
-// 	w.Header().Set("Content-Type", "application/json")
-// 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-// 		slog.ErrorContext(
-// 			r.Context(), "json encoding failed", slog.Any("error", err),
-// 		)
-//
-// 		http.Error(
-// 			w, "Internal Server Error", http.StatusInternalServerError,
-// 		)
-//
-// 		return
-// 	}
-// }
+// HandleGet processes retrieving an application by Id.
+func (h *Handler) HandleGet(w http.ResponseWriter, r *http.Request) {
+	s := r.PathValue("id")
+	id, err := strconv.ParseInt(s, 10, 64)
+
+	if err != nil || id <= 0 {
+		h.svc.logger.WarnContext(
+			r.Context(), "id validation failed", slog.Any("error", err),
+		)
+
+		http.Error(w, "Invalid Id", http.StatusBadRequest)
+
+		return
+	}
+
+	req := GetApplicationRequest{Id: id}
+	resp, err := h.svc.GetApplicationById(r.Context(), req)
+	if err != nil {
+		if errors.Is(err, ErrNotFound) {
+			h.svc.logger.WarnContext(
+				r.Context(), "unknown id", slog.Any("error", err),
+			)
+			http.Error(w, "Application Not Found", http.StatusNotFound)
+
+			return
+		}
+
+		h.svc.logger.ErrorContext(
+			r.Context(), "database error", slog.Any("error", err),
+		)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		h.svc.logger.ErrorContext(
+			r.Context(), "json encoding failed", slog.Any("error", err),
+		)
+
+		http.Error(
+			w, "Internal Server Error", http.StatusInternalServerError,
+		)
+
+		return
+	}
+}

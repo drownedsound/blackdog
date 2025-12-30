@@ -17,6 +17,7 @@ type ApplicationRepository struct {
 	stmtInsertPersonalLoan  *sql.Stmt
 	stmtInsertApplicant     *sql.Stmt
 	stmtInsertContactNumber *sql.Stmt
+	stmtGetApplicationById  *sql.Stmt
 }
 
 func NewApplicationRepository(db *sql.DB, idGen IdGenerator) (
@@ -79,6 +80,27 @@ func NewApplicationRepository(db *sql.DB, idGen IdGenerator) (
 	) VALUES (?, ?, ?, ?)`)
 	if err != nil {
 		return nil, fmt.Errorf("preparing insert contact stmt failed: %w", err)
+	}
+
+	repo.stmtGetApplicationById, err = prepare(`
+	SELECT 
+		app.id, app.member_reference_no, app.status_id, app.requested_amount, 
+		app.created_at, app.updated_at, cc.profile_id, cc.credit_limit, 
+		rcc.interest_rate, rcc.currency_id, pl.profile_id, pl.loan_amount, 
+		rpl.interest_rate, rpl.currency_id, a.id, a.is_principal, 
+		a.first_name, a.middle_name, a.last_name, a.birthday, c.value, c.type_id
+	FROM APPLICATION app
+	LEFT JOIN CREDIT_CARD cc ON app.credit_card_id = cc.id
+	LEFT JOIN REF_CREDIT_CARD rcc ON cc.profile_id = rcc.id
+	LEFT JOIN PERSONAL_LOAN pl ON app.personal_loan_id = pl.id
+	LEFT JOIN REF_PERSONAL_LOAN rpl ON pl.profile_id = rpl.id
+	JOIN APPLICANT a ON app.id = a.application_id
+	LEFT JOIN CONTACT_NUMBER c ON a.id = c.applicant_id
+	WHERE app.id = ?
+	ORDER BY a.is_principal DESC, a.id
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("preparing get application stmt failed: %w", err)
 	}
 
 	return repo, nil
@@ -223,4 +245,154 @@ func (r *ApplicationRepository) insertApplicant(
 	}
 
 	return nil
+}
+
+func (r *ApplicationRepository) GetByInternalId(
+	ctx context.Context,
+	id int64,
+) (*app.Application, error) {
+	rows, err := r.stmtGetApplicationById.QueryContext(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("get application failed: %w", err)
+	}
+	defer rows.Close()
+
+	var (
+		application        *app.Application
+		currentApplicant   *app.Applicant
+		currentApplicantId int64
+	)
+
+	for rows.Next() {
+		var (
+			// Application fields
+			appId, statusId, reqAmount int64
+			createdAt, updatedAt       int64
+			mrn                        string
+
+			// Credit Card fields (Nullable)
+			ccProfileId, ccLimit, ccRate, ccCurrency sql.NullInt64
+
+			// Personal Loan fields (Nullable)
+			plProfileId, plAmount, plRate, plCurrency sql.NullInt64
+
+			// Applicant fields
+			applId, isPrincipal          int64
+			applFirst, applLast, applDob string
+			applMiddle                   sql.NullString
+
+			// Contact fields (Nullable)
+			contactValue sql.NullString
+			contactType  sql.NullInt64
+		)
+
+		if err := rows.Scan(
+			&appId, &mrn, &statusId, &reqAmount, &createdAt, &updatedAt,
+			&ccProfileId, &ccLimit, &ccRate, &ccCurrency,
+			&plProfileId, &plAmount, &plRate, &plCurrency,
+			&applId, &isPrincipal, &applFirst, &applMiddle, &applLast, &applDob,
+			&contactValue, &contactType,
+		); err != nil {
+			return nil, fmt.Errorf("database row scan failed: %w", err)
+		}
+
+		// Initialize Application on first row
+		if application == nil {
+			application = &app.Application{
+				Id:                    appId,
+				MemberReferenceNumber: mrn,
+				Status:                app.ApplicationStatus(statusId),
+				RequestedAmount:       int32(reqAmount),
+				CreatedAt:             time.Unix(createdAt, 0).UTC(),
+				UpdatedAt:             time.Unix(updatedAt, 0).UTC(),
+				// Initialize slice to avoid nil slice issues
+				OtherApplicants: make([]app.Applicant, 0, 1),
+			}
+
+			if ccProfileId.Valid {
+				application.CreditCard = app.CreditCard{
+					ProfileId:    ccProfileId.Int64,
+					CreditLimit:  int32(ccLimit.Int64),
+					InterestRate: int16(ccRate.Int64),
+					CurrencyId:   ccCurrency.Int64,
+				}
+			}
+
+			if plProfileId.Valid {
+				application.PersonalLoan = app.PersonalLoan{
+					ProfileId:    plProfileId.Int64,
+					LoanAmount:   int32(plAmount.Int64),
+					InterestRate: int16(plRate.Int64),
+					CurrencyId:   plCurrency.Int64,
+				}
+			}
+		}
+
+		// Handle Applicant switching
+		if applId != currentApplicantId {
+			// Save the finished applicant to the application struct
+			if currentApplicant != nil {
+				if currentApplicant.IsPrincipal {
+					application.Applicant = *currentApplicant
+				} else {
+					application.OtherApplicants = append(
+						application.OtherApplicants, *currentApplicant,
+					)
+				}
+			}
+
+			// Start new applicant
+			dob, err := time.Parse(time.DateOnly, applDob)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"invalid dob format %s: %w", applDob, err,
+				)
+			}
+
+			currentApplicant = &app.Applicant{
+				FirstName:      applFirst,
+				LastName:       applLast,
+				Birthday:       dob,
+				IsPrincipal:    isPrincipal == 1,
+				ContactNumbers: make([]app.ContactNumber, 0, 2),
+			}
+			if applMiddle.Valid {
+				currentApplicant.MiddleName = applMiddle.String
+			}
+			currentApplicantId = applId
+		}
+
+		// Add Contact Number
+		if contactValue.Valid {
+			currentApplicant.ContactNumbers = append(
+				currentApplicant.ContactNumbers,
+				app.ContactNumber{
+					Value: contactValue.String,
+					Type:  app.ContactNumberType(contactType.Int64),
+				},
+			)
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration failed: %w", err)
+	}
+
+	// No rows found
+	if application == nil {
+		return nil, app.ErrNotFound
+	}
+
+	// Save the very last applicant (since loop finishes before saving it)
+	if currentApplicant != nil {
+		if currentApplicant.IsPrincipal {
+			application.Applicant = *currentApplicant
+		} else {
+			application.OtherApplicants = append(
+				application.OtherApplicants, *currentApplicant,
+			)
+		}
+	}
+
+	return application, nil
 }

@@ -137,6 +137,21 @@ func (s *Service) CreateApplication(
 	return res, nil
 }
 
+func (s *Service) GetApplicationById(
+	ctx context.Context,
+	req GetApplicationRequest,
+) (GetApplicationResponse, error) {
+	app, err := s.repo.GetByInternalId(ctx, req.Id)
+	if err != nil {
+		return GetApplicationResponse{}, fmt.Errorf(
+			"application.service failed to get application: %w",
+			err,
+		)
+	}
+
+	return s.mapApplicationEntityToDto(app), nil
+}
+
 // mapApplicantDtoToEntity transforms the DTO into a Domain Entity.
 func (s *Service) mapApplicantDtoToEntity(
 	req ApplicantRequest,
@@ -185,4 +200,50 @@ func (s *Service) mapApplicantEntityToDto(a Applicant) ApplicantResponse {
 		ContactNumbers: contacts,
 		IsPrincipal:    a.IsPrincipal,
 	}
+}
+
+func (s *Service) mapApplicationEntityToDto(
+	app *Application,
+) GetApplicationResponse {
+	contactNumbersRes := make([]ContactNumberResponse, len(app.ContactNumbers))
+	for i, c := range app.ContactNumbers {
+		contactNumbersRes[i] = ContactNumberResponse{
+			Value: c.Value,
+			Type:  int(c.Type),
+		}
+	}
+
+	othersRes := make([]ApplicantResponse, len(app.OtherApplicants))
+	for i, oa := range app.OtherApplicants {
+		othersRes[i] = s.mapApplicantEntityToDto(oa)
+	}
+
+	res := GetApplicationResponse{
+		Birthday:              app.Birthday.Format(time.DateOnly),
+		CreatedAt:             app.CreatedAt,
+		UpdatedAt:             app.UpdatedAt,
+		MemberReferenceNumber: app.MemberReferenceNumber,
+		LastName:              app.LastName,
+		FirstName:             app.FirstName,
+		MiddleName:            app.MiddleName,
+		CardProfile:           app.CreditCard.ProfileId,
+		CreditLimit:           app.CreditCard.CreditLimit,
+		LoanProfile:           app.PersonalLoan.ProfileId,
+		LoanAmount:            app.PersonalLoan.LoanAmount,
+		Status:                app.Status,
+		Id:                    app.Id,
+		RequestedAmount:       app.RequestedAmount,
+		ContactNumbers:        contactNumbersRes,
+		OtherApplicants:       othersRes,
+	}
+
+	if app.CreditCard.ProfileId > 0 {
+		res.InterestRate = app.CreditCard.InterestRate
+	}
+
+	if app.PersonalLoan.ProfileId > 0 {
+		res.InterestRate = app.PersonalLoan.InterestRate
+	}
+
+	return res
 }

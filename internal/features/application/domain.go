@@ -104,13 +104,13 @@ func (a *Application) Validate(v *validator) error {
 		return ErrTooManyProducts
 	}
 
-	if a.CreditCard.ProfileId > 0 {
+	if a.CreditCard.ProfileId != 0 {
 		if err := a.CreditCard.Validate(); err != nil {
 			return fmt.Errorf("credit card failed validation: %w", err)
 		}
 	}
 
-	if a.PersonalLoan.ProfileId > 0 {
+	if a.PersonalLoan.ProfileId != 0 {
 		if err := a.PersonalLoan.Validate(); err != nil {
 			return fmt.Errorf("personal loan failed validation: %w", err)
 		}

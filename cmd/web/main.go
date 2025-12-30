@@ -42,7 +42,7 @@ func initSrvDependencies(cfg config) (*slog.Logger, app.Repository) {
 	}
 	logger.Debug("Initialized SQLite database", slog.String("path", cfg.dbPath))
 
-	// FIXME: Set nodeId in using a configuration file
+	// FIXME: Set nodeId using a configuration file
 	idGen, err := infra.NewSnowflakeIdGenerator(1)
 	if err != nil {
 		logger.Error("Failed to create Id Generator", slog.Any("error", err))
