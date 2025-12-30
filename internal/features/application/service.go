@@ -58,7 +58,7 @@ func (s *Service) CreateApplication(
 		CreatedAt:             now,
 		UpdatedAt:             now,
 		OtherApplicants:       others,
-		MemberReferenceNumber: req.MemberReferenceNumber,
+		MemberReferenceNumber: trimWhiteSpace(req.MemberReferenceNumber),
 		Applicant:             principal,
 		CreditCard: CreditCard{
 			ProfileId: req.CardProfile,
@@ -165,7 +165,7 @@ func (s *Service) mapApplicantDtoToEntity(
 	contacts := make([]ContactNumber, len(req.ContactNumbers))
 	for i, c := range req.ContactNumbers {
 		contacts[i] = ContactNumber{
-			Value: c.Value,
+			Value: trimWhiteSpace(c.Value),
 			Type:  ContactNumberType(c.Type),
 		}
 	}
@@ -173,9 +173,9 @@ func (s *Service) mapApplicantDtoToEntity(
 	return Applicant{
 		Birthday:       birthday,
 		ContactNumbers: contacts,
-		LastName:       req.LastName,
-		FirstName:      req.FirstName,
-		MiddleName:     req.MiddleName,
+		LastName:       trimWhiteSpace(req.LastName),
+		FirstName:      trimWhiteSpace(req.FirstName),
+		MiddleName:     trimWhiteSpace(req.MiddleName),
 		IsPrincipal:    isPrincipal,
 	}, nil
 }
@@ -246,4 +246,39 @@ func (s *Service) mapApplicationEntityToDto(
 	}
 
 	return res
+}
+
+// trimWhiteSpace slices the string to remove leading and trailing
+// space, tab, newline, and carriage return.
+//
+// It is safe for UTF-8 strings (e.g., " José ") because ASCII whitespace bytes
+// never appear within multi-byte UTF-8 characters.
+func trimWhiteSpace(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+
+	// Access the underlying array directly via index.
+	// This avoids the 'range' loop which incurs rune decoding costs.
+	start := 0
+	for start < len(s) {
+		c := s[start]
+		// Check for the following: ' ', '\t', '\n' (and '\r' for safety)
+		if c != ' ' && c != '\t' && c != '\n' && c != '\r' {
+			break
+		}
+		start++
+	}
+
+	end := len(s)
+	for end > start {
+		c := s[end-1]
+		if c != ' ' && c != '\t' && c != '\n' && c != '\r' {
+			break
+		}
+		end--
+	}
+
+	// Create a new string header pointing to the same backing array.
+	return s[start:end]
 }

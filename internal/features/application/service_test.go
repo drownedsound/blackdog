@@ -438,3 +438,66 @@ func TestService_Internal_Mappings(t *testing.T) {
 		})
 	})
 }
+
+func TestTrimWhiteSpace(t *testing.T) {
+	testCases := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{
+			name:  "Empty string",
+			input: "",
+			want:  "",
+		},
+		{
+			name:  "No whitespace",
+			input: "admin",
+			want:  "admin",
+		},
+		{
+			name:  "Leading space",
+			input: "  admin",
+			want:  "admin",
+		},
+		{
+			name:  "Trailing newline and tab",
+			input: "admin\n\t",
+			want:  "admin",
+		},
+		{
+			name:  "Mixed ASCII whitespace",
+			input: " \t\r\n data \n\t ",
+			want:  "data",
+		},
+		{
+			name:  "Whitespace in middle preserved",
+			input: "John Doe",
+			want:  "John Doe",
+		},
+		{
+			name:  "UTF-8 Safety: Spanish (José Núñez)",
+			input: "  José Núñez  ",
+			want:  "José Núñez",
+		},
+		{
+			name:  "UTF-8 Safety: Multi-byte chars at boundaries",
+			input: "\tñandú\n",
+			want:  "ñandú",
+		},
+		{
+			name:  "All whitespace",
+			input: "   \t\n\r   ",
+			want:  "",
+		},
+	}
+
+	for _, tC := range testCases {
+		t.Run(tC.name, func(t *testing.T) {
+			got := trimWhiteSpace(tC.input)
+			if got != tC.want {
+				t.Errorf("trimWhiteSpace(%q) = %q, Expected = %q", tC.input, got, tC.want)
+			}
+		})
+	}
+}
