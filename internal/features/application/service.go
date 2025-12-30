@@ -139,7 +139,7 @@ func (s *Service) CreateApplication(
 
 // mapApplicantDtoToEntity transforms the DTO into a Domain Entity.
 func (s *Service) mapApplicantDtoToEntity(
-	req ApplicantRequest, 
+	req ApplicantRequest,
 	isPrincipal bool,
 ) (Applicant, error) {
 	birthday, err := time.Parse(time.DateOnly, req.Birthday)
@@ -178,7 +178,7 @@ func (s *Service) mapApplicantEntityToDto(a Applicant) ApplicantResponse {
 
 	return ApplicantResponse{
 		// Format as YYYY-MM-DD
-		Birthday:       a.Birthday.Format(time.DateOnly), 
+		Birthday:       a.Birthday.Format(time.DateOnly),
 		LastName:       a.LastName,
 		FirstName:      a.FirstName,
 		MiddleName:     a.MiddleName,
