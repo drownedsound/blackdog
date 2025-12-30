@@ -47,11 +47,11 @@ type Application struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	OtherApplicants []Applicant
-	// Used as the external identifier
-	MemberReferenceNumber string
 	Applicant
 	CreditCard   CreditCard
 	PersonalLoan PersonalLoan
+	// Used as the external identifier
+	MemberReferenceNumber string
 	// Used as the internal identifier
 	Id int64
 	// Shown in centavos
