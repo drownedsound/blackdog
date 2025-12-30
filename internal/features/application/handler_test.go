@@ -23,7 +23,7 @@ func TestHandler_CreateApplication(t *testing.T) {
 		LastName:              "Doe",
 		FirstName:             "John",
 		ContactNumbers: []ContactNumberRequest{
-			{Value: "09171234567", Type: 1}, // TypeMobile
+			{Value: "09171234567", Type: 1},
 		},
 	}
 
@@ -36,24 +36,24 @@ func TestHandler_CreateApplication(t *testing.T) {
 		expectedBody   string
 	}{
 		{
-			desc:   "Success_Returns_201_And_JSON",
+			desc:   "Valid JSON Returns HTTP 201",
 			mutate: func(r *CreateApplicationRequest) {},
 			mockInsert: func(ctx context.Context, a *Application) error {
-				a.Id = 101
+				a.Id = 7411684689993273344
 				return nil
 			},
 			expectedStatus: http.StatusCreated,
-			expectedBody:   `"id":101`,
+			expectedBody:   `"id":7411684689993273344`,
 		},
 		{
-			desc:           "Invalid_JSON_Returns_400",
+			desc:           "Invalid JSON Returns HTTP 400",
 			rawPayload:     "invalid-json-string",
 			mockInsert:     nil,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "Invalid JSON",
+			expectedBody:   "invalid json",
 		},
 		{
-			desc: "Service_Error_Returns_400",
+			desc: "Client Request Error Returns HTTP 400",
 			mutate: func(r *CreateApplicationRequest) {
 				r.MemberReferenceNumber = "REF-FAIL"
 			},
@@ -61,10 +61,10 @@ func TestHandler_CreateApplication(t *testing.T) {
 				return errors.New("db error")
 			},
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "application.service failed to save entity",
+			expectedBody:   "system failed to insert entity",
 		},
 		{
-			desc: "Infrastructure_Error_Returns_500",
+			desc: "Unexpected Server Error Returns HTTP 500",
 			mutate: func(r *CreateApplicationRequest) {
 				r.MemberReferenceNumber = "ERR-100"
 			},
@@ -72,7 +72,7 @@ func TestHandler_CreateApplication(t *testing.T) {
 				return ErrConnectionRefused
 			},
 			expectedStatus: http.StatusInternalServerError,
-			expectedBody:   "Internal Server Error",
+			expectedBody:   "internal server error",
 		},
 	}
 
@@ -137,11 +137,11 @@ func TestHandler_GetApplication(t *testing.T) {
 		expectedBody   string
 	}{
 		{
-			desc:  "Success_Returns_200",
-			urlId: "101",
+			desc:  "Valid Id Returns HTTP 200",
+			urlId: "7411689458224861184",
 			mockGet: func(ctx context.Context, id int64) (*Application, error) {
 				return &Application{
-					Id:                    101,
+					Id:                    7411689458224861184,
 					MemberReferenceNumber: "REF-101",
 					CreatedAt:             now,
 					UpdatedAt:             now,
@@ -154,33 +154,33 @@ func TestHandler_GetApplication(t *testing.T) {
 				}, nil
 			},
 			expectedStatus: http.StatusOK,
-			expectedBody:   `"id":101`,
+			expectedBody:   `"id":7411689458224861184`,
 		},
 		{
-			desc:  "Not_Found_Returns_404",
-			urlId: "999",
+			desc:  "Unknown Id Returns HTTP 404",
+			urlId: "9999999999",
 			mockGet: func(ctx context.Context, id int64) (*Application, error) {
 				return nil, ErrNotFound
 			},
 			expectedStatus: http.StatusNotFound,
-			expectedBody:   "Application Not Found",
+			expectedBody:   "application not found",
 		},
 		{
-			desc:           "Invalid_ID_Format_Returns_400",
+			desc:           "Invalid ID Format Returns 400",
 			urlId:          "abc",
 			mockGet:        nil,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "Invalid Id",
+			expectedBody:   "invalid id",
 		},
 		{
-			desc:           "Invalid_ID_Value_Returns_400",
+			desc:           "Invalid ID Value Returns 400",
 			urlId:          "0",
 			mockGet:        nil,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "Invalid Id",
+			expectedBody:   "invalid id",
 		},
 		{
-			desc:  "Internal_Error_Returns_500",
+			desc:  "Internal Error Returns 500",
 			urlId: "500",
 			mockGet: func(ctx context.Context, id int64) (*Application, error) {
 				return nil, errors.New("connection failed")
@@ -253,7 +253,7 @@ func TestHandler_JsonEncodingFailure(t *testing.T) {
 	svc := NewService(mock, logger)
 	h := NewHandler(svc)
 
-	t.Run("HandleCreate_JsonEncodeError_LogsError", func(t *testing.T) {
+	t.Run("HandleCreate JsonEncodeError LogsError", func(t *testing.T) {
 		reqBody := CreateApplicationRequest{
 			MemberReferenceNumber: "REF-123",
 			RequestedAmount:       50_000,
@@ -284,7 +284,7 @@ func TestHandler_JsonEncodingFailure(t *testing.T) {
 		// will also fail (which is fine).
 	})
 
-	t.Run("HandleGet_JsonEncodeError_LogsError", func(t *testing.T) {
+	t.Run("HandleGet JsonEncodeError LogsError", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/application/101", nil)
 		req.SetPathValue("id", "101") // Manually set path value for Go 1.22+
 

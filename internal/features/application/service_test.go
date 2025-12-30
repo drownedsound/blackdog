@@ -11,7 +11,6 @@ import (
 )
 
 func TestService_CreateApplication(t *testing.T) {
-	// Base request with all required fields populated.
 	baseReq := CreateApplicationRequest{
 		MemberReferenceNumber: "APP-001",
 		CardProfile:           1,
@@ -20,7 +19,7 @@ func TestService_CreateApplication(t *testing.T) {
 		FirstName:             "John",
 		LastName:              "Doe",
 		ContactNumbers: []ContactNumberRequest{
-			{Value: "09171234567", Type: 1}, // Type 1 = Mobile
+			{Value: "09171234567", Type: 1}, 
 		},
 	}
 
@@ -50,7 +49,7 @@ func TestService_CreateApplication(t *testing.T) {
 				return ErrInsertFailed
 			},
 			expectedErr: fmt.Errorf(
-				"application.service failed to save entity: %w",
+				"system failed to insert entity: %w",
 				ErrInsertFailed,
 			),
 		},
@@ -68,17 +67,19 @@ func TestService_CreateApplication(t *testing.T) {
 			expectedState: StatusUnknown,
 		},
 		{
-			desc: "Validation Failure (Missing Birthday)",
+			desc: "Domain Validation Failure (Missing Birthday)",
 			mutate: func(req *CreateApplicationRequest) {
 				req.Birthday = ""
 			},
 			mockInsert: func(ctx context.Context, a *Application) error {
 				return nil
 			},
-			expectedErr: errors.New("principal mapping failed: invalid birthday format"),
+			expectedErr: errors.New(
+				"principal mapping failed: invalid birthday format",
+				),
 		},
 		{
-			desc: "Create Application With Other Applicants Succeeds",
+			desc: "Create Credit Card Application With Other Applicants Succeeds",
 			mutate: func(req *CreateApplicationRequest) {
 				req.OtherApplicants = []ApplicantRequest{
 					{
@@ -100,13 +101,14 @@ func TestService_CreateApplication(t *testing.T) {
 			expectedState: StatusCreated,
 		},
 		{
-			desc: "Create Application With Invalid Other Applicant Fails",
+			desc: "Create Credit Card Application" +
+			"With Invalid Other Applicants Fails",
 			mutate: func(req *CreateApplicationRequest) {
 				req.OtherApplicants = []ApplicantRequest{
 					{
 						FirstName: "Jane",
 						LastName:  "Doe",
-						Birthday:  "invalid-date", // Triggers parsing error
+						Birthday:  "invalid-date", 
 						ContactNumbers: []ContactNumberRequest{
 							{Value: "09181234567", Type: 1},
 						},
@@ -116,7 +118,9 @@ func TestService_CreateApplication(t *testing.T) {
 			mockInsert: func(ctx context.Context, a *Application) error {
 				return nil
 			},
-			expectedErr: errors.New("other applicant 0 mapping failed: invalid birthday format"),
+			expectedErr: errors.New(
+				"other applicant 0 mapping failed: invalid birthday format",
+				),
 		},
 		{
 			desc: "Create Personal Loan Application Succeeds",
@@ -140,7 +144,6 @@ func TestService_CreateApplication(t *testing.T) {
 				insertFunc: tC.mockInsert,
 			}
 
-			// Create a copy of the base request for mutation
 			req := baseReq
 			if tC.mutate != nil {
 				tC.mutate(&req)
@@ -199,14 +202,18 @@ func TestService_GetApplicationById(t *testing.T) {
 	testCases := []struct {
 		desc                string
 		req                 GetApplicationRequest
-		mockGetByInternalId func(ctx context.Context, id int64) (*Application, error)
+		mockGetByInternalId func(ctx context.Context, id int64) (
+			*Application, error,
+		)
 		expectedErr         error
 		expectedState       ApplicationStatus
 	}{
 		{
-			desc: "Get Existing Application Succeeds",
+			desc: "Get Credit Card Application Succeeds",
 			req:  GetApplicationRequest{Id: 99},
-			mockGetByInternalId: func(ctx context.Context, id int64) (*Application, error) {
+			mockGetByInternalId: func(ctx context.Context, id int64) (
+				*Application, error,
+			) {
 				if id == 99 {
 					return &Application{
 						CreatedAt:             now,
@@ -232,7 +239,7 @@ func TestService_GetApplicationById(t *testing.T) {
 				return nil, ErrNotFound
 			},
 			expectedErr: fmt.Errorf(
-				"application.service failed to get application: %w",
+				"system failed to get application: %w",
 				ErrNotFound,
 			),
 		},
@@ -243,7 +250,7 @@ func TestService_GetApplicationById(t *testing.T) {
 				return nil, errors.New("connection refused")
 			},
 			expectedErr: fmt.Errorf(
-				"application.service failed to get application: %w",
+				"system failed to get application: %w",
 				errors.New("connection refused")),
 		},
 		{

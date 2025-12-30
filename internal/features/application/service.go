@@ -82,13 +82,13 @@ func (s *Service) CreateApplication(
 
 	if err := app.Validate(validator); err != nil {
 		return CreateApplicationResponse{}, fmt.Errorf(
-			"application.service stopped validating entity: %w", err,
+			"system stopped validating entity: %w", err,
 		)
 	}
 
 	if err := s.repo.Insert(ctx, &app); err != nil {
 		return CreateApplicationResponse{}, fmt.Errorf(
-			"application.service failed to save entity: %w", err,
+			"system failed to insert entity: %w", err,
 		)
 	}
 
@@ -144,7 +144,7 @@ func (s *Service) GetApplicationById(
 	app, err := s.repo.GetByInternalId(ctx, req.Id)
 	if err != nil {
 		return GetApplicationResponse{}, fmt.Errorf(
-			"application.service failed to get application: %w",
+			"system failed to get application: %w",
 			err,
 		)
 	}

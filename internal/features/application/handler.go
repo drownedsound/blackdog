@@ -55,7 +55,7 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 			r.Context(), "json decoding failed", slog.Any("error", err),
 		)
 
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		http.Error(w, "invalid json", http.StatusBadRequest)
 
 		return
 	}
@@ -69,7 +69,7 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 			)
 
 			http.Error(
-				w, "Internal Server Error", http.StatusInternalServerError,
+				w, "internal server error", http.StatusInternalServerError,
 			)
 
 			return
@@ -94,7 +94,7 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 		)
 
 		http.Error(
-			w, "Internal Server Error", http.StatusInternalServerError,
+			w, "internal server error", http.StatusInternalServerError,
 		)
 
 		return
@@ -111,7 +111,7 @@ func (h *Handler) HandleGet(w http.ResponseWriter, r *http.Request) {
 			r.Context(), "id validation failed", slog.Any("error", err),
 		)
 
-		http.Error(w, "Invalid Id", http.StatusBadRequest)
+		http.Error(w, "invalid id", http.StatusBadRequest)
 
 		return
 	}
@@ -123,7 +123,7 @@ func (h *Handler) HandleGet(w http.ResponseWriter, r *http.Request) {
 			h.svc.logger.WarnContext(
 				r.Context(), "unknown id", slog.Any("error", err),
 			)
-			http.Error(w, "Application Not Found", http.StatusNotFound)
+			http.Error(w, "application not found", http.StatusNotFound)
 
 			return
 		}
@@ -143,7 +143,7 @@ func (h *Handler) HandleGet(w http.ResponseWriter, r *http.Request) {
 		)
 
 		http.Error(
-			w, "Internal Server Error", http.StatusInternalServerError,
+			w, "internal server error", http.StatusInternalServerError,
 		)
 
 		return
