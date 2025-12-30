@@ -15,7 +15,7 @@ staticcheck: gofumpt
 	staticcheck ./...
 
 test: staticcheck
-	go test ./internal/features/application ./internal/infra -cover
+	go test -v ./internal/features/application ./internal/infra -cover
 
 build: test
 	go build -C cmd/web -o ../../bin/blackdog-web
