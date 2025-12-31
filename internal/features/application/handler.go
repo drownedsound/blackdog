@@ -22,18 +22,34 @@ func NewHandler(svc *Service) *Handler {
 
 // RegisterRoutes registers the route patterns with the provided ServeMux.
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("POST /application", h.HandleCreate)
-	mux.HandleFunc("GET /application/{id}", h.HandleGet)
+	mux.HandleFunc("GET /{$}", h.Home)
+	mux.HandleFunc("GET /site/{$}", h.Home)
+	mux.HandleFunc("GET /site/application/new", h.NewApplicationForm)
+	mux.HandleFunc("POST /site/application/save/{id}", h.SaveApplicationForm)
+	mux.HandleFunc("POST /site/application/submit/{id}", h.SubmitApplicationForm)
+	mux.HandleFunc("GET /site/application/view/{id}", h.ViewApplicationForm)
+
+	mux.HandleFunc("POST /api/application", h.Create)
+	mux.HandleFunc("GET /api/application/{id}", h.Get)
+
+	// TODO: Add HandleFunc for API
+	//
+	// 1. ✅ POST /api/application (new application)
+	// 2. ✅ GET /api/application/{id} (view existing application)
+	// 3. ❌ GET /api/application (view existing applications
+	//				with paging, sorting and filtering
+	// 4. ❌ PATCH /api/application/{id} (update existing application)
+
 	// TODO: Add HandleFunc for web forms
-	//	     1. /application/new
-	//	     2. /application/100/save
-	//	     3. /application/100/view
-	//	     4. /application/100/edit
-	//	     4. /application/100/submit
+	// 1. ✅ /site/application/new
+	// 2. ✅ /site/application/save/100
+	// 3. ✅ /site/application/view/100
+	// 4. ❌ /site/application/100/edit
+	// 5. ✅ /site/application/100/submit
 }
 
 // HandleCreate processes the creation of a new application.
-func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	var req CreateApplicationRequest
 
 	// Limit payload to 1MB (adjust based on requirements)
@@ -42,33 +58,32 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	dec.DisallowUnknownFields()
 
 	if err := dec.Decode(&req); err != nil {
-		// if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		slog.ErrorContext(
+		h.svc.logger.ErrorContext(
 			r.Context(), "json decoding failed", slog.Any("error", err),
 		)
 
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		http.Error(w, "invalid json", http.StatusBadRequest)
 
 		return
 	}
 
 	resp, err := h.svc.CreateApplication(r.Context(), req)
 	if err != nil {
-		// Handles infrastructure layer concerns
+		// Handles infrastructure failures
 		if errors.Is(err, ErrConnectionRefused) {
-			slog.ErrorContext(
+			h.svc.logger.ErrorContext(
 				r.Context(), "database error", slog.Any("error", err),
 			)
 
 			http.Error(
-				w, "Internal Server Error", http.StatusInternalServerError,
+				w, "internal server error", http.StatusInternalServerError,
 			)
 
 			return
 		}
 
-		// Handles domain layer concerns
-		slog.WarnContext(
+		// Handles domain failures
+		h.svc.logger.WarnContext(
 			r.Context(), "domain validation failed", slog.Any("error", err),
 		)
 
@@ -81,12 +96,12 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		slog.ErrorContext(
+		h.svc.logger.ErrorContext(
 			r.Context(), "json encoding failed", slog.Any("error", err),
 		)
 
 		http.Error(
-			w, "Internal Server Error", http.StatusInternalServerError,
+			w, "internal server error", http.StatusInternalServerError,
 		)
 
 		return
@@ -94,16 +109,16 @@ func (h *Handler) HandleCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleGet processes retrieving an application by Id.
-func (h *Handler) HandleGet(w http.ResponseWriter, r *http.Request) {
-	idStr := r.PathValue("id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
+func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
+	s := r.PathValue("id")
+	id, err := strconv.ParseInt(s, 10, 64)
 
 	if err != nil || id <= 0 {
-		slog.WarnContext(
+		h.svc.logger.WarnContext(
 			r.Context(), "id validation failed", slog.Any("error", err),
 		)
 
-		http.Error(w, "Invalid Id", http.StatusBadRequest)
+		http.Error(w, "invalid id", http.StatusBadRequest)
 
 		return
 	}
@@ -112,15 +127,15 @@ func (h *Handler) HandleGet(w http.ResponseWriter, r *http.Request) {
 	resp, err := h.svc.GetApplicationById(r.Context(), req)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			slog.WarnContext(
+			h.svc.logger.WarnContext(
 				r.Context(), "unknown id", slog.Any("error", err),
 			)
-			http.Error(w, "Application Not Found", http.StatusNotFound)
+			http.Error(w, "application not found", http.StatusNotFound)
 
 			return
 		}
 
-		slog.ErrorContext(
+		h.svc.logger.ErrorContext(
 			r.Context(), "database error", slog.Any("error", err),
 		)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -130,14 +145,37 @@ func (h *Handler) HandleGet(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		slog.ErrorContext(
+		h.svc.logger.ErrorContext(
 			r.Context(), "json encoding failed", slog.Any("error", err),
 		)
 
 		http.Error(
-			w, "Internal Server Error", http.StatusInternalServerError,
+			w, "internal server error", http.StatusInternalServerError,
 		)
 
 		return
 	}
+}
+
+func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello, Black Dog!"))
+}
+
+func (h *Handler) NewApplicationForm(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("New Application"))
+}
+
+func (h *Handler) SaveApplicationForm(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	w.Write([]byte("Save Application " + id))
+}
+
+func (h *Handler) SubmitApplicationForm(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	w.Write([]byte("SubmitApplication " + id))
+}
+
+func (h *Handler) ViewApplicationForm(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	w.Write([]byte("View Application " + id))
 }

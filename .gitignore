@@ -29,4 +29,6 @@ go.work.sum
 .idea/
 .vscode/
 
+# SQLite files
 data/*.db
+data/*.db-*

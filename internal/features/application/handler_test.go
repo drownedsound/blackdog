@@ -15,65 +15,70 @@ import (
 )
 
 func TestHandler_CreateApplication(t *testing.T) {
+	base := CreateApplicationRequest{
+		MemberReferenceNumber: "REF-123",
+		CardProfile:           1,
+		RequestedAmount:       50_000,
+		Birthday:              "1980-01-01",
+		LastName:              "Doe",
+		FirstName:             "John",
+		ContactNumbers: []ContactNumberRequest{
+			{Value: "09171234567", Type: 1},
+		},
+	}
+
 	testCases := []struct {
 		desc           string
-		reqBody        interface{} // Use interface{} to test invalid JSON payloads
-		mockSave       func(context.Context, *Application) error
+		mutate         func(*CreateApplicationRequest)
+		rawPayload     interface{}
+		mockInsert     func(context.Context, *Application) error
 		expectedStatus int
-		expectedBody   string // Partial match or specific check
+		expectedBody   string
 	}{
 		{
-			desc: "Success_Returns_201_And_JSON",
-			reqBody: CreateApplicationRequest{
-				MemberReferenceNo: "REF-123",
-				CategoryCode:      "loan",
-				RequestedAmount:   50000,
-			},
-			mockSave: func(ctx context.Context, a *Application) error {
-				a.Id = 101
+			desc:   "Valid JSON Returns HTTP 201",
+			mutate: func(r *CreateApplicationRequest) {},
+			mockInsert: func(ctx context.Context, a *Application) error {
+				a.Id = 7411684689993273344
 				return nil
 			},
 			expectedStatus: http.StatusCreated,
-			expectedBody:   `"id":101`,
+			expectedBody:   `"id":7411684689993273344`,
 		},
 		{
-			desc:           "Invalid_JSON_Returns_400",
-			reqBody:        "invalid-json-string",
-			mockSave:       nil,
+			desc:           "Invalid JSON Returns HTTP 400",
+			rawPayload:     "invalid-json-string",
+			mockInsert:     nil,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "Invalid JSON",
+			expectedBody:   "invalid json",
 		},
 		{
-			desc: "Service_Error_Returns_400",
-			reqBody: CreateApplicationRequest{
-				MemberReferenceNo: "REF-FAIL",
-				CategoryCode:      "loan",
-				RequestedAmount:   50000,
+			desc: "Client Request Error Returns HTTP 400",
+			mutate: func(r *CreateApplicationRequest) {
+				r.MemberReferenceNumber = "REF-FAIL"
 			},
-			mockSave: func(ctx context.Context, a *Application) error {
+			mockInsert: func(ctx context.Context, a *Application) error {
 				return errors.New("db error")
 			},
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "application.service failed to save entity",
+			expectedBody:   "system failed to insert entity",
 		},
 		{
-			desc: "Infrastructure_Error_Returns_500",
-			reqBody: CreateApplicationRequest{
-				MemberReferenceNo: "ERR-100",
-				CategoryCode:      "loan",
-				RequestedAmount:   50000,
+			desc: "Unexpected Server Error Returns HTTP 500",
+			mutate: func(r *CreateApplicationRequest) {
+				r.MemberReferenceNumber = "ERR-100"
 			},
-			mockSave: func(ctx context.Context, a *Application) error {
+			mockInsert: func(ctx context.Context, a *Application) error {
 				return ErrConnectionRefused
 			},
 			expectedStatus: http.StatusInternalServerError,
-			expectedBody:   "Internal Server Error",
+			expectedBody:   "internal server error",
 		},
 	}
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			mock := &mockRepo{saveFunc: tC.mockSave}
+			mock := &mockRepo{insertFunc: tC.mockInsert}
 			logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 			svc := NewService(mock, logger)
 			h := NewHandler(svc)
@@ -81,14 +86,22 @@ func TestHandler_CreateApplication(t *testing.T) {
 			h.RegisterRoutes(mux)
 
 			var body []byte
-			if s, ok := tC.reqBody.(string); ok && s == "invalid-json-string" {
-				body = []byte("{invalid")
+			if tC.rawPayload != nil {
+				if s, ok := tC.rawPayload.(string); ok && s == "invalid-json-string" {
+					body = []byte("{invalid")
+				} else {
+					body, _ = json.Marshal(tC.rawPayload)
+				}
 			} else {
-				body, _ = json.Marshal(tC.reqBody)
+				req := base
+				if tC.mutate != nil {
+					tC.mutate(&req)
+				}
+				body, _ = json.Marshal(req)
 			}
 
 			req := httptest.NewRequest(
-				http.MethodPost, "/application", bytes.NewReader(body),
+				http.MethodPost, "/api/application", bytes.NewReader(body),
 			)
 			rec := httptest.NewRecorder()
 
@@ -100,8 +113,6 @@ func TestHandler_CreateApplication(t *testing.T) {
 				)
 			}
 
-			// Simple substring check for body to verify error messages
-			// or ID presence
 			if tC.expectedBody != "" {
 				if !bytes.Contains(rec.Body.Bytes(), []byte(tC.expectedBody)) {
 					t.Errorf(
@@ -121,52 +132,58 @@ func TestHandler_GetApplication(t *testing.T) {
 	testCases := []struct {
 		desc           string
 		urlId          string
-		mockGet        func(context.Context, int64) (Application, error)
+		mockGet        func(context.Context, int64) (*Application, error)
 		expectedStatus int
 		expectedBody   string
 	}{
 		{
-			desc:  "Success_Returns_200",
-			urlId: "101",
-			mockGet: func(ctx context.Context, id int64) (Application, error) {
-				return Application{
-					Id:                101,
-					MemberReferenceNo: "REF-101",
-					CreatedAt:         now,
-					UpdatedAt:         now,
+			desc:  "Valid Id Returns HTTP 200",
+			urlId: "7411689458224861184",
+			mockGet: func(ctx context.Context, id int64) (*Application, error) {
+				return &Application{
+					Id:                    7411689458224861184,
+					MemberReferenceNumber: "REF-101",
+					CreatedAt:             now,
+					UpdatedAt:             now,
+					CreditCard: CreditCard{
+						ProfileId:    1,
+						InterestRate: 1250,
+					},
+					Status:          StatusCreated,
+					RequestedAmount: 1_000_000,
 				}, nil
 			},
 			expectedStatus: http.StatusOK,
-			expectedBody:   `"id":101`,
+			expectedBody:   `"id":7411689458224861184`,
 		},
 		{
-			desc:  "Not_Found_Returns_404",
-			urlId: "999",
-			mockGet: func(ctx context.Context, id int64) (Application, error) {
-				return Application{}, ErrNotFound
+			desc:  "Unknown Id Returns HTTP 404",
+			urlId: "9999999999",
+			mockGet: func(ctx context.Context, id int64) (*Application, error) {
+				return nil, ErrNotFound
 			},
 			expectedStatus: http.StatusNotFound,
-			expectedBody:   "Application Not Found",
+			expectedBody:   "application not found",
 		},
 		{
-			desc:           "Invalid_ID_Format_Returns_400",
+			desc:           "Invalid ID Format Returns 400",
 			urlId:          "abc",
 			mockGet:        nil,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "Invalid Id",
+			expectedBody:   "invalid id",
 		},
 		{
-			desc:           "Invalid_ID_Value_Returns_400",
+			desc:           "Invalid ID Value Returns 400",
 			urlId:          "0",
 			mockGet:        nil,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   "Invalid Id",
+			expectedBody:   "invalid id",
 		},
 		{
-			desc:  "Internal_Error_Returns_500",
+			desc:  "Internal Error Returns 500",
 			urlId: "500",
-			mockGet: func(ctx context.Context, id int64) (Application, error) {
-				return Application{}, errors.New("connection failed")
+			mockGet: func(ctx context.Context, id int64) (*Application, error) {
+				return nil, errors.New("connection failed")
 			},
 			expectedStatus: http.StatusInternalServerError,
 			expectedBody:   "connection failed",
@@ -175,7 +192,7 @@ func TestHandler_GetApplication(t *testing.T) {
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			mock := &mockRepo{getByIdFunc: tC.mockGet}
+			mock := &mockRepo{getByInternalIdFunc: tC.mockGet}
 			logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 			svc := NewService(mock, logger)
 			h := NewHandler(svc)
@@ -183,7 +200,7 @@ func TestHandler_GetApplication(t *testing.T) {
 			h.RegisterRoutes(mux)
 
 			req := httptest.NewRequest(
-				http.MethodGet, fmt.Sprintf("/application/%s", tC.urlId), nil,
+				http.MethodGet, fmt.Sprintf("/api/application/%s", tC.urlId), nil,
 			)
 			rec := httptest.NewRecorder()
 
@@ -221,33 +238,45 @@ func (f *failWriter) Write([]byte) (int, error) {
 
 func TestHandler_JsonEncodingFailure(t *testing.T) {
 	mock := &mockRepo{
-		saveFunc: func(ctx context.Context, a *Application) error {
+		insertFunc: func(ctx context.Context, a *Application) error {
 			a.Id = 101
 			return nil
 		},
-		getByIdFunc: func(ctx context.Context, id int64) (Application, error) {
-			return Application{Id: 101}, nil
+		getByInternalIdFunc: func(
+			ctx context.Context,
+			id int64,
+		) (*Application, error) {
+			return &Application{Id: 101}, nil
 		},
 	}
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	svc := NewService(mock, logger)
 	h := NewHandler(svc)
 
-	t.Run("HandleCreate_JsonEncodeError_LogsError", func(t *testing.T) {
+	t.Run("HandleCreate JsonEncodeError LogsError", func(t *testing.T) {
 		reqBody := CreateApplicationRequest{
-			MemberReferenceNo: "REF-123",
-			CategoryCode:      "loan",
-			RequestedAmount:   50000,
+			MemberReferenceNumber: "REF-123",
+			RequestedAmount:       50_000,
+			CardProfile:           1,
+			Birthday:              "1980-01-01",
+			LastName:              "Doe",
+			FirstName:             "John",
+			ContactNumbers: []ContactNumberRequest{
+				{Value: "09171234567", Type: 1}, // TypeMobile
+			},
 		}
 		body, _ := json.Marshal(reqBody)
-		req := httptest.NewRequest(http.MethodPost, "/application", bytes.NewReader(body))
+		req := httptest.NewRequest(
+			http.MethodPost,
+			"/application",
+			bytes.NewReader(body))
 
 		// Use failWriter to trigger the json.Encode error
 		rec := httptest.NewRecorder()
 		fw := &failWriter{ResponseWriter: rec}
 
 		// Call handler directly to bypass mux and inject faulty writer
-		h.HandleCreate(fw, req)
+		h.Create(fw, req)
 
 		// Can't easily check the response body because Write failed,
 		// but checking that the function didn't panic and coverage increased
@@ -255,13 +284,13 @@ func TestHandler_JsonEncodingFailure(t *testing.T) {
 		// will also fail (which is fine).
 	})
 
-	t.Run("HandleGet_JsonEncodeError_LogsError", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/application/101", nil)
+	t.Run("HandleGet JsonEncodeError LogsError", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/api/application/101", nil)
 		req.SetPathValue("id", "101") // Manually set path value for Go 1.22+
 
 		rec := httptest.NewRecorder()
 		fw := &failWriter{ResponseWriter: rec}
 
-		h.HandleGet(fw, req)
+		h.Get(fw, req)
 	})
 }

@@ -11,10 +11,11 @@ import (
 
 func TestRequestLogger(t *testing.T) {
 	testCases := []struct {
-		desc           string
-		handlerStatus  int
-		expectedLevel  string // "INFO", "WARN", "ERROR"
-		shouldWriteHdr bool   // whether the handler explicitly calls WriteHeader
+		desc          string
+		handlerStatus int
+		expectedLevel string // "INFO", "WARN", "ERROR"
+		// Whether the handler explicitly calls WriteHeader
+		shouldWriteHdr bool
 	}{
 		{
 			desc:           "Success_200_Logged_As_Info",
