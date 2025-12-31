@@ -101,7 +101,7 @@ func TestHandler_CreateApplication(t *testing.T) {
 			}
 
 			req := httptest.NewRequest(
-				http.MethodPost, "/application", bytes.NewReader(body),
+				http.MethodPost, "/api/application", bytes.NewReader(body),
 			)
 			rec := httptest.NewRecorder()
 
@@ -200,7 +200,7 @@ func TestHandler_GetApplication(t *testing.T) {
 			h.RegisterRoutes(mux)
 
 			req := httptest.NewRequest(
-				http.MethodGet, fmt.Sprintf("/application/%s", tC.urlId), nil,
+				http.MethodGet, fmt.Sprintf("/api/application/%s", tC.urlId), nil,
 			)
 			rec := httptest.NewRecorder()
 
@@ -276,7 +276,7 @@ func TestHandler_JsonEncodingFailure(t *testing.T) {
 		fw := &failWriter{ResponseWriter: rec}
 
 		// Call handler directly to bypass mux and inject faulty writer
-		h.HandleCreate(fw, req)
+		h.Create(fw, req)
 
 		// Can't easily check the response body because Write failed,
 		// but checking that the function didn't panic and coverage increased
@@ -285,12 +285,12 @@ func TestHandler_JsonEncodingFailure(t *testing.T) {
 	})
 
 	t.Run("HandleGet JsonEncodeError LogsError", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/application/101", nil)
+		req := httptest.NewRequest(http.MethodGet, "/api/application/101", nil)
 		req.SetPathValue("id", "101") // Manually set path value for Go 1.22+
 
 		rec := httptest.NewRecorder()
 		fw := &failWriter{ResponseWriter: rec}
 
-		h.HandleGet(fw, req)
+		h.Get(fw, req)
 	})
 }

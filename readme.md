@@ -88,10 +88,10 @@ To invoke the API, `POST localhost:4000/application`, any REST API client can be
 
 #### Using cURL
 ```shell
-curl -v -X POST http://localhost:4000/application \
+curl -v -X POST http://localhost:4000/api/application \
   -H "Content-Type: application/json" \
   -d '{
-    "member_reference_no": "APP-002",
+    "member_reference_no": "APP-100",
     "card_profile": 1,
     "requested_amount": 1000000,
     "last_name": "SMITH",
@@ -145,8 +145,8 @@ curl -v -X POST http://localhost:4000/application \
 
 #### Using HTTPie
 ```shell
-http -v POST localhost:4000/application \
-  member_reference_no=APP-001 \
+http -v POST localhost:4000/api/application \
+  member_reference_no=APP-100 \
   card_profile:=1 \
   requested_amount:=1000000 \
   last_name="SMITH" \
