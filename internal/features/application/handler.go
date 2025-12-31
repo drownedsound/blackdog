@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"errors"
+	"html/template"
 	"io"
 	"log/slog"
 	"net/http"
@@ -159,7 +160,33 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "Welcome to BlackDog!")
+	w.Header().Add("Server", "BlackDog")
+
+	ts, err := template.ParseFiles("./ui/html/home.html")
+	if err != nil {
+		h.svc.logger.ErrorContext(
+			r.Context(), "template parsing failed", slog.Any("error", err),
+		)
+
+		http.Error(
+			w, "internal server error", http.StatusInternalServerError,
+		)
+
+		return
+	}
+
+	err = ts.Execute(w, nil)
+	if err != nil {
+		h.svc.logger.ErrorContext(
+			r.Context(), "template rendering failed", slog.Any("error", err),
+		)
+
+		http.Error(
+			w, "internal server error", http.StatusInternalServerError,
+		)
+
+		return
+	}
 }
 
 func (h *Handler) NewApplicationForm(w http.ResponseWriter, r *http.Request) {
@@ -174,7 +201,9 @@ func (h *Handler) SaveApplicationForm(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) SubmitApplicationForm(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	w.WriteHeader(http.Accepted)
+	w.WriteHeader(http.StatusAccepted)
+	:wa
+
 	io.WriteString(w, "Submit Application "+id)
 }
 
