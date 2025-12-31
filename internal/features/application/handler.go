@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -158,24 +159,30 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello, Black Dog!"))
+	io.WriteString(w, "Welcome to BlackDog!")
 }
 
 func (h *Handler) NewApplicationForm(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("New Application"))
+	io.WriteString(w, "New Application")
 }
 
 func (h *Handler) SaveApplicationForm(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	w.Write([]byte("Save Application " + id))
+	w.WriteHeader(http.StatusCreated)
+	io.WriteString(w, "Save Application "+id)
 }
 
 func (h *Handler) SubmitApplicationForm(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	w.Write([]byte("SubmitApplication " + id))
+	w.WriteHeader(http.Accepted)
+	io.WriteString(w, "Submit Application "+id)
 }
 
 func (h *Handler) ViewApplicationForm(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-	w.Write([]byte("View Application " + id))
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+	}
+
+	io.WriteString(w, "View Application "+strconv.Itoa(id))
 }
