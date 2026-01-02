@@ -1,5 +1,29 @@
 {{define "nav"}}
-    <nav>
-        <a href="/">Home</a>
-    </nav>
+<nav>
+    <ul>
+        <li>
+            <label for="omni-search">Search</label>
+            <input 
+                type="search" 
+                name="q" 
+                placeholder="CMD+K" 
+                autocomplete="off" 
+                spellcheck="false"
+                maxlength=30
+                minlength=3
+            >
+            <button type="submit">Go</button>
+        </li>
+        <li>
+            <button type="button">Create</button>
+            <ul id="create-menu" hidden>
+                <li><a href="/site/application/new">New Application</a></li>
+                <li><a href="/site/document/upload">Upload Document</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="/site/dashboard">My Tasks</a>
+        </li>
+    </ul>
+</nav>
 {{end}}

@@ -25,7 +25,7 @@ func NewHandler(svc *Service) *Handler {
 // RegisterRoutes registers the route patterns with the provided ServeMux.
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /{$}", h.Home)
-	mux.HandleFunc("GET /site/{$}", h.Home)
+	mux.HandleFunc("GET /site/home/{$}", h.Home)
 	mux.HandleFunc("GET /site/application/new", h.NewApplicationForm)
 	mux.HandleFunc("POST /site/application/save/{id}", h.SaveApplicationForm)
 	mux.HandleFunc("POST /site/application/submit/{id}", h.SubmitApplicationForm)
