@@ -1,0 +1,28 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{{template "title" .}}</title>
+        <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+        <script src="/static/script/main.js" defer></script>
+    </head>
+    <body>
+        <header>
+            <h1><a href="/">BlackDog</a></h1>
+        </header> 
+        {{template "nav" .}}
+        {{block "sidebar" .}}
+            <p>default sidebar</p>
+        {{end}}
+        <main>
+            {{template "main" .}}
+            <button type="button" id="submitButton">Submit</button>
+        </main>
+        <footer>
+            <a href="https://go.dev">Go</a>
+        </footer>
+    </body>
+</html>
+{{end}}

@@ -35,7 +35,6 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/application/{id}", h.Get)
 
 	// TODO: Add HandleFunc for API
-	//
 	// 1. ✅ POST /api/application (new application)
 	// 2. ✅ GET /api/application/{id} (view existing application)
 	// 3. ❌ GET /api/application (view existing applications
@@ -43,11 +42,11 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	// 4. ❌ PATCH /api/application/{id} (update existing application)
 
 	// TODO: Add HandleFunc for web forms
-	// 1. ✅ /site/application/new
-	// 2. ✅ /site/application/save/100
-	// 3. ✅ /site/application/view/100
-	// 4. ❌ /site/application/100/edit
-	// 5. ✅ /site/application/100/submit
+	// 1. ✅ GET /site/application/new
+	// 2. ✅ POST /site/application/save/100
+	// 3. ✅ GET /site/application/view/100
+	// 4. ❌ GET /site/application/100/edit
+	// 5. ✅ POST /site/application/100/submit
 }
 
 // HandleCreate processes the creation of a new application.
@@ -162,7 +161,13 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "BlackDog")
 
-	ts, err := template.ParseFiles("./ui/html/home.html")
+	files := []string{
+		"./ui/html/base.tmpl",
+		"./ui/html/pages/home.tmpl",
+		"./ui/html/partials/nav.tmpl",
+	}
+
+	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		h.svc.logger.ErrorContext(
 			r.Context(), "template parsing failed", slog.Any("error", err),
@@ -175,7 +180,7 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ts.Execute(w, nil)
+	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
 		h.svc.logger.ErrorContext(
 			r.Context(), "template rendering failed", slog.Any("error", err),
@@ -202,7 +207,6 @@ func (h *Handler) SaveApplicationForm(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) SubmitApplicationForm(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	w.WriteHeader(http.StatusAccepted)
-	:wa
 
 	io.WriteString(w, "Submit Application "+id)
 }

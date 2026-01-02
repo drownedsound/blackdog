@@ -100,6 +100,10 @@ func main() {
 
 	svc := app.NewService(repo, logger)
 	mux := http.NewServeMux()
+
+	fs := http.FileServer(http.Dir("./ui/static/"))
+	mux.Handle("GET /static/", http.StripPrefix("/static", fs))
+
 	handler := app.NewHandler(svc)
 	handler.RegisterRoutes(mux)
 
