@@ -1,0 +1,106 @@
+{{define "title"}}Home{{end}}
+
+{{define "main"}}
+    <h2>New Application</h2>
+    <section>
+        <fieldset>
+            <legend><h2>Product</h2></legend>
+                <legend>Product Type</legend>
+                <label>
+                    <input type="radio" name="product_type" value="CC" checked required> 
+                    Credit Card
+                </label>
+                <label>
+                    <input type="radio" name="product_type" value="PL"> 
+                    Personal Loan
+                </label>
+            <div>
+                <label for="amount">Requested Amount</label>
+                <input 
+                    id="amount" 
+                    type="number" 
+                    inputmode="numeric" 
+                    min="10000" 
+                    step="10000" 
+                    placeholder="50,000"
+                    required>
+                <small id="amount-hint">Enter preferred credit limit or loan amount</small>
+            </div>
+        </fieldset>
+    </section>
+    <section>
+        <fieldset>
+            <legend><h2>Personal Information</h2></legend>
+            <div>
+                <div>
+                    <label for="fname">First Name</label>
+                    <input 
+                        id="fname" 
+                        name="first_name" 
+                        type="text" 
+                        maxlength="30" 
+                        autocomplete="given-name" 
+                        required>
+                </div>
+                <div>
+                    <label for="mname">Middle Name</label>
+                    <input 
+                        id="mname" 
+                        name="middle_name" 
+                        type="text" 
+                        maxlength="30" 
+                        autocomplete="additional-name">
+                </div>
+                 <div>
+                    <label for="lname">Last Name</label>
+                    <input 
+                        id="lname" 
+                        name="last_name" 
+                        type="text" 
+                        maxlength="30" 
+                        autocomplete="family-name" 
+                        required>
+                </div>
+            </div>
+            <div>
+                <label for="dob">Date of Birth</label>
+                <input 
+                    id="dob" 
+                    name="dob" 
+                    type="date" 
+                    max="{{.MaxDate}}" 
+                    autocomplete="bday" 
+                    required>
+            </div>
+        </fieldset>
+    </section>
+    <section>
+        <fieldset>
+            <legend><h2>Contact Details</h2></legend>
+            <div>
+                <label for="phone">Primary Phone</label>
+                <input 
+                    id="phone" 
+                    name="contact_val" 
+                    type="tel" 
+                    pattern="^09\d{9}$"
+                    minlength="11" 
+                    maxlength="11"
+                    autocomplete="tel" 
+                    placeholder="09171234567" 
+                    required>
+                <small id="phone-hint">Format: 09XXXXXXXXX</small>
+            </div>
+            <div>
+                <label for="ptype">Type</label>
+                <select id="ptype" name="contact_type" required>
+                    <option value="1" selected>Mobile</option>
+                    <option value="2">Home</option>
+                    <option value="3">Office</option>
+                </select>
+            </div>
+        </fieldset>
+    </section>
+    <button type="button" id="submitButton">Submit</button>
+{{end}}
+

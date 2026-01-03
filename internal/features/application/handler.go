@@ -195,7 +195,39 @@ func (h *Handler) Home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) NewApplicationForm(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "New Application")
+	w.Header().Add("Server", "BlackDog")
+
+	files := []string{
+		"./ui/html/base.tmpl",
+		"./ui/html/pages/new.tmpl",
+		"./ui/html/partials/nav.tmpl",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		h.svc.logger.ErrorContext(
+			r.Context(), "template parsing failed", slog.Any("error", err),
+		)
+
+		http.Error(
+			w, "internal server error", http.StatusInternalServerError,
+		)
+
+		return
+	}
+
+	err = ts.ExecuteTemplate(w, "base", nil)
+	if err != nil {
+		h.svc.logger.ErrorContext(
+			r.Context(), "template rendering failed", slog.Any("error", err),
+		)
+
+		http.Error(
+			w, "internal server error", http.StatusInternalServerError,
+		)
+
+		return
+	}
 }
 
 func (h *Handler) SaveApplicationForm(w http.ResponseWriter, r *http.Request) {
